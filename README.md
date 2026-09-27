@@ -89,6 +89,7 @@ epilepsy_temple/
 ├── Temple_Technical_Dossier.md      Temple wearable: hardware, software, validation, gaps
 ├── Epilepsy_Overview.md             causes, seizure types, diagnosis, treatment, wearables
 ├── Seizure_Neurophysiology.md       second-by-second: ions, cells, networks, blood
+├── Seizure_Physiological_Signals.md body signals during seizures (heart, breathing, SpO₂, sweat, motion…) and ear sensing
 ├── Inference_Formulas.md            derivations + verification audit for inferring hidden variables
 ├── docs/images/                     README figures
 └── epilepsy_sim/                    all code (Python 3.13, uv)
@@ -309,6 +310,7 @@ A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/
 | [`Temple_Technical_Dossier.md`](Temple_Technical_Dossier.md) | Temple wearable: company, hardware (multi-wavelength PPG), software (Brain Flow index, Entropy), 3 validation preprints, engineering inference, epilepsy relevance |
 | [`Epilepsy_Overview.md`](Epilepsy_Overview.md) | Definition (ILAE 2014), prevalence, causes (6 aetiologies), 2025 seizure classification, diagnosis, drugs, surgery, SUDEP, wearables |
 | [`Seizure_Neurophysiology.md`](Seizure_Neurophysiology.md) | Seizure life cycle; second-by-second ions, synapses, spread, energy, termination; what each sensor can see |
+| [`Seizure_Physiological_Signals.md`](Seizure_Physiological_Signals.md) | Heart rate (↑ in 82% of patients), HRV (pre-ictal in 41%), apnea (36.5% of focal seizures, often **before** EEG), SpO₂, blood pressure, sweat, temperature, EMG/motion, blood markers; which are measurable from the ear; multimodal ear-hook design and benchmarks |
 | [`Inference_Formulas.md`](Inference_Formulas.md) | Measured vs inferred; Bayes, least squares, Kalman, ABC; derivations for K⁺, Cl⁻, E/I, fNIRS; verification audit |
 | [`epilepsy_sim/SIMULATION.md`](epilepsy_sim/SIMULATION.md) | Full model documentation: equations, parameters with sources, validation, results, 14-step calibration log |
 | [`epilepsy_sim/COMPARISON.md`](epilepsy_sim/COMPARISON.md) | Twin experiments E1–E7, TVB cross-validation and whole-brain inference, head-to-head comparison |
