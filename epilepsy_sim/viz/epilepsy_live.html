@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Epilepsy Live Lab</title>
+<style>
+  :root {
+    --bg: #05070d; --panel: #0b1020; --panel2: #0f1629; --line: #1c2540; --text: #d8e1f5;
+    --muted: #7d8bab; --dim: #5d6a8a; --hdr: 46px; --gap: 7px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 12px/1.35 "Segoe UI", system-ui, -apple-system, sans-serif; overflow: hidden; }
+
+  /* ---------- header ---------- */
+  header { height: var(--hdr); display: flex; align-items: center; gap: 10px; padding: 0 12px;
+    border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #0a0f1f, #05070d); white-space: nowrap; }
+  h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  h1 span { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .ctrl { display: flex; gap: 4px; align-items: center; }
+  button, select { background: var(--panel2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 6px; padding: 3px 8px; font: inherit; cursor: pointer; }
+  button:hover, select:hover { border-color: #33416b; }
+  button.on { background: #1d2b52; border-color: #4a64b0; }
+  #seek { flex: 1; min-width: 80px; accent-color: #6f8cff; }
+  .clock { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 78px; }
+  .badge { padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 11.5px; border: 1px solid; }
+  .grow { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+  /* ---------- one-screen dashboard ---------- */
+  .dash { height: calc(100vh - var(--hdr)); padding: var(--gap); display: grid; gap: var(--gap);
+    grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 6px 8px 5px;
+    display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+  .card h2 { font-size: 10.5px; margin: 0 0 2px; color: var(--muted); font-weight: 600; letter-spacing: .35px;
+    text-transform: uppercase; display: flex; justify-content: space-between; gap: 6px; white-space: nowrap; flex: none; }
+  .card h2 > span { overflow: hidden; text-overflow: ellipsis; }
+  .card h2 em { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--dim); }
+  .tag { font-size: 9px; padding: 0 5px; border-radius: 4px; margin-right: 5px; vertical-align: 1px; font-weight: 700; }
+  .tag.model { background: #1d2b52; color: #9fb3ff; }
+  .tag.real { background: #3a1a26; color: #ff9ab8; }
+  .plot { flex: 1 1 auto; position: relative; min-height: 0; }
+  .plot canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .keys { display: flex; flex-wrap: wrap; gap: 0 9px; font-size: 9.5px; color: var(--muted); flex: none;
+    white-space: nowrap; overflow: hidden; max-height: 14px; }
+  .keys span::before { content: ""; display: inline-block; width: 10px; height: 3px; margin-right: 4px;
+    vertical-align: middle; background: var(--c); border-radius: 2px; }
+  .keys span.dsh::before { background: repeating-linear-gradient(90deg, var(--c) 0 3px, transparent 3px 5px); }
+
+  /* grid placement: 12 cols x 6 rows */
+  #pField { grid-column: 1 / 6; grid-row: 1 / 5; padding: 0; position: relative; }
+  #pRead  { grid-column: 1 / 6; grid-row: 5 / 7; }
+  #pLfp   { grid-column: 6 / 8;  grid-row: 1 / 2; }
+  #pRate  { grid-column: 8 / 10; grid-row: 1 / 2; }
+  #pK     { grid-column: 10 / 13; grid-row: 1 / 2; }
+  #pCl    { grid-column: 6 / 8;  grid-row: 2 / 3; }
+  #pNa    { grid-column: 8 / 10; grid-row: 2 / 3; }
+  #pAdo   { grid-column: 10 / 13; grid-row: 2 / 3; }
+  #pHemo  { grid-column: 6 / 8;  grid-row: 3 / 5; }
+  #pRev   { grid-column: 8 / 10; grid-row: 3 / 5; }
+  #pMap   { grid-column: 10 / 13; grid-row: 3 / 5; }
+  #pEeg   { grid-column: 6 / 10; grid-row: 5 / 7; }
+  #pProb  { grid-column: 10 / 13; grid-row: 5 / 6; }
+  #pBands { grid-column: 10 / 13; grid-row: 6 / 7; }
+
+  /* orb field */
+  #pField .plot { position: absolute; inset: 0; }
+  .legend { position: absolute; left: 8px; top: 7px; background: rgba(5,7,13,.72); border: 1px solid var(--line);
+    border-radius: 7px; padding: 5px 8px; font-size: 11px; backdrop-filter: blur(4px); z-index: 2; }
+  .legend label { display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 1px 0; user-select: none; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 7px currentColor; flex: none; }
+  .fieldNote { position: absolute; right: 8px; bottom: 7px; font-size: 10px; color: var(--muted); z-index: 2;
+    background: rgba(5,7,13,.72); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); }
+
+  /* readouts */
+  #pRead { gap: 5px; }
+  .readouts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; flex: none; }
+  .ro { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 3px 7px 4px; min-width: 0; }
+  .ro .lab { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; }
+  .ro .val { font-size: clamp(13px, 2.2vh, 19px); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .ro .val small { font-size: 10px; color: var(--muted); font-weight: 400; margin-left: 2px; }
+  .ro .bar { height: 3px; background: #182038; border-radius: 3px; overflow: hidden; }
+  .ro .bar i { display: block; height: 100%; border-radius: 3px; }
+  #explain { flex: 1 1 auto; min-height: 0; overflow: hidden; background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 7px; padding: 5px 8px; font-size: clamp(10.5px, 1.45vh, 12.5px); }
+  #explain b { color: #fff; }
+
+  /* info overlay */
+  #info { position: fixed; right: 12px; top: calc(var(--hdr) + 6px); width: min(560px, 92vw); z-index: 10;
+    background: #0d1426; border: 1px solid #33416b; border-radius: 10px; padding: 12px 14px; font-size: 12px;
+    display: none; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+  #info.open { display: block; }
+  #info h3 { margin: 0 0 6px; font-size: 13px; }
+  #info p { margin: 5px 0; color: #b8c4e0; }
+
+  /* small screens: fall back to scrolling */
+  @media (max-width: 900px), (max-height: 620px) {
+    html, body { overflow: auto; height: auto; }
+    header { flex-wrap: wrap; height: auto; padding: 6px 10px; white-space: normal; }
+    .dash { height: auto; grid-template-columns: 1fr; grid-template-rows: none; grid-auto-rows: 200px; }
+    .dash > .card { grid-column: auto !important; grid-row: auto !important; }
+    #pField { height: 420px; } #pRead { height: auto; } #pEeg { height: 300px; }
+    .readouts { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Epilepsy Live Lab <span>· ions, neurons, blood &amp; real EEG</span></h1>
+  <div class="ctrl">
+    <select id="scen" title="Tissue">
+      <option value="epileptic">Epileptic tissue</option>
+      <option value="healthy">Healthy tissue</option>
+    </select>
+    <select id="eegSrc" title="Where the EEG panels come from">
+      <option value="model">EEG: model (synced)</option>
+      <option value="real">EEG: real patient</option>
+    </select>
+    <button id="play" title="Space">❚❚ Pause</button>
+    <div id="speeds" class="ctrl"></div>
+  </div>
+  <div class="grow"><input id="seek" type="range" min="0" max="1000" value="0"><span class="clock" id="clock">0.0 s</span></div>
+  <span class="badge" id="phase">—</span>
+  <button id="infoBtn" title="Sources & notes">ⓘ</button>
+</header>
+<div id="info"></div>
+
+<div class="dash">
+  <div class="card" id="pField">
+    <div class="plot"><canvas id="field"></canvas></div>
+    <div class="legend" id="legend"></div>
+    <div class="fieldNote">Model: ionic.py · 100 neurons on a ring</div>
+  </div>
+
+  <div class="card" id="pRead">
+    <h2><span><span class="tag model">MODEL</span>Live readouts</span><em id="scenNote"></em></h2>
+    <div class="readouts" id="readouts"></div>
+    <div id="explain"></div>
+  </div>
+
+  <div class="card" id="pLfp"><h2><span><span class="tag model">MODEL</span>Field potential (LFP)</span><em>µA/cm²</em></h2><div class="plot"><canvas id="cLfp"></canvas></div></div>
+  <div class="card" id="pRate"><h2><span><span class="tag model">MODEL</span>Firing rate</span><em>Hz</em></h2><div class="plot"><canvas id="cRate"></canvas></div></div>
+  <div class="card" id="pK"><h2><span><span class="tag model">MODEL</span>Extracellular K⁺</span><em>mM</em></h2><div class="plot"><canvas id="cK"></canvas></div><div class="keys" id="kK"></div></div>
+  <div class="card" id="pCl"><h2><span><span class="tag model">MODEL</span>Cl⁻ inside &amp; E<sub>GABA</sub></span><em>mM · mV</em></h2><div class="plot"><canvas id="cCl"></canvas></div><div class="keys" id="kCl"></div></div>
+  <div class="card" id="pNa"><h2><span><span class="tag model">MODEL</span>Na⁺ inside &amp; pump</span><em>mM · mM/s</em></h2><div class="plot"><canvas id="cNa"></canvas></div><div class="keys" id="kNa"></div></div>
+  <div class="card" id="pAdo"><h2><span><span class="tag model">MODEL</span>Adenosine (brake)</span><em>× A1 EC50</em></h2><div class="plot"><canvas id="cAdo"></canvas></div></div>
+  <div class="card" id="pHemo"><h2><span><span class="tag model">MODEL</span>Blood flow &amp; Hb</span><em>% · optical view</em></h2><div class="plot"><canvas id="cHemo"></canvas></div><div class="keys" id="kHemo"></div></div>
+  <div class="card" id="pRev"><h2><span><span class="tag model">MODEL</span>Reversal potentials</span><em>mV</em></h2><div class="plot"><canvas id="cRev"></canvas></div><div class="keys" id="kRev"></div></div>
+  <div class="card" id="pMap"><h2><span><span class="tag model">MODEL</span>K⁺ across space</span><em>100 cells × 20 s</em></h2><div class="plot"><canvas id="cMap"></canvas></div></div>
+
+  <div class="card" id="pEeg"><h2><span id="tEeg"></span><em id="eegClock"></em></h2><div class="plot"><canvas id="cEeg"></canvas></div></div>
+  <div class="card" id="pProb"><h2><span id="tProb"></span><em id="tProbSub"></em></h2><div class="plot"><canvas id="cProb"></canvas></div><div class="keys" id="kProb"></div></div>
+  <div class="card" id="pBands"><h2><span id="tBands"></span><em>band power · line length</em></h2><div class="plot"><canvas id="cBands"></canvas></div><div class="keys" id="kBands"></div></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+"use strict";
+const D = window.SIM_DATA;
+if (!D) { document.body.innerHTML = "<p style='padding:20px'>data.js not found — run <code>uv run viz/export_data.py</code> first.</p>"; }
+const FPS = D.fps;
+const C = {
+  k: "#ffb347", na: "#ffe066", cl: "#4df0ff", ado: "#b388ff", exc: "#9ad7ff", inh: "#ff6b9a",
+  hbo: "#ff4d5e", hbr: "#5b7cff", cbf: "#e8ecf8", lfp: "#3ddc97", egaba: "#6f8cff", ek: "#ff8a5b",
+  pump: "#c8a26b", muted: "#7d8bab", grid: "#18203a", ok: "#3ddc97", warn: "#ffcc4d", bad: "#ff5470",
+};
+const decode = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+for (const k of ["epileptic", "healthy"]) {
+  D[k].komapU8 = decode(D[k].komap);
+  D[k].fireU8 = decode(D[k].fire);
+  D[k].dur = D[k].n / FPS;
+  const pre = D[k].rate.slice(0, Math.floor(D[k].stim_on * FPS));
+  D[k].baseRate = pre.reduce((a, b) => a + b, 0) / Math.max(pre.length, 1);
+}
+
+// ---------------------------------------------------------------- state
+const S = { scen: "epileptic", t: 0, playing: true, speed: 1, eegT: 0,
+  show: { neuron: true, k: true, na: true, cl: true, ado: true, blood: true } };
+const M = () => D[S.scen];
+const frame = () => Math.min(M().n - 1, Math.max(0, Math.floor(S.t * FPS)));
+
+// ---------------------------------------------------------------- controls
+const $ = id => document.getElementById(id);
+[0.25, 0.5, 1, 2, 4, 8].forEach(v => {
+  const b = document.createElement("button");
+  b.textContent = v + "×"; b.onclick = () => { S.speed = v; syncSpeed(); };
+  b.dataset.v = v; $("speeds").appendChild(b);
+});
+function syncSpeed() { [...$("speeds").children].forEach(b => b.classList.toggle("on", +b.dataset.v === S.speed)); }
+syncSpeed();
+$("play").onclick = togglePlay;
+function togglePlay() { S.playing = !S.playing; $("play").textContent = S.playing ? "❚❚ Pause" : "▶ Play"; }
+document.addEventListener("keydown", e => { if (e.code === "Space" && e.target.tagName !== "SELECT") { e.preventDefault(); togglePlay(); } });
+$("scen").onchange = e => { S.scen = e.target.value; S.t = 0; resetParticles(); };
+$("seek").oninput = e => { S.t = (+e.target.value / 1000) * M().dur; };
+$("infoBtn").onclick = () => $("info").classList.toggle("open");
+
+const legendItems = [
+  ["neuron", "Neurons (flash = spike)", C.exc, "Excitatory (blue-white) and inhibitory (pink) neurons of the ring network"],
+  ["k", "K⁺ outside cells", C.k, "Extracellular potassium; more orbs = higher [K]o near that neuron"],
+  ["na", "Na⁺ inside cells", C.na, "Gold core glow = intracellular sodium"],
+  ["cl", "Cl⁻ inside cells", C.cl, "Orbiting cyan orbs = intracellular chloride (loads up when GABA fails)"],
+  ["ado", "Adenosine", C.ado, "Violet haze = adenosine, the brain's seizure brake"],
+  ["blood", "Blood (HbO / HbR)", C.hbo, "Vessels glow red with oxygenated, blue with deoxygenated haemoglobin"],
+];
+$("legend").innerHTML = legendItems.map(([k, lab, col, tip]) =>
+  `<label title="${tip}" data-k="${k}"><span class="dot" style="color:${col};background:${col}"></span><span>${lab}</span></label>`).join("");
+$("legend").querySelectorAll("label").forEach(l => l.onclick = () => {
+  const k = l.dataset.k; S.show[k] = !S.show[k]; l.style.opacity = S.show[k] ? 1 : 0.35; });
+
+$("info").innerHTML = `<h3>Sources &amp; notes</h3>
+  <p><b>MODEL</b> panels: <b>ionic.py</b> — Cressman-based conductance neurons with K⁺/Na⁺/Cl⁻ dynamics, KCC2, glia, adenosine and Balloon haemodynamics. Epileptic tissue = KCC2 ×${D.epileptic.kcc2}, glia ×${D.epileptic.glia}, K⁺ clearance ×${D.epileptic.clear}. Simulated, not measured.</p>
+  <p><b>Device-inferred K⁺</b> (white dashed): Kalman filter on simulated scalp DC-EEG — RMSE ${D.inference.ekf_rmse.toFixed(2)} mM vs naive conversion ${D.inference.naive_rmse.toFixed(2)} mM. <b>Inferred Cl⁻</b> (white dots): inverse chord equation from a noisy E<sub>GABA</sub> estimate.</p>
+  <p><b>EEG: model (synced)</b> — a <b>virtual EEG</b> computed from the simulated neurons by a forward model: distance-weighted synaptic currents from every spike, a glial K⁺ DC shift (51 mV/decade, 1% reaching the scalp) and 1/f background noise. Detector: ${D.epileptic.veeg.model}. It shares the model clock, so ions, neurons and EEG line up exactly.</p>
+  <p><b>EEG: real patient</b> — CHB-MIT Scalp EEG Database (PhysioNet), chb01_03.edf, seizure marked by clinicians at 2996–3036 s (file time). Detector: ${D.eeg.model}. A different source from the model, shown on its own clock.</p>
+  <p>Model and patient timelines run side by side at the same speed; they are different sources. Keys: <b>Space</b> play/pause. Deep links: <code>?scen=healthy&amp;t=9&amp;eeg=65&amp;speed=0.5&amp;paused=1</code></p>`;
+
+// ---------------------------------------------------------------- readouts
+const RO = [
+  { key: "ko", lab: "[K]o outside", unit: "mM", col: C.k, lo: 3, hi: 13, ref: "normal 3–4.5 · ceiling ~12" },
+  { key: "nai", lab: "[Na]i inside", unit: "mM", col: C.na, lo: 22, hi: 32, ref: "model rest ~24" },
+  { key: "cli", lab: "[Cl]i inside", unit: "mM", col: C.cl, lo: 3, hi: 18, ref: "healthy 4–7 · epileptic ≥10" },
+  { key: "egaba", lab: "E_GABA", unit: "mV", col: C.egaba, lo: -75, hi: -45, ref: "below −65 = inhibitory" },
+  { key: "rate", lab: "Firing rate", unit: "Hz", col: C.exc, lo: 0, hi: 150, ref: "awake cortex 1–10 Hz" },
+  { key: "ado", lab: "Adenosine", unit: "×EC50", col: C.ado, lo: 0, hi: 0.8, ref: "surges after seizures" },
+  { key: "cbf", lab: "Blood flow", unit: "%", col: C.cbf, lo: -60, hi: 60, ref: "vs pre-trigger baseline" },
+  { key: "hbo", lab: "HbO", unit: "%", col: C.hbo, lo: -60, hi: 60, ref: "what fNIRS measures" },
+];
+$("readouts").innerHTML = RO.map(r => `<div class="ro" title="${r.ref}"><div class="lab"><span class="dot" style="color:${r.col};background:${r.col}"></span>${r.lab}</div>
+  <div class="val" id="v_${r.key}">–</div><div class="bar"><i id="b_${r.key}" style="background:${r.col}"></i></div></div>`).join("");
+
+function phaseOf(m, i) {
+  const t = i / FPS, r = m.rate[i], base = m.baseRate;
+  if (t >= m.stim_on && t < m.stim_off) return ["Trigger stimulus", C.warn,
+    "<b>A burst of input hits the network.</b> Neurons fire hard; K⁺ pours out and Na⁺ rushes in. In <b>epileptic</b> tissue weak KCC2 lets Cl⁻ pile up, GABA inhibition fails and K⁺ climbs toward the ~12 mM ceiling. In <b>healthy</b> tissue glia and KCC2 hold K⁺ near 6 mM."];
+  if (t >= m.stim_off && t < m.stim_off + 45 && r < 0.5 * base) return ["Postictal depression", "#8aa0ff",
+    "<b>The network goes quiet.</b> The Na⁺/K⁺ pump works flat-out (hyperpolarising cells), adenosine from spent ATP brakes every synapse, and K⁺ undershoots below baseline. Blood flow drops below baseline — the <b>postictal hypoperfusion</b> an optical sensor would see."];
+  if (r > 4 * base && r > 20) return [S.scen === "epileptic" ? "Epileptiform burst" : "Activity burst", C.bad,
+    "<b>Neurons fire together.</b> A synchronous population burst — in epileptic tissue these are the <b>interictal discharges</b> neurologists look for on EEG between seizures. Local K⁺ flares around the ring and Cl⁻ ticks upward."];
+  if (S.scen === "epileptic") return ["Interictal (epileptic)", C.inh,
+    "<b>Between seizures.</b> Resting Cl⁻ is ~2× healthy, so E<sub>GABA</sub> sits near −54 mV — GABA barely inhibits. K⁺ clearance is slow. The tissue is primed: spontaneous bursts keep appearing."];
+  return ["Healthy baseline", C.ok,
+    "<b>Normal cortex.</b> Neurons fire irregularly and independently (1–10 Hz). Cl⁻ is low so GABA is strongly inhibitory (E<sub>GABA</sub> ≈ −70 mV), and glia keep K⁺ near 4 mM."];
+}
+
+// ---------------------------------------------------------------- canvas helpers
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(10, Math.round(r.width * dpr)), h = Math.max(10, Math.round(r.height * dpr));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return { ctx: cv.getContext("2d"), w, h, dpr };
+}
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const font = (px, dpr) => `${px * dpr}px Segoe UI, system-ui, sans-serif`;
+
+// ---------------------------------------------------------------- orb field
+const field = $("field");
+let P = [];
+function resetParticles() { P = []; }
+function neuronPos(i, n, w, h) {
+  const a = (i / n) * Math.PI * 2 - Math.PI / 2, inh = M().inh[i];
+  const rx = w * 0.37 * (inh ? 0.9 : 1), ry = h * 0.36 * (inh ? 0.9 : 1);
+  return [w / 2 + rx * Math.cos(a), h / 2 + ry * Math.sin(a), a];
+}
+const flash = new Float32Array(200);
+let vesselPhase = 0;
+
+function drawField(dt) {
+  const { ctx, w, h, dpr } = fitCanvas(field);
+  const m = M(), i = frame(), n = m.ncell;
+  const s = Math.min(w, h) / (430 * dpr); // scale orbs with panel size
+  const ko = m.ko[i], nai = m.nai[i], cli = m.cli[i], ado = m.ado[i], cbf = m.cbf[i], hbo = m.hbo[i], hbr = m.hbr[i];
+  const lfp = m.lfp200[Math.max(0, Math.min(m.lfp200.length - 1, Math.floor(S.t * 200)))] || 0;
+
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "rgba(4,6,12,0.55)"; ctx.fillRect(0, 0, w, h);
+  const act = Math.min(1, Math.abs(lfp) / 25);
+  const g = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.6);
+  g.addColorStop(0, `rgba(60,90,200,${0.05 + 0.25 * act})`); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+
+  ctx.globalCompositeOperation = "lighter";
+  if (S.show.blood) {
+    vesselPhase += dt * (0.6 + Math.max(0, 1 + cbf / 100));
+    const beat = 0.5 + 0.5 * Math.sin(S.t * 2 * Math.PI * 1.2);
+    const oxy = Math.max(0, Math.min(1, 0.5 + (hbo - hbr) / 120));
+    const rgb = [Math.round(255 * oxy + 90 * (1 - oxy)), Math.round(60 + 20 * oxy), Math.round(90 * oxy + 255 * (1 - oxy))];
+    const rgba = a => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
+    const inten = Math.max(0.15, Math.min(1, 0.45 + cbf / 120)) * (0.75 + 0.25 * beat);
+    const paths = [[0.02, 0.12, 0.3, -0.05, 0.62, 0.1, 0.98, 0.04], [0.0, 0.92, 0.35, 1.08, 0.7, 0.88, 1.0, 0.97],
+                   [0.03, 0.5, 0.12, 0.3, 0.1, 0.72, 0.2, 1.0]];
+    for (const p of paths) {
+      const [x0, y0, x1, y1, x2, y2, x3, y3] = p.map((v, k) => v * (k % 2 ? h : w));
+      for (const [lw, a] of [[18, 0.06], [8, 0.14], [2.5, 0.55]]) {
+        ctx.strokeStyle = rgba(a * inten); ctx.lineWidth = lw * dpr * s;
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3); ctx.stroke();
+      }
+      for (let c = 0; c < 9; c++) {
+        const u = (vesselPhase * 0.12 + c / 9) % 1, v = 1 - u;
+        const x = v * v * v * x0 + 3 * v * v * u * x1 + 3 * v * u * u * x2 + u * u * u * x3;
+        const y = v * v * v * y0 + 3 * v * v * u * y1 + 3 * v * u * u * y2 + u * u * u * y3;
+        orb(ctx, x, y, 3.2 * dpr * s, rgba(0.8 * inten), 3);
+      }
+    }
+  }
+  if (S.show.ado && ado > 0.01) {
+    const a = Math.min(1, ado / 0.7);
+    for (let k = 0; k < 6; k++) {
+      const x = w * (0.5 + 0.32 * Math.sin(S.t * 0.13 + k * 1.7)), y = h * (0.5 + 0.28 * Math.cos(S.t * 0.11 + k * 2.3));
+      const gg = ctx.createRadialGradient(x, y, 0, x, y, h * 0.35);
+      gg.addColorStop(0, hexA(C.ado, 0.16 * a)); gg.addColorStop(1, hexA(C.ado, 0));
+      ctx.fillStyle = gg; ctx.fillRect(0, 0, w, h);
+    }
+  }
+  const row = i * n;
+  for (let c = 0; c < n; c++) {
+    const [x, y, ang] = neuronPos(c, n, w, h);
+    const f = m.fireU8[row + c];
+    flash[c] = Math.max(flash[c] * Math.pow(0.02, dt), Math.min(1, f / 3));
+    const base = m.inh[c] ? C.inh : C.exc;
+    if (S.show.neuron) {
+      orb(ctx, x, y, (4 + 5 * flash[c]) * dpr * s, hexA(base, 0.22 + 0.5 * flash[c]), 2.1);
+      orb(ctx, x, y, 2 * dpr * s, hexA("#ffffff", 0.3 + 0.5 * flash[c]), 1.4);
+    }
+    if (S.show.na) orb(ctx, x, y, Math.max(0.5, 1.5 + (nai - 22) * 0.55) * dpr * s, hexA(C.na, Math.max(0, Math.min(0.9, 0.12 + (nai - 23) * 0.09))), 2);
+    if (S.show.cl) {
+      const ncl = Math.max(0, Math.min(6, Math.round((cli - 3.5) / 2)));
+      for (let q = 0; q < ncl; q++) {
+        const a2 = S.t * (1.6 + (c % 5) * 0.2) + q * (Math.PI * 2 / ncl) + c;
+        orb(ctx, x + Math.cos(a2) * 11 * dpr * s, y + Math.sin(a2) * 11 * dpr * s, 1.4 * dpr * s, hexA(C.cl, 0.7), 2);
+      }
+    }
+    if (S.show.k) {
+      const kloc = 3 + (m.komapU8[row + c] / 255) * 10;
+      const want = Math.max(0, Math.round((kloc - 3.4) * 1.5));
+      let have = 0;
+      for (const p of P) if (p.cell === c && p.life > 0) have++;
+      for (let q = have; q < want && P.length < 2600; q++) {
+        const r0 = (14 + Math.random() * 30) * dpr * s, a0 = Math.random() * Math.PI * 2;
+        P.push({ cell: c, x: x + Math.cos(a0) * r0, y: y + Math.sin(a0) * r0, vx: 0, vy: 0, life: 1, ang });
+      }
+      let excess = have - want;
+      for (const p of P) { if (excess <= 0) break; if (p.cell === c && p.life > 0.99) { p.life = 0.98; excess--; } }
+    }
+  }
+  if (S.show.k) {
+    const R = Math.min(w, h);
+    for (const p of P) {
+      p.vx += (Math.random() - 0.5) * 60 * dpr * s * dt; p.vy += (Math.random() - 0.5) * 60 * dpr * s * dt;
+      p.vx *= 0.9; p.vy *= 0.9;
+      p.vx += -Math.sin(p.ang) * (Math.random() - 0.5) * 30 * dpr * s * dt;
+      p.vy += Math.cos(p.ang) * (Math.random() - 0.5) * 30 * dpr * s * dt;
+      p.x += p.vx * dt * 3; p.y += p.vy * dt * 3;
+      if (p.life < 0.99) p.life -= dt * 1.5;
+      if (p.life > 0) orb(ctx, p.x, p.y, 1.7 * dpr * s, hexA(C.k, 0.55 * p.life), 2.2);
+    }
+    P = P.filter(p => p.life > 0 && p.x > -R && p.x < w + R);
+  } else P = [];
+
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "rgba(216,225,245,0.8)"; ctx.textAlign = "center";
+  ctx.font = font(13, dpr);
+  ctx.fillText(S.scen === "epileptic" ? "EPILEPTIC TISSUE" : "HEALTHY TISSUE", w / 2, h / 2 - 8 * dpr);
+  ctx.font = font(11, dpr); ctx.fillStyle = "rgba(125,139,171,0.95)";
+  ctx.fillText(`[K]o ${ko.toFixed(1)} mM · [Cl]i ${cli.toFixed(1)} mM · E_GABA ${m.egaba[i].toFixed(0)} mV`, w / 2, h / 2 + 12 * dpr);
+}
+function orb(ctx, x, y, r, col, halo) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * halo);
+  g.addColorStop(0, col); g.addColorStop(0.35, col.replace(/[\d.]+\)$/, v => (parseFloat(v) * 0.45).toFixed(3) + ")"));
+  g.addColorStop(1, col.replace(/[\d.]+\)$/, "0)"));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * halo, 0, Math.PI * 2); ctx.fill();
+}
+
+// ---------------------------------------------------------------- scrolling charts
+const WIN = 20;
+function lineChart(id, series, opt = {}) {
+  const { ctx, w, h, dpr } = fitCanvas($(id));
+  const m = M(), t = S.t, t0 = Math.max(0, t - WIN);
+  const padL = 30 * dpr, padR = (opt.right ? 30 : 6) * dpr, padT = 4 * dpr, padB = 13 * dpr;
+  ctx.clearRect(0, 0, w, h);
+  const X = tt => padL + ((tt - t0) / WIN) * (w - padL - padR);
+  const axes = { l: opt.yl || null, r: opt.yr || null };
+  for (const side of ["l", "r"]) {
+    if (axes[side]) continue;
+    let lo = Infinity, hi = -Infinity;
+    for (const s of series) {
+      if ((s.side || "l") !== side) continue;
+      const arr = s.data(m); if (!arr) continue;
+      const rate = s.fs || FPS;
+      for (let k = Math.floor(t0 * rate); k <= Math.min(arr.length - 1, Math.floor(t * rate)); k++) {
+        const v = arr[k]; if (v < lo) lo = v; if (v > hi) hi = v;
+      }
+    }
+    if (lo === Infinity) continue;
+    const pad = (hi - lo) * 0.08 || 1; axes[side] = [lo - pad, hi + pad];
+  }
+  const Y = (v, side) => { const [lo, hi] = axes[side || "l"]; return padT + (1 - (v - lo) / (hi - lo)) * (h - padT - padB); };
+  ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.fillStyle = C.muted; ctx.font = font(9, dpr);
+  const nTicks = h / dpr > 110 ? 3 : 2;
+  for (const side of ["l", "r"]) {
+    if (!axes[side]) continue;
+    const [lo, hi] = axes[side];
+    for (let k = 0; k <= nTicks; k++) {
+      const v = lo + (hi - lo) * k / nTicks, y = Y(v, side);
+      if (side === "l") { ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke(); }
+      ctx.textAlign = side === "l" ? "right" : "left";
+      ctx.fillText(fmt(v), side === "l" ? padL - 3 * dpr : w - padR + 3 * dpr, y + 3 * dpr);
+    }
+  }
+  ctx.textAlign = "center";
+  for (let s = Math.ceil(t0 / 5) * 5; s <= t; s += 5) ctx.fillText(s + "s", X(s), h - 2 * dpr);
+  if (m.stim_off > t0 && m.stim_on < t) {
+    ctx.fillStyle = "rgba(255,204,77,0.12)";
+    ctx.fillRect(X(Math.max(t0, m.stim_on)), padT, X(Math.min(t, m.stim_off)) - X(Math.max(t0, m.stim_on)), h - padT - padB);
+  }
+  for (const s of series) {
+    const arr = s.data(m); if (!arr) continue;
+    const rate = s.fs || FPS, side = s.side || "l";
+    ctx.strokeStyle = s.col; ctx.lineWidth = (s.lw || 1.4) * dpr; ctx.setLineDash(s.dash ? [4 * dpr, 3 * dpr] : []);
+    ctx.beginPath(); let first = true;
+    const k0 = Math.floor(t0 * rate), k1 = Math.min(arr.length - 1, Math.floor(t * rate));
+    const step = Math.max(1, Math.floor((k1 - k0) / (w / dpr)));
+    for (let k = k0; k <= k1; k += step) {
+      const x = X(k / rate), y = Y(arr[k], side);
+      if (s.dots) { ctx.fillStyle = s.col; ctx.fillRect(x - 1.5 * dpr, y - 1.5 * dpr, 3 * dpr, 3 * dpr); continue; }
+      first ? ctx.moveTo(x, y) : ctx.lineTo(x, y); first = false;
+    }
+    if (!s.dots) ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.beginPath(); ctx.moveTo(X(t), padT); ctx.lineTo(X(t), h - padB); ctx.stroke();
+}
+const fmt = v => Math.abs(v) >= 10 ? v.toFixed(0) : Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(2);
+function keys(id, items) { $(id).innerHTML = items.map(([lab, col, dash]) => `<span class="${dash ? "dsh" : ""}" style="--c:${col}">${lab}</span>`).join(""); }
+
+keys("kK", [["true", C.k], ["Kalman (device)", "#ffffff", 1], ["naive", C.bad, 1]]);
+keys("kCl", [["true", C.cl], ["inferred", "#ffffff", 1], ["E_GABA →", C.egaba]]);
+keys("kNa", [["[Na]i", C.na], ["pump →", C.pump]]);
+keys("kHemo", [["CBF", C.cbf], ["HbO", C.hbo], ["HbR", C.hbr]]);
+keys("kRev", [["E_GABA", C.egaba], ["E_K", C.ek]]);
+keys("kProb", [["prob.", C.warn], ["thr 0.5", C.muted, 1], ["alarm", C.bad]]);
+keys("kBands", [["δ", "#5b7cff"], ["θ", "#3ddc97"], ["α", "#ffe066"], ["β", "#ffb347"], ["γ", "#ff5470"], ["LL", "#ffffff", 1]]);
+
+const inf = D.inference;
+function drawCharts() {
+  lineChart("cLfp", [{ data: m => m.lfp200, fs: 200, col: C.lfp, lw: 1 }]);
+  lineChart("cRate", [{ data: m => m.rate, col: C.exc }]);
+  lineChart("cK", [
+    { data: m => m.ko, col: C.k, lw: 2 },
+    { data: () => S.scen === "epileptic" ? inf.ko_ekf : null, col: "#ffffff", dash: 1, lw: 1.2 },
+    { data: () => S.scen === "epileptic" ? inf.ko_naive : null, col: C.bad, dash: 1, lw: 0.8 },
+  ], { yl: [3, S.scen === "epileptic" ? 15 : 8] });
+  lineChart("cCl", [
+    { data: m => m.cli, col: C.cl, lw: 2 },
+    { data: () => S.scen === "epileptic" ? inf.cl_inferred_1hz : null, fs: 1, col: "#ffffff", dots: 1 },
+    { data: m => m.egaba, col: C.egaba, side: "r" },
+  ], { yl: [3, 20], yr: [-75, -40], right: 1 });
+  lineChart("cNa", [{ data: m => m.nai, col: C.na, lw: 2 }, { data: m => m.pump, col: C.pump, side: "r" }], { right: 1 });
+  lineChart("cAdo", [{ data: m => m.ado, col: C.ado, lw: 2 }], { yl: [0, 0.75] });
+  lineChart("cHemo", [{ data: m => m.cbf, col: C.cbf, lw: 1.6 }, { data: m => m.hbo, col: C.hbo }, { data: m => m.hbr, col: C.hbr }],
+    { yl: [-60, 60] });
+  lineChart("cRev", [{ data: m => m.egaba, col: C.egaba, lw: 2 }, { data: m => m.ek, col: C.ek }], { yl: [-100, -40] });
+  drawMap();
+}
+
+const mapImg = { img: null, w: 0, cv: null };
+function drawMap() {
+  const { ctx, w, h, dpr } = fitCanvas($("cMap"));
+  const m = M(), n = m.ncell, i1 = frame(), i0 = Math.max(0, i1 - WIN * FPS), cols = WIN * FPS;
+  if (!mapImg.img || mapImg.w !== cols) { mapImg.img = new ImageData(cols, n); mapImg.w = cols; }
+  const d = mapImg.img.data;
+  for (let x = 0; x < cols; x++) {
+    const fi = i0 + x - (cols - (i1 - i0));
+    for (let c = 0; c < n; c++) {
+      const o = ((n - 1 - c) * cols + x) * 4;
+      if (fi < 0 || fi > i1) { d[o] = 8; d[o + 1] = 10; d[o + 2] = 20; d[o + 3] = 255; continue; }
+      const [r, g, b] = magma(Math.min(1, (m.komapU8[fi * n + c] / 255) * 1.6));
+      d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255;
+    }
+  }
+  const off = mapImg.cv || (mapImg.cv = document.createElement("canvas"));
+  off.width = cols; off.height = n; off.getContext("2d").putImageData(mapImg.img, 0, 0);
+  ctx.imageSmoothingEnabled = false; ctx.drawImage(off, 0, 0, w, h - 13 * dpr);
+  ctx.fillStyle = C.muted; ctx.font = font(9, dpr); ctx.textAlign = "left";
+  ctx.fillText("−20 s", 2 * dpr, h - 2 * dpr); ctx.textAlign = "right"; ctx.fillText("now · colour: 3 → 9+ mM", w - 2 * dpr, h - 2 * dpr);
+}
+function magma(t) {
+  const s = [[0, 0, 4], [59, 15, 112], [140, 41, 129], [222, 73, 104], [254, 159, 109], [252, 253, 191]];
+  const x = t * (s.length - 1), k = Math.min(s.length - 2, Math.floor(x)), f = x - k;
+  return s[k].map((v, j) => Math.round(v + (s[k + 1][j] - v) * f));
+}
+
+// ---------------------------------------------------------------- real EEG
+const EDUR = D.eeg.data[0].length / D.eeg.fs, EWIN = 10;
+S.eegSrc = "model";
+const srcE = () => (S.eegSrc === "model" ? M().veeg : D.eeg);
+const srcT = () => (S.eegSrc === "model" ? S.t : D.eeg.t0 + S.eegT);
+function syncEegTitles() {
+  const model = S.eegSrc === "model";
+  const tag = model ? '<span class="tag model">MODEL</span>' : '<span class="tag real">REAL</span>';
+  $("tEeg").innerHTML = tag + (model ? "Virtual EEG · forward model of the simulated tissue" : "EEG · temple / ear-hook channels (CHB-MIT chb01)");
+  $("tProb").innerHTML = tag + "Detector: seizure probability";
+  $("tProbSub").textContent = model ? "K⁺-DC detector" : "both-temples model";
+  $("tBands").innerHTML = tag + (model ? "EEG features (V1)" : "EEG features (T8-P8)");
+}
+$("eegSrc").onchange = e => { S.eegSrc = e.target.value; syncEegTitles(); };
+syncEegTitles();
+function drawEEG() {
+  const E = srcE();
+  const { ctx, w, h, dpr } = fitCanvas($("cEeg"));
+  ctx.clearRect(0, 0, w, h);
+  const tt = srcT(), a = tt - EWIN, padL = 52 * dpr, padB = 13 * dpr;
+  const X = s => padL + ((s - a) / EWIN) * (w - padL - 6 * dpr);
+  ctx.font = font(9.5, dpr);
+  if (E.end > a && E.onset < tt) {
+    ctx.fillStyle = "rgba(255,84,112,0.13)";
+    ctx.fillRect(X(Math.max(a, E.onset)), 0, X(Math.min(tt, E.end)) - X(Math.max(a, E.onset)), h - padB);
+    ctx.fillStyle = C.bad; ctx.textAlign = "left";
+    ctx.fillText(E.source === "model" ? (S.scen === "healthy" ? "trigger (no seizure)" : "trigger / ictal event") : "clinician-marked seizure", X(Math.max(a, E.onset)) + 4 * dpr, 10 * dpr);
+  }
+  for (const al of E.alarms) if (al > a && al <= tt) {
+    ctx.strokeStyle = C.bad; ctx.lineWidth = 2 * dpr; ctx.beginPath(); ctx.moveTo(X(al), 0); ctx.lineTo(X(al), h - padB); ctx.stroke();
+    ctx.fillStyle = C.bad; ctx.textAlign = "left"; ctx.fillText("⚠ ALARM", X(al) + 4 * dpr, h - padB - 5 * dpr);
+  }
+  const nc = E.chans.length, lane = (h - padB) / nc;
+  const cols = E.source === "model" ? ["#ff9ab8", "#ff9ab8", "#9ad7ff", "#9ad7ff", "#ffb347"] : ["#9ad7ff", "#9ad7ff", "#ff9ab8", "#ff9ab8", "#ffe066"];
+  for (let c = 0; c < nc; c++) {
+    const y0 = lane * (c + 0.5), sig = E.data[c];
+    ctx.fillStyle = C.muted; ctx.textAlign = "right";
+    ctx.fillText(E.chans[c], padL - 5 * dpr, y0 + 3 * dpr);
+    ctx.strokeStyle = cols[c]; ctx.lineWidth = 1 * dpr; ctx.beginPath();
+    const k0 = Math.max(0, Math.floor((a - E.t0) * E.fs)), k1 = Math.min(sig.length - 1, Math.floor((tt - E.t0) * E.fs));
+    const step = Math.max(1, Math.floor((k1 - k0) / ((w - padL) / dpr * 1.5)));
+    for (let k = k0; k <= k1; k += step) {
+      const x = X(E.t0 + k / E.fs), y = y0 - Math.max(-lane * 0.55, Math.min(lane * 0.55, sig[k] * lane / 500));
+      k === k0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.fillStyle = C.muted; ctx.textAlign = "center";
+  for (let s = Math.ceil(a / 2) * 2; s <= tt - 0.8; s += 2) ctx.fillText(s + "s", X(s), h - 2 * dpr);
+  const rel = tt - E.onset;
+  const what = E.source === "model" ? ["event in", "IN EVENT +", "after event"] : ["onset in", "IN SEIZURE +", "post-seizure"];
+  $("eegClock").textContent = `${E.source === "model" ? "model" : "file"} t=${tt.toFixed(0)}s · ${rel < 0 ? what[0] + " " + (-rel).toFixed(0) + " s" : rel <= E.end - E.onset ? what[1] + rel.toFixed(0) + " s" : what[2]}`;
+}
+function timeAxis(ctx, X, a, tt, h, dpr, every) {
+  ctx.fillStyle = C.muted; ctx.font = font(9, dpr); ctx.textAlign = "center";
+  for (let s = Math.ceil(a / every) * every; s <= tt; s += every) ctx.fillText(s + "s", X(s), h - 2 * dpr);
+}
+function drawProb() {
+  const E = srcE();
+  const { ctx, w, h, dpr } = fitCanvas($("cProb"));
+  ctx.clearRect(0, 0, w, h);
+  const tt = srcT(), a = tt - 60, padL = 24 * dpr, padB = 13 * dpr, padT = 4 * dpr;
+  const X = s => padL + ((s - a) / 60) * (w - padL - 6 * dpr), Y = v => padT + (1 - v) * (h - padT - padB);
+  if (E.end > a && E.onset < tt) { ctx.fillStyle = "rgba(255,84,112,0.13)"; ctx.fillRect(X(Math.max(a, E.onset)), padT, X(Math.min(tt, E.end)) - X(Math.max(a, E.onset)), h - padT - padB); }
+  ctx.strokeStyle = C.muted; ctx.setLineDash([4 * dpr, 3 * dpr]); ctx.beginPath(); ctx.moveTo(padL, Y(E.threshold)); ctx.lineTo(w, Y(E.threshold)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = C.warn; ctx.lineWidth = 2 * dpr; ctx.beginPath(); let f = true;
+  for (let k = 0; k < E.feat_t.length; k++) { const s = E.feat_t[k]; if (s < a || s > tt) continue; const x = X(s), y = Y(E.prob[k]); f ? ctx.moveTo(x, y) : ctx.lineTo(x, y); f = false; }
+  ctx.stroke();
+  for (const al of E.alarms) if (al > a && al <= tt) { ctx.fillStyle = C.bad; ctx.beginPath(); ctx.arc(X(al), Y(0.95), 4 * dpr, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = C.muted; ctx.font = font(9, dpr); ctx.textAlign = "right";
+  for (const v of [0, 0.5, 1]) ctx.fillText(v, padL - 3 * dpr, Y(v) + 3 * dpr);
+  timeAxis(ctx, X, a, tt, h, dpr, 15);
+}
+function drawBands() {
+  const E = srcE();
+  const { ctx, w, h, dpr } = fitCanvas($("cBands"));
+  ctx.clearRect(0, 0, w, h);
+  const tt = srcT(), a = tt - 60, padL = 24 * dpr, padB = 13 * dpr, padT = 3 * dpr;
+  const X = s => padL + ((s - a) / 60) * (w - padL - 6 * dpr), Y = v => padT + (1 - v) * (h - padT - padB);
+  const names = ["delta", "theta", "alpha", "beta", "gamma"], cols = ["#5b7cff", "#3ddc97", "#ffe066", "#ffb347", "#ff5470"];
+  const bw = Math.max(1, (w - padL) / 60 - 0.5);
+  for (let k = 0; k < E.feat_t.length; k++) {
+    const s = E.feat_t[k]; if (s < a || s > tt) continue;
+    let acc = 0;
+    for (let b = 0; b < 5; b++) { const v = E.bands[names[b]][k]; ctx.fillStyle = hexA(cols[b], 0.85); ctx.fillRect(X(s) - bw, Y(acc + v), bw, Y(acc) - Y(acc + v)); acc += v; }
+  }
+  const ll = E.linelen, lo = Math.min(...ll), hi = Math.max(...ll);
+  ctx.strokeStyle = "#ffffff"; ctx.setLineDash([4 * dpr, 3 * dpr]); ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); let f = true;
+  for (let k = 0; k < E.feat_t.length; k++) { const s = E.feat_t[k]; if (s < a || s > tt) continue; const y = Y((ll[k] - lo) / (hi - lo)); f ? ctx.moveTo(X(s), y) : ctx.lineTo(X(s), y); f = false; }
+  ctx.stroke(); ctx.setLineDash([]);
+  timeAxis(ctx, X, a, tt, h, dpr, 15);
+}
+
+// ---------------------------------------------------------------- readouts + loop
+function updateReadouts() {
+  const m = M(), i = frame();
+  for (const r of RO) {
+    const v = m[r.key][i];
+    $("v_" + r.key).innerHTML = `${r.key === "ado" ? v.toFixed(2) : Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1)}<small>${r.unit}</small>`;
+    $("b_" + r.key).style.width = Math.max(0, Math.min(100, (v - r.lo) / (r.hi - r.lo) * 100)) + "%";
+  }
+  const [name, col, text] = phaseOf(m, i);
+  const b = $("phase"); b.textContent = name; b.style.color = col; b.style.borderColor = col; b.style.background = hexA(col, 0.12);
+  if ($("explain").dataset.p !== name) { $("explain").innerHTML = text; $("explain").dataset.p = name; }
+  $("clock").textContent = `${S.t.toFixed(1)} / ${m.dur.toFixed(0)} s`;
+  $("seek").value = Math.round(S.t / m.dur * 1000);
+  $("scenNote").textContent = S.scen === "epileptic" ? "KCC2 ×0.3 · glia ×0.3 · clearance ×0.35" : "all mechanisms normal";
+}
+let last = performance.now();
+function loop(now) {
+  const dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now; // rAF time can precede performance.now()
+  if (S.playing) {
+    S.t += dt * S.speed; if (S.t >= M().dur) { S.t = 0; resetParticles(); }
+    S.eegT += dt * S.speed; if (S.eegT >= EDUR) S.eegT = EWIN;
+  }
+  drawField(S.playing ? dt * S.speed : 0);
+  drawCharts(); drawEEG(); drawProb(); drawBands(); updateReadouts();
+  requestAnimationFrame(loop);
+}
+S.eegT = EWIN;
+{ // deep links: ?scen=healthy&t=9&eeg=65&speed=0.5&paused=1
+  const q = new URLSearchParams(location.search);
+  if (q.get("scen") in D) { S.scen = q.get("scen"); $("scen").value = S.scen; }
+  if (q.has("t")) S.t = Math.max(0, Math.min(M().dur - 0.1, +q.get("t")));
+  if (q.has("eeg")) S.eegT = Math.max(EWIN, Math.min(EDUR - 0.1, +q.get("eeg")));
+  if (q.has("speed")) { S.speed = +q.get("speed"); syncSpeed(); }
+  if (q.get("paused") === "1") togglePlay();
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

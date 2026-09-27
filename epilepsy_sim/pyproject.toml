@@ -1,0 +1,21 @@
+[project]
+name = "epilepsy-sim"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fooof>=1.1.1",
+    "matplotlib>=3.11.2",
+    "mne>=1.13.2",
+    "numba>=0.67.0",
+    "numpy>=2.5.3",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+]
+
+[project.optional-dependencies]
+tvb = [
+    "tvb-data>=3.0.0",
+    "tvb-library>=2.10.0",
+]

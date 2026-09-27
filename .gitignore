@@ -1,0 +1,21 @@
+# --- private / local-only ---
+.claude/
+epilepsy_temple.logger/
+epilepsy_sim/detect/ntfy_topic.txt
+
+# --- datasets (download with the fetch scripts; not ours to redistribute) ---
+epilepsy_sim/data/
+
+# --- large regenerable simulation arrays (uv run ionic.py <scenario> --save) ---
+epilepsy_sim/output/*.npz
+
+# --- logs of long runs ---
+*.log
+
+# --- Python ---
+__pycache__/
+*.py[oc]
+.venv/
+build/
+dist/
+*.egg-info

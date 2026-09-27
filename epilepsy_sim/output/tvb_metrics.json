@@ -1,0 +1,118 @@
+{
+  "T1": {
+    "ours_dt0.05_runtime_s": 1.7026212215423584,
+    "ours_dt0.01_runtime_s": 7.033011436462402,
+    "tvb_runtime_s": 43.02456021308899,
+    "table": {
+      "TVB (Heun, dt 0.05)": {
+        "n_seizures": 3,
+        "onsets": [
+          886.2,
+          2820.2,
+          4754.2
+        ],
+        "durations": [
+          968.7,
+          968.7,
+          968.8
+        ]
+      },
+      "ours (Euler, dt 0.05)": {
+        "n_seizures": 3,
+        "onsets": [
+          887.0,
+          2883.0,
+          4880.0
+        ],
+        "durations": [
+          1030.0,
+          1031.0,
+          1030.0
+        ],
+        "z_rmse_vs_tvb": 0.13901149266500215,
+        "lfp_corr_vs_tvb": 0.7100136301476644
+      },
+      "ours (Euler, dt 0.01)": {
+        "n_seizures": 3,
+        "onsets": [
+          886.2,
+          2827.6,
+          4769.0
+        ],
+        "durations": [
+          976.2,
+          976.2,
+          976.2
+        ],
+        "z_rmse_vs_tvb": 0.01772217092793355,
+        "lfp_corr_vs_tvb": 0.8722788923775118
+      }
+    }
+  },
+  "T2": {
+    "n_regions": 76,
+    "ez_label": "rAMYG",
+    "ez_index": 2,
+    "pz_labels": [
+      "rPHC",
+      "rTCV",
+      "rTCPOL"
+    ],
+    "regions_seizing": 36,
+    "recruited": [
+      "rAMYG",
+      "rTCV",
+      "rTCPOL",
+      "rIP",
+      "rCCS",
+      "rPHC",
+      "rTCC",
+      "rIA",
+      "rTCI",
+      "rPFCM",
+      "rCCA",
+      "rTCS",
+      "rPFCPOL",
+      "rPFCORB",
+      "rA1",
+      "rPFCVL",
+      "rPFCDL",
+      "rPCI",
+      "rV2",
+      "rPCIP",
+      "rFEF",
+      "rPCS",
+      "rPFCCL",
+      "rA2",
+      "rCCP",
+      "rPMCM",
+      "rPMCDL",
+      "rPCM",
+      "rG",
+      "rM1",
+      "rPMCVL",
+      "rS1",
+      "rS2",
+      "rV1",
+      "rCCR",
+      "rPFCDM"
+    ],
+    "localised_ez": "rAMYG",
+    "localisation_correct": true,
+    "x0_true": -1.6,
+    "x0_map": -1.6,
+    "x0_mean": -1.599999698405695,
+    "x0_sd": 0.00017806814654363002,
+    "posterior": {
+      "-2.1": 2.036969584643517e-22,
+      "-2.0": 0.0,
+      "-1.9": 2.692144284050255e-151,
+      "-1.8": 5.87436092742057e-43,
+      "-1.7": 7.74462630195928e-08,
+      "-1.6": 0.9999968291644228,
+      "-1.5": 3.093389314198024e-06,
+      "-1.4": 1.0807542817141635e-17
+    },
+    "runtime_per_sim_s": 63.15344023704529
+  }
+}
