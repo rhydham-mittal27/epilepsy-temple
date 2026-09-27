@@ -6,7 +6,9 @@
 >
 > Adding shoulder EMG and motion on top of ECG gave **no consistent further gain**. Most of these seizures are focal and don't involve large movements.
 >
-> False-alarm rates are still far too high for daily use. These are general models tested on patients they have never seen, with no personal tuning.
+> **Personal fine-tuning adds to that.** Retraining with each patient's first 2 seizures and adding ECG together cut false alarms by **52–62%** versus ear-EEG alone, on that patient's later data (71 patients, 649 test seizures). Requiring a sustained 10–20 s alarm did **not** help.
+>
+> **Still far from usable:** at ≤1 false alarm per day, the best setup catches only 14% of seizures.
 
 Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Results: [`epilepsy_sim/detect/results_seizeit2/`](epilepsy_sim/detect/results_seizeit2/)
 
@@ -20,6 +22,7 @@ Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Re
 4. [Signals and features](#4-signals-and-features)
 5. [Models and evaluation](#5-models-and-evaluation)
 6. [Results](#6-results)
+   - [6.5 Personal fine-tuning and sustained-alarm rules](#65-personal-fine-tuning-and-sustained-alarm-rules)
 7. [Interim snapshots](#7-interim-snapshots)
 8. [What it means for the ear-hook](#8-what-it-means-for-the-ear-hook)
 9. [Limitations](#9-limitations)
@@ -152,6 +155,57 @@ Seizures caught per patient barely changed: EEG + ECG caught more in 16 patients
 
 ![SeizeIT2 results](epilepsy_sim/detect/results_seizeit2/seizeit2.png)
 
+### 6.5 Personal fine-tuning and sustained-alarm rules
+
+**Question.** How much does learning the user's own seizures help, on top of ECG? And does requiring the alarm to be *sustained* remove more false alarms?
+
+**Protocol** (`seizeit2.py finetune`):
+- **Chronological split per patient.** Tune on everything up to 10 min after their k-th seizure (k = 1 or 2); test only on what comes after. Nothing from the future leaks into tuning.
+- **Two models, same test data:**
+  - the general model, which never saw the patient;
+  - the same training data **plus the patient's tuning windows, weighted ×10**.
+- **Three alarm rules:**
+  - 6 s smoothing (as in §6.1–6.4);
+  - probability above threshold for **10 s** in a row;
+  - **20 s** in a row.
+
+A vectorised event scorer was checked to give identical results to the reference scorer before use.
+
+**False alarms per 24 h at matched sensitivity, 6 s smoothing rule, tuned on 2 own seizures (71 patients, 649 test seizures):**
+
+| Setup | 40% caught | 50% | 60% | 70% | Caught at ≤1 FA/day | at ≤5 | at ≤20 | Delay |
+|---|---|---|---|---|---|---|---|---|
+| EEG, general | 100.8 | 157.9 | 221.3 | 289.0 | 0% | 11% | 20% | 8 s |
+| EEG, fine-tuned | 61.5 | 91.6 | 127.9 | 217.1 | 8% | 15% | 28% | 8 s |
+| EEG + ECG, general | 52.4 | 88.7 | 168.0 | 254.7 | 10% | 18% | 32% | 9 s |
+| **EEG + ECG, fine-tuned** | **40.5 (−60%)** | **60.5 (−62%)** | **107.2 (−52%)** | **192.5 (−33%)** | **14%** | **21%** | 27% | 9 s |
+
+*Percentages are relative to EEG, general, on the same test data.*
+
+**Tuned on just 1 own seizure (97 patients, 751 test seizures):**
+
+| Setup | 40% | 50% | 60% | 70% | ≤1/day | ≤5 | ≤20 |
+|---|---|---|---|---|---|---|---|
+| EEG, general | 100.8 | 100.8 | 158.4 | 291.8 | 6% | 12% | 21% |
+| EEG, fine-tuned | 53.8 | 87.9 | 175.4 (worse) | 286.8 | 5% | 9% (worse) | 17% (worse) |
+| EEG + ECG, general | 48.8 | 83.2 | 158.7 | 243.7 | 11% | 19% | 34% |
+| **EEG + ECG, fine-tuned** | **26.9** | **70.1** | **121.4** | **181.8** | 9% | **23%** | 30% |
+
+*Where two columns show the same value (e.g. 100.8 at 40% and 50%), a single threshold is the cheapest way to reach both targets.*
+
+![Fine-tuning](epilepsy_sim/detect/results_seizeit2/finetune.png)
+
+**Findings:**
+
+1. **The heart and personal tuning add up.** At 50% caught with 2 tuning seizures:
+   - ECG alone: −44%;
+   - fine-tuning alone: −42%;
+   - **both: −62%**, close to what fully independent effects would give (−67%).
+   The delay stays 8–9 s.
+2. **Two seizures are the minimum for EEG.** With one, EEG-only tuning is inconsistent: better at 40% caught, worse at 60% and under strict budgets. That is classic overfitting to a single event. With ECG in the model, even one seizure helps (−16% to −45%). **Device rule: switch on personal tuning after about 2 confirmed seizures.**
+3. **Sustained-alarm rules don't pay off.** Requiring 10 s or 20 s above threshold only helps at low sensitivity (e.g. EEG fine-tuned at 40%: 62 → 44). It is worse at 60–70% caught and adds 3–7 s of delay. It rejects brief false alarms but also misses short or flickering seizures. **Keep the 6 s smoothing rule.**
+4. **Still far from the ≤1 false alarm/day target.** The best setup catches **14%** of seizures at ≤1 FA/day and **21–23%** at ≤5. Tuning plus ECG closes about 60% of the gap in false alarms; the rest needs a better signal or model (§10).
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -168,7 +222,8 @@ The analysis was run twice while the data was still streaming. The effect of ECG
 2. **The body alone rivals the 2-channel ear EEG under strict false-alarm budgets.** At 20 or fewer false alarms a day, ECG alone (29%) and the body sensors (28%) beat EEG alone (23%). For focal seizures, the heart carries about as much seizure information as a behind-the-ear electrode pair.
 3. **EMG and motion are not worth it for focal seizures overall.** On top of ECG they were mixed: slightly better in some columns, worse in others. They are expected to matter for **convulsive** seizures (tonic-clonic, hyperkinetic), which are a minority here. That should be tested on its own. For the ear-hook, the built-in IMU is still useful for **artefact rejection** (walking, chewing), which this experiment doesn't isolate.
 4. **Delay:** fusion costs about 1 s (median 6 s → 7 s after EEG onset). That is acceptable for a warning device.
-5. **The ceiling is sensitivity, not only false alarms.** No setup catches much more than about 80% of seizures. Some focal seizures show almost nothing at the mastoid and have no heart-rate change. The live lab's "no HR response" scenario shows exactly this case.
+5. **Personalise after about 2 seizures.** Fine-tuning on 2 of the user's own seizures plus ECG cut false alarms by 52–62% (§6.5). The app should learn from each confirmed seizure and false alarm.
+6. **The ceiling is sensitivity, not only false alarms.** No setup catches much more than about 80% of seizures. Some focal seizures show almost nothing at the mastoid and have no heart-rate change. The live lab's "no HR response" scenario shows exactly this case.
 
 The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-off on simulated body signals: requiring body confirmation removes movement false alarms but costs a few seconds and misses seizures with no body sign.
 
@@ -185,8 +240,10 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 
 | Priority | Step | Why |
 |---|---|---|
-| ★★★ | **Personal fine-tuning** on SeizeIT2: add each patient's first 1–2 seizures, test on the rest | On CHB-MIT this cut false alarms by 40–65% |
-| ★★★ | **Longer decision windows + event-level post-processing** (e.g. require ≥10 s of agreement) | Standard way published systems reach ≤1 FA/day |
+| ✅ | ~~Personal fine-tuning~~ (§6.5: −42% alone, −62% with ECG, needs ≥2 seizures) | – |
+| ✅ | ~~Sustained-alarm post-processing~~ (§6.5: does not help) | – |
+| ★★★ | **Personal alarm threshold** set from each user's tuning data | One shared threshold is a poor fit for patients whose baseline probabilities differ |
+| ★★★ | **Longer context:** features over 5–10 min of HR/HRV and EEG trends | Autonomic change builds over minutes; 4 s windows can't see it |
 | ★★ | **Split by seizure type** (non-motor vs motor vs tonic-clonic) | Tells whether EMG/motion earn their place for convulsive seizures |
 | ★★ | **Degrade ECG to PPG-like beat timing** (jitter, dropouts) | Estimates what the ear-hook's optical heart rate would achieve |
 | ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Captures slow pre-ictal autonomic change |
@@ -201,6 +258,7 @@ uv run detect/seizeit2.py fetch              # stream all 2,850 runs (~126 GB th
 uv run detect/seizeit2.py run                # 5 setups x 5-fold CV (~1 h); results -> detect/results_seizeit2/
 uv run detect/seizeit2.py run --snapshot     # interim results on fully streamed patients while fetch is running
 uv run detect/seizeit2.py report             # recompute tables + figure from saved metrics (no retraining)
+uv run detect/seizeit2.py finetune --k 2     # personal fine-tuning on 2 own seizures (~35 min); then --k 1 (~45 min)
 ```
 
 If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or run finishes, or crashes.

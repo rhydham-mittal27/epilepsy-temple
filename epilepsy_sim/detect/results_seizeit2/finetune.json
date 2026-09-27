@@ -1,0 +1,4830 @@
+{
+ "EEG only (ear) | k=2": {
+  "patients": 71,
+  "general": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7318952234206472,
+     "detected": 475,
+     "seizures": 649,
+     "fa_per_24h": 1396.5853584954289,
+     "false_alarms": 252894,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.150": {
+     "sensitivity": 0.7164869029275809,
+     "detected": 465,
+     "seizures": 649,
+     "fa_per_24h": 1322.6788923367048,
+     "false_alarms": 239511,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.200": {
+     "sensitivity": 0.7257318952234206,
+     "detected": 471,
+     "seizures": 649,
+     "fa_per_24h": 1223.9491753834309,
+     "false_alarms": 221633,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.250": {
+     "sensitivity": 0.711864406779661,
+     "detected": 462,
+     "seizures": 649,
+     "fa_per_24h": 1122.2649669562784,
+     "false_alarms": 203220,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.300": {
+     "sensitivity": 0.7457627118644068,
+     "detected": 484,
+     "seizures": 649,
+     "fa_per_24h": 1015.3896893974511,
+     "false_alarms": 183867,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.7611710323574731,
+     "detected": 494,
+     "seizures": 649,
+     "fa_per_24h": 910.1048670619457,
+     "false_alarms": 164802,
+     "hours": 4345.925555555555,
+     "latency_median_s": 4.0
+    },
+    "0.400": {
+     "sensitivity": 0.7611710323574731,
+     "detected": 494,
+     "seizures": 649,
+     "fa_per_24h": 806.8688603092605,
+     "false_alarms": 146108,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.450": {
+     "sensitivity": 0.7750385208012327,
+     "detected": 503,
+     "seizures": 649,
+     "fa_per_24h": 706.4382398532675,
+     "false_alarms": 127922,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.500": {
+     "sensitivity": 0.765793528505393,
+     "detected": 497,
+     "seizures": 649,
+     "fa_per_24h": 613.1315334184026,
+     "false_alarms": 111026,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.550": {
+     "sensitivity": 0.7750385208012327,
+     "detected": 503,
+     "seizures": 649,
+     "fa_per_24h": 524.9882840453627,
+     "false_alarms": 95065,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.600": {
+     "sensitivity": 0.7534668721109399,
+     "detected": 489,
+     "seizures": 649,
+     "fa_per_24h": 441.1911744666078,
+     "false_alarms": 79891,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.650": {
+     "sensitivity": 0.7349768875192604,
+     "detected": 477,
+     "seizures": 649,
+     "fa_per_24h": 362.9882702393277,
+     "false_alarms": 65730,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.700": {
+     "sensitivity": 0.7149460708782742,
+     "detected": 464,
+     "seizures": 649,
+     "fa_per_24h": 289.0265799409051,
+     "false_alarms": 52337,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.750": {
+     "sensitivity": 0.6795069337442219,
+     "detected": 441,
+     "seizures": 649,
+     "fa_per_24h": 221.30521742843172,
+     "false_alarms": 40074,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.800": {
+     "sensitivity": 0.5963020030816641,
+     "detected": 387,
+     "seizures": 649,
+     "fa_per_24h": 157.902382640394,
+     "false_alarms": 28593,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.850": {
+     "sensitivity": 0.4869029275808937,
+     "detected": 316,
+     "seizures": 649,
+     "fa_per_24h": 100.84480150373288,
+     "false_alarms": 18261,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.900": {
+     "sensitivity": 0.37596302003081666,
+     "detected": 244,
+     "seizures": 649,
+     "fa_per_24h": 51.22038957051216,
+     "false_alarms": 9275,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.0
+    },
+    "0.950": {
+     "sensitivity": 0.2033898305084746,
+     "detected": 132,
+     "seizures": 649,
+     "fa_per_24h": 13.286928011498897,
+     "false_alarms": 2406,
+     "hours": 4345.925555555555,
+     "latency_median_s": 17.5
+    },
+    "0.970": {
+     "sensitivity": 0.11093990755007704,
+     "detected": 72,
+     "seizures": 649,
+     "fa_per_24h": 3.9209139186052435,
+     "false_alarms": 710,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.980": {
+     "sensitivity": 0.04776579352850539,
+     "detected": 31,
+     "seizures": 649,
+     "fa_per_24h": 1.1817965895514397,
+     "false_alarms": 214,
+     "hours": 4345.925555555555,
+     "latency_median_s": 34.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.011044827939733081,
+     "false_alarms": 2,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7257318952234206,
+     "detected": 471,
+     "seizures": 649,
+     "fa_per_24h": 1295.2159276645586,
+     "false_alarms": 234538,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.150": {
+     "sensitivity": 0.7087827426810478,
+     "detected": 460,
+     "seizures": 649,
+     "fa_per_24h": 1102.0584542405368,
+     "false_alarms": 199561,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.200": {
+     "sensitivity": 0.7395993836671803,
+     "detected": 480,
+     "seizures": 649,
+     "fa_per_24h": 904.3891686031338,
+     "false_alarms": 163767,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.250": {
+     "sensitivity": 0.7303543913713405,
+     "detected": 474,
+     "seizures": 649,
+     "fa_per_24h": 738.5565995020114,
+     "false_alarms": 133738,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.300": {
+     "sensitivity": 0.7426810477657936,
+     "detected": 482,
+     "seizures": 649,
+     "fa_per_24h": 599.8169933370542,
+     "false_alarms": 108615,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.350": {
+     "sensitivity": 0.7288135593220338,
+     "detected": 473,
+     "seizures": 649,
+     "fa_per_24h": 485.2600379461428,
+     "false_alarms": 87871,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.400": {
+     "sensitivity": 0.711864406779661,
+     "detected": 462,
+     "seizures": 649,
+     "fa_per_24h": 392.7043798111796,
+     "false_alarms": 71111,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.450": {
+     "sensitivity": 0.6902927580893683,
+     "detected": 448,
+     "seizures": 649,
+     "fa_per_24h": 317.6161170629042,
+     "false_alarms": 57514,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.500": {
+     "sensitivity": 0.6594761171032357,
+     "detected": 428,
+     "seizures": 649,
+     "fa_per_24h": 257.31135651196155,
+     "false_alarms": 46594,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.550": {
+     "sensitivity": 0.6348228043143297,
+     "detected": 412,
+     "seizures": 649,
+     "fa_per_24h": 206.38365488185232,
+     "false_alarms": 37372,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.600": {
+     "sensitivity": 0.5978428351309707,
+     "detected": 388,
+     "seizures": 649,
+     "fa_per_24h": 162.64613624050935,
+     "false_alarms": 29452,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.0
+    },
+    "0.650": {
+     "sensitivity": 0.551617873651772,
+     "detected": 358,
+     "seizures": 649,
+     "fa_per_24h": 124.32058328963555,
+     "false_alarms": 22512,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.700": {
+     "sensitivity": 0.49768875192604006,
+     "detected": 323,
+     "seizures": 649,
+     "fa_per_24h": 90.53445462199207,
+     "false_alarms": 16394,
+     "hours": 4345.925555555555,
+     "latency_median_s": 15.0
+    },
+    "0.750": {
+     "sensitivity": 0.4221879815100154,
+     "detected": 274,
+     "seizures": 649,
+     "fa_per_24h": 62.52477096682897,
+     "false_alarms": 11322,
+     "hours": 4345.925555555555,
+     "latency_median_s": 16.0
+    },
+    "0.800": {
+     "sensitivity": 0.36363636363636365,
+     "detected": 236,
+     "seizures": 649,
+     "fa_per_24h": 40.357801291784675,
+     "false_alarms": 7308,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.0
+    },
+    "0.850": {
+     "sensitivity": 0.29738058551617874,
+     "detected": 193,
+     "seizures": 649,
+     "fa_per_24h": 23.072645566102405,
+     "false_alarms": 4178,
+     "hours": 4345.925555555555,
+     "latency_median_s": 21.0
+    },
+    "0.900": {
+     "sensitivity": 0.2172573189522342,
+     "detected": 141,
+     "seizures": 649,
+     "fa_per_24h": 10.144674462644835,
+     "false_alarms": 1837,
+     "hours": 4345.925555555555,
+     "latency_median_s": 26.0
+    },
+    "0.950": {
+     "sensitivity": 0.10631741140215717,
+     "detected": 69,
+     "seizures": 649,
+     "fa_per_24h": 1.9991138570916873,
+     "false_alarms": 362,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.970": {
+     "sensitivity": 0.05701078582434515,
+     "detected": 37,
+     "seizures": 649,
+     "fa_per_24h": 0.4307482896495901,
+     "false_alarms": 78,
+     "hours": 4345.925555555555,
+     "latency_median_s": 38.0
+    },
+    "0.980": {
+     "sensitivity": 0.026194144838212634,
+     "detected": 17,
+     "seizures": 649,
+     "fa_per_24h": 0.1214931073370639,
+     "false_alarms": 22,
+     "hours": 4345.925555555555,
+     "latency_median_s": 42.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.7134052388289677,
+     "detected": 463,
+     "seizures": 649,
+     "fa_per_24h": 1231.8462273603402,
+     "false_alarms": 223063,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.150": {
+     "sensitivity": 0.6902927580893683,
+     "detected": 448,
+     "seizures": 649,
+     "fa_per_24h": 955.1567202281169,
+     "false_alarms": 172960,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.200": {
+     "sensitivity": 0.6718027734976888,
+     "detected": 436,
+     "seizures": 649,
+     "fa_per_24h": 706.0019691496482,
+     "false_alarms": 127843,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.250": {
+     "sensitivity": 0.6286594761171033,
+     "detected": 408,
+     "seizures": 649,
+     "fa_per_24h": 522.0006580876649,
+     "false_alarms": 94524,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.300": {
+     "sensitivity": 0.576271186440678,
+     "detected": 374,
+     "seizures": 649,
+     "fa_per_24h": 390.96481941067157,
+     "false_alarms": 70796,
+     "hours": 4345.925555555555,
+     "latency_median_s": 16.0
+    },
+    "0.350": {
+     "sensitivity": 0.559322033898305,
+     "detected": 363,
+     "seizures": 649,
+     "fa_per_24h": 298.0667716095767,
+     "false_alarms": 53974,
+     "hours": 4345.925555555555,
+     "latency_median_s": 20.0
+    },
+    "0.400": {
+     "sensitivity": 0.5208012326656395,
+     "detected": 338,
+     "seizures": 649,
+     "fa_per_24h": 228.91510387890784,
+     "false_alarms": 41452,
+     "hours": 4345.925555555555,
+     "latency_median_s": 21.0
+    },
+    "0.450": {
+     "sensitivity": 0.5053929121725732,
+     "detected": 328,
+     "seizures": 649,
+     "fa_per_24h": 176.24784184829062,
+     "false_alarms": 31915,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.500": {
+     "sensitivity": 0.4714946070878274,
+     "detected": 306,
+     "seizures": 649,
+     "fa_per_24h": 135.41511295509744,
+     "false_alarms": 24521,
+     "hours": 4345.925555555555,
+     "latency_median_s": 24.0
+    },
+    "0.550": {
+     "sensitivity": 0.4530046224961479,
+     "detected": 294,
+     "seizures": 649,
+     "fa_per_24h": 102.76660156524645,
+     "false_alarms": 18609,
+     "hours": 4345.925555555555,
+     "latency_median_s": 25.0
+    },
+    "0.600": {
+     "sensitivity": 0.41140215716486905,
+     "detected": 267,
+     "seizures": 649,
+     "fa_per_24h": 75.05512826445614,
+     "false_alarms": 13591,
+     "hours": 4345.925555555555,
+     "latency_median_s": 26.0
+    },
+    "0.650": {
+     "sensitivity": 0.3728813559322034,
+     "detected": 242,
+     "seizures": 649,
+     "fa_per_24h": 53.274727567302506,
+     "false_alarms": 9647,
+     "hours": 4345.925555555555,
+     "latency_median_s": 27.0
+    },
+    "0.700": {
+     "sensitivity": 0.34668721109399075,
+     "detected": 225,
+     "seizures": 649,
+     "fa_per_24h": 36.10554253498744,
+     "false_alarms": 6538,
+     "hours": 4345.925555555555,
+     "latency_median_s": 29.0
+    },
+    "0.750": {
+     "sensitivity": 0.29583975346687214,
+     "detected": 192,
+     "seizures": 649,
+     "fa_per_24h": 22.59771796469388,
+     "false_alarms": 4092,
+     "hours": 4345.925555555555,
+     "latency_median_s": 31.0
+    },
+    "0.800": {
+     "sensitivity": 0.26040061633281975,
+     "detected": 169,
+     "seizures": 649,
+     "fa_per_24h": 12.762298684361575,
+     "false_alarms": 2311,
+     "hours": 4345.925555555555,
+     "latency_median_s": 34.0
+    },
+    "0.850": {
+     "sensitivity": 0.22033898305084745,
+     "detected": 143,
+     "seizures": 649,
+     "fa_per_24h": 6.151969162431326,
+     "false_alarms": 1114,
+     "hours": 4345.925555555555,
+     "latency_median_s": 37.0
+    },
+    "0.900": {
+     "sensitivity": 0.14637904468412943,
+     "detected": 95,
+     "seizures": 649,
+     "fa_per_24h": 2.2752345555850146,
+     "false_alarms": 412,
+     "hours": 4345.925555555555,
+     "latency_median_s": 37.0
+    },
+    "0.950": {
+     "sensitivity": 0.061633281972265024,
+     "detected": 40,
+     "seizures": 649,
+     "fa_per_24h": 0.44179311758932316,
+     "false_alarms": 80,
+     "hours": 4345.925555555555,
+     "latency_median_s": 44.5
+    },
+    "0.970": {
+     "sensitivity": 0.03543913713405239,
+     "detected": 23,
+     "seizures": 649,
+     "fa_per_24h": 0.07731379557813156,
+     "false_alarms": 14,
+     "hours": 4345.925555555555,
+     "latency_median_s": 44.0
+    },
+    "0.980": {
+     "sensitivity": 0.015408320493066256,
+     "detected": 10,
+     "seizures": 649,
+     "fa_per_24h": 0.022089655879466163,
+     "false_alarms": 4,
+     "hours": 4345.925555555555,
+     "latency_median_s": 47.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    }
+   }
+  },
+  "finetuned": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7026194144838213,
+     "detected": 456,
+     "seizures": 649,
+     "fa_per_24h": 1257.4812730084607,
+     "false_alarms": 227705,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.150": {
+     "sensitivity": 0.7195685670261941,
+     "detected": 467,
+     "seizures": 649,
+     "fa_per_24h": 1101.7768111280734,
+     "false_alarms": 199510,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.200": {
+     "sensitivity": 0.7519260400616333,
+     "detected": 488,
+     "seizures": 649,
+     "fa_per_24h": 956.432397855156,
+     "false_alarms": 173191,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.250": {
+     "sensitivity": 0.7426810477657936,
+     "detected": 482,
+     "seizures": 649,
+     "fa_per_24h": 823.6680436055946,
+     "false_alarms": 149150,
+     "hours": 4345.925555555555,
+     "latency_median_s": 4.0
+    },
+    "0.300": {
+     "sensitivity": 0.7580893682588598,
+     "detected": 492,
+     "seizures": 649,
+     "fa_per_24h": 703.6162863146658,
+     "false_alarms": 127411,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.7688751926040062,
+     "detected": 499,
+     "seizures": 649,
+     "fa_per_24h": 593.8638310775382,
+     "false_alarms": 107537,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.400": {
+     "sensitivity": 0.7750385208012327,
+     "detected": 503,
+     "seizures": 649,
+     "fa_per_24h": 496.1668055366291,
+     "false_alarms": 89846,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.450": {
+     "sensitivity": 0.7627118644067796,
+     "detected": 495,
+     "seizures": 649,
+     "fa_per_24h": 411.09954074480504,
+     "false_alarms": 74442,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.500": {
+     "sensitivity": 0.7457627118644068,
+     "detected": 484,
+     "seizures": 649,
+     "fa_per_24h": 337.37531424708664,
+     "false_alarms": 61092,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.550": {
+     "sensitivity": 0.7318952234206472,
+     "detected": 475,
+     "seizures": 649,
+     "fa_per_24h": 272.9894897724127,
+     "false_alarms": 49433,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.600": {
+     "sensitivity": 0.7103235747303543,
+     "detected": 461,
+     "seizures": 649,
+     "fa_per_24h": 217.08609315545368,
+     "false_alarms": 39310,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.650": {
+     "sensitivity": 0.6594761171032357,
+     "detected": 428,
+     "seizures": 649,
+     "fa_per_24h": 168.96930023600652,
+     "false_alarms": 30597,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.700": {
+     "sensitivity": 0.6209553158705701,
+     "detected": 403,
+     "seizures": 649,
+     "fa_per_24h": 127.88806271416934,
+     "false_alarms": 23158,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.750": {
+     "sensitivity": 0.5500770416024653,
+     "detected": 357,
+     "seizures": 649,
+     "fa_per_24h": 91.57266844832698,
+     "false_alarms": 16582,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.800": {
+     "sensitivity": 0.4869029275808937,
+     "detected": 316,
+     "seizures": 649,
+     "fa_per_24h": 61.53625886622286,
+     "false_alarms": 11143,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.850": {
+     "sensitivity": 0.386748844375963,
+     "detected": 251,
+     "seizures": 649,
+     "fa_per_24h": 36.867635662829024,
+     "false_alarms": 6676,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.900": {
+     "sensitivity": 0.275808936825886,
+     "detected": 179,
+     "seizures": 649,
+     "fa_per_24h": 17.345902279350803,
+     "false_alarms": 3141,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.950": {
+     "sensitivity": 0.15408320493066255,
+     "detected": 100,
+     "seizures": 649,
+     "fa_per_24h": 4.119720821520439,
+     "false_alarms": 746,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.970": {
+     "sensitivity": 0.08166409861325115,
+     "detected": 53,
+     "seizures": 649,
+     "fa_per_24h": 0.9885121006061106,
+     "false_alarms": 179,
+     "hours": 4345.925555555555,
+     "latency_median_s": 28.0
+    },
+    "0.980": {
+     "sensitivity": 0.03697996918335902,
+     "detected": 24,
+     "seizures": 649,
+     "fa_per_24h": 0.276120698493327,
+     "false_alarms": 50,
+     "hours": 4345.925555555555,
+     "latency_median_s": 29.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.005522413969866541,
+     "false_alarms": 1,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7026194144838213,
+     "detected": 456,
+     "seizures": 649,
+     "fa_per_24h": 989.450910980988,
+     "false_alarms": 179170,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.150": {
+     "sensitivity": 0.7211093990755008,
+     "detected": 468,
+     "seizures": 649,
+     "fa_per_24h": 734.7295666208938,
+     "false_alarms": 133045,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.200": {
+     "sensitivity": 0.7426810477657936,
+     "detected": 482,
+     "seizures": 649,
+     "fa_per_24h": 550.540493483935,
+     "false_alarms": 99692,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.250": {
+     "sensitivity": 0.7380585516178737,
+     "detected": 479,
+     "seizures": 649,
+     "fa_per_24h": 416.9477771388937,
+     "false_alarms": 75501,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.300": {
+     "sensitivity": 0.7149460708782742,
+     "detected": 464,
+     "seizures": 649,
+     "fa_per_24h": 315.78819803887836,
+     "false_alarms": 57183,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.350": {
+     "sensitivity": 0.6795069337442219,
+     "detected": 441,
+     "seizures": 649,
+     "fa_per_24h": 240.41276976416998,
+     "false_alarms": 43534,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.400": {
+     "sensitivity": 0.6363636363636364,
+     "detected": 413,
+     "seizures": 649,
+     "fa_per_24h": 183.81354898700778,
+     "false_alarms": 33285,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.450": {
+     "sensitivity": 0.5963020030816641,
+     "detected": 387,
+     "seizures": 649,
+     "fa_per_24h": 141.8100683322029,
+     "false_alarms": 25679,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.0
+    },
+    "0.500": {
+     "sensitivity": 0.5670261941448382,
+     "detected": 368,
+     "seizures": 649,
+     "fa_per_24h": 108.42707588435965,
+     "false_alarms": 19634,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.0
+    },
+    "0.550": {
+     "sensitivity": 0.5269645608628659,
+     "detected": 342,
+     "seizures": 649,
+     "fa_per_24h": 82.36680436055944,
+     "false_alarms": 14915,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.600": {
+     "sensitivity": 0.46687211093990755,
+     "detected": 303,
+     "seizures": 649,
+     "fa_per_24h": 61.006107125115676,
+     "false_alarms": 11047,
+     "hours": 4345.925555555555,
+     "latency_median_s": 15.0
+    },
+    "0.650": {
+     "sensitivity": 0.41602465331278893,
+     "detected": 270,
+     "seizures": 649,
+     "fa_per_24h": 43.64916001782514,
+     "false_alarms": 7904,
+     "hours": 4345.925555555555,
+     "latency_median_s": 16.0
+    },
+    "0.700": {
+     "sensitivity": 0.3682588597842835,
+     "detected": 239,
+     "seizures": 649,
+     "fa_per_24h": 30.45611304381397,
+     "false_alarms": 5515,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.0
+    },
+    "0.750": {
+     "sensitivity": 0.31278890600924497,
+     "detected": 203,
+     "seizures": 649,
+     "fa_per_24h": 20.443976516445932,
+     "false_alarms": 3702,
+     "hours": 4345.925555555555,
+     "latency_median_s": 20.0
+    },
+    "0.800": {
+     "sensitivity": 0.25115562403698,
+     "detected": 163,
+     "seizures": 649,
+     "fa_per_24h": 12.458565916018916,
+     "false_alarms": 2256,
+     "hours": 4345.925555555555,
+     "latency_median_s": 23.0
+    },
+    "0.850": {
+     "sensitivity": 0.20647149460708783,
+     "detected": 134,
+     "seizures": 649,
+     "fa_per_24h": 6.7649571130865125,
+     "false_alarms": 1225,
+     "hours": 4345.925555555555,
+     "latency_median_s": 28.5
+    },
+    "0.900": {
+     "sensitivity": 0.14637904468412943,
+     "detected": 95,
+     "seizures": 649,
+     "fa_per_24h": 2.8329983665415353,
+     "false_alarms": 513,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.950": {
+     "sensitivity": 0.08320493066255778,
+     "detected": 54,
+     "seizures": 649,
+     "fa_per_24h": 0.4749276014085225,
+     "false_alarms": 86,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.970": {
+     "sensitivity": 0.03697996918335902,
+     "detected": 24,
+     "seizures": 649,
+     "fa_per_24h": 0.13253793527679697,
+     "false_alarms": 24,
+     "hours": 4345.925555555555,
+     "latency_median_s": 43.0
+    },
+    "0.980": {
+     "sensitivity": 0.01078582434514638,
+     "detected": 7,
+     "seizures": 649,
+     "fa_per_24h": 0.027612069849332697,
+     "false_alarms": 5,
+     "hours": 4345.925555555555,
+     "latency_median_s": 36.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.7041602465331279,
+     "detected": 457,
+     "seizures": 649,
+     "fa_per_24h": 831.0073317715471,
+     "false_alarms": 150479,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.150": {
+     "sensitivity": 0.6671802773497689,
+     "detected": 433,
+     "seizures": 649,
+     "fa_per_24h": 542.6489639209958,
+     "false_alarms": 98263,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.200": {
+     "sensitivity": 0.6209553158705701,
+     "detected": 403,
+     "seizures": 649,
+     "fa_per_24h": 363.94364785611464,
+     "false_alarms": 65903,
+     "hours": 4345.925555555555,
+     "latency_median_s": 15.0
+    },
+    "0.250": {
+     "sensitivity": 0.5546995377503852,
+     "detected": 360,
+     "seizures": 649,
+     "fa_per_24h": 250.0769942114364,
+     "false_alarms": 45284,
+     "hours": 4345.925555555555,
+     "latency_median_s": 19.0
+    },
+    "0.300": {
+     "sensitivity": 0.5069337442218799,
+     "detected": 329,
+     "seizures": 649,
+     "fa_per_24h": 176.45769357914557,
+     "false_alarms": 31953,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.350": {
+     "sensitivity": 0.47919876733436056,
+     "detected": 311,
+     "seizures": 649,
+     "fa_per_24h": 126.42462301215471,
+     "false_alarms": 22893,
+     "hours": 4345.925555555555,
+     "latency_median_s": 23.0
+    },
+    "0.400": {
+     "sensitivity": 0.4406779661016949,
+     "detected": 286,
+     "seizures": 649,
+     "fa_per_24h": 91.35177188953232,
+     "false_alarms": 16542,
+     "hours": 4345.925555555555,
+     "latency_median_s": 24.0
+    },
+    "0.450": {
+     "sensitivity": 0.3975346687211094,
+     "detected": 258,
+     "seizures": 649,
+     "fa_per_24h": 65.72224865538169,
+     "false_alarms": 11901,
+     "hours": 4345.925555555555,
+     "latency_median_s": 25.0
+    },
+    "0.500": {
+     "sensitivity": 0.37442218798151,
+     "detected": 243,
+     "seizures": 649,
+     "fa_per_24h": 47.21663944235892,
+     "false_alarms": 8550,
+     "hours": 4345.925555555555,
+     "latency_median_s": 26.0
+    },
+    "0.550": {
+     "sensitivity": 0.3436055469953775,
+     "detected": 223,
+     "seizures": 649,
+     "fa_per_24h": 33.526575211059765,
+     "false_alarms": 6071,
+     "hours": 4345.925555555555,
+     "latency_median_s": 28.0
+    },
+    "0.600": {
+     "sensitivity": 0.30970724191063176,
+     "detected": 201,
+     "seizures": 649,
+     "fa_per_24h": 23.24384039916827,
+     "false_alarms": 4209,
+     "hours": 4345.925555555555,
+     "latency_median_s": 30.0
+    },
+    "0.650": {
+     "sensitivity": 0.275808936825886,
+     "detected": 179,
+     "seizures": 649,
+     "fa_per_24h": 15.68917808839084,
+     "false_alarms": 2841,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.700": {
+     "sensitivity": 0.2465331278890601,
+     "detected": 160,
+     "seizures": 649,
+     "fa_per_24h": 10.371093435409362,
+     "false_alarms": 1878,
+     "hours": 4345.925555555555,
+     "latency_median_s": 34.0
+    },
+    "0.750": {
+     "sensitivity": 0.22033898305084745,
+     "detected": 143,
+     "seizures": 649,
+     "fa_per_24h": 6.3618208932862546,
+     "false_alarms": 1152,
+     "hours": 4345.925555555555,
+     "latency_median_s": 36.0
+    },
+    "0.800": {
+     "sensitivity": 0.18181818181818182,
+     "detected": 118,
+     "seizures": 649,
+     "fa_per_24h": 3.412851833377522,
+     "false_alarms": 618,
+     "hours": 4345.925555555555,
+     "latency_median_s": 38.0
+    },
+    "0.850": {
+     "sensitivity": 0.1386748844375963,
+     "detected": 90,
+     "seizures": 649,
+     "fa_per_24h": 1.5462759115626312,
+     "false_alarms": 280,
+     "hours": 4345.925555555555,
+     "latency_median_s": 42.0
+    },
+    "0.900": {
+     "sensitivity": 0.09244992295839753,
+     "detected": 60,
+     "seizures": 649,
+     "fa_per_24h": 0.5964207087455864,
+     "false_alarms": 108,
+     "hours": 4345.925555555555,
+     "latency_median_s": 48.0
+    },
+    "0.950": {
+     "sensitivity": 0.040061633281972264,
+     "detected": 26,
+     "seizures": 649,
+     "fa_per_24h": 0.09388103748773119,
+     "false_alarms": 17,
+     "hours": 4345.925555555555,
+     "latency_median_s": 48.0
+    },
+    "0.970": {
+     "sensitivity": 0.01386748844375963,
+     "detected": 9,
+     "seizures": 649,
+     "fa_per_24h": 0.022089655879466163,
+     "false_alarms": 4,
+     "hours": 4345.925555555555,
+     "latency_median_s": 56.0
+    },
+    "0.980": {
+     "sensitivity": 0.0030816640986132513,
+     "detected": 2,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": 59.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": null
+    }
+   }
+  }
+ },
+ "EEG + ECG | k=2": {
+  "patients": 71,
+  "general": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7395993836671803,
+     "detected": 480,
+     "seizures": 649,
+     "fa_per_24h": 1190.505436381919,
+     "false_alarms": 215577,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.150": {
+     "sensitivity": 0.765793528505393,
+     "detected": 497,
+     "seizures": 649,
+     "fa_per_24h": 1040.4780160625548,
+     "false_alarms": 188410,
+     "hours": 4345.925555555555,
+     "latency_median_s": 4.0
+    },
+    "0.200": {
+     "sensitivity": 0.7966101694915254,
+     "detected": 517,
+     "seizures": 649,
+     "fa_per_24h": 911.490992968382,
+     "false_alarms": 165053,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.250": {
+     "sensitivity": 0.7919876733436055,
+     "detected": 514,
+     "seizures": 649,
+     "fa_per_24h": 795.5810461548533,
+     "false_alarms": 144064,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.300": {
+     "sensitivity": 0.7966101694915254,
+     "detected": 517,
+     "seizures": 649,
+     "fa_per_24h": 695.0841567312219,
+     "false_alarms": 125866,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.7935285053929122,
+     "detected": 515,
+     "seizures": 649,
+     "fa_per_24h": 608.2994211947694,
+     "false_alarms": 110151,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.400": {
+     "sensitivity": 0.7842835130970724,
+     "detected": 509,
+     "seizures": 649,
+     "fa_per_24h": 531.7642859863888,
+     "false_alarms": 96292,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.450": {
+     "sensitivity": 0.7842835130970724,
+     "detected": 509,
+     "seizures": 649,
+     "fa_per_24h": 465.13636143994904,
+     "false_alarms": 84227,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.500": {
+     "sensitivity": 0.7719568567026194,
+     "detected": 501,
+     "seizures": 649,
+     "fa_per_24h": 405.345185388204,
+     "false_alarms": 73400,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.550": {
+     "sensitivity": 0.7596302003081664,
+     "detected": 493,
+     "seizures": 649,
+     "fa_per_24h": 352.04836816502205,
+     "false_alarms": 63749,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.600": {
+     "sensitivity": 0.7519260400616333,
+     "detected": 488,
+     "seizures": 649,
+     "fa_per_24h": 302.20858208697655,
+     "false_alarms": 54724,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.650": {
+     "sensitivity": 0.7103235747303543,
+     "detected": 461,
+     "seizures": 649,
+     "fa_per_24h": 254.66059780642564,
+     "false_alarms": 46114,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.700": {
+     "sensitivity": 0.6779661016949152,
+     "detected": 440,
+     "seizures": 649,
+     "fa_per_24h": 210.05606017181358,
+     "false_alarms": 38037,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.750": {
+     "sensitivity": 0.6209553158705701,
+     "detected": 403,
+     "seizures": 649,
+     "fa_per_24h": 167.99735537731004,
+     "false_alarms": 30421,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.800": {
+     "sensitivity": 0.5731895223420647,
+     "detected": 372,
+     "seizures": 649,
+     "fa_per_24h": 126.94925233929203,
+     "false_alarms": 22988,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.850": {
+     "sensitivity": 0.5238828967642527,
+     "detected": 340,
+     "seizures": 649,
+     "fa_per_24h": 88.7286252538457,
+     "false_alarms": 16067,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.900": {
+     "sensitivity": 0.4391371340523883,
+     "detected": 285,
+     "seizures": 649,
+     "fa_per_24h": 52.38561891815401,
+     "false_alarms": 9486,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.950": {
+     "sensitivity": 0.3220338983050847,
+     "detected": 209,
+     "seizures": 649,
+     "fa_per_24h": 19.610092006996084,
+     "false_alarms": 3551,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.970": {
+     "sensitivity": 0.2573189522342065,
+     "detected": 167,
+     "seizures": 649,
+     "fa_per_24h": 7.405557133591031,
+     "false_alarms": 1341,
+     "hours": 4345.925555555555,
+     "latency_median_s": 29.0
+    },
+    "0.980": {
+     "sensitivity": 0.1802773497688752,
+     "detected": 117,
+     "seizures": 649,
+     "fa_per_24h": 2.960013887848466,
+     "false_alarms": 536,
+     "hours": 4345.925555555555,
+     "latency_median_s": 36.0
+    },
+    "0.990": {
+     "sensitivity": 0.09553158705701079,
+     "detected": 62,
+     "seizures": 649,
+     "fa_per_24h": 0.41970346170985706,
+     "false_alarms": 76,
+     "hours": 4345.925555555555,
+     "latency_median_s": 42.0
+    },
+    "0.995": {
+     "sensitivity": 0.026194144838212634,
+     "detected": 17,
+     "seizures": 649,
+     "fa_per_24h": 0.049701725728798864,
+     "false_alarms": 9,
+     "hours": 4345.925555555555,
+     "latency_median_s": 52.0
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7457627118644068,
+     "detected": 484,
+     "seizures": 649,
+     "fa_per_24h": 942.4330784415442,
+     "false_alarms": 170656,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.150": {
+     "sensitivity": 0.7318952234206472,
+     "detected": 475,
+     "seizures": 649,
+     "fa_per_24h": 742.0964668566958,
+     "false_alarms": 134379,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.200": {
+     "sensitivity": 0.7226502311248074,
+     "detected": 469,
+     "seizures": 649,
+     "fa_per_24h": 598.0774329365463,
+     "false_alarms": 108300,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.250": {
+     "sensitivity": 0.7180277349768875,
+     "detected": 466,
+     "seizures": 649,
+     "fa_per_24h": 491.10827434023145,
+     "false_alarms": 88930,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.300": {
+     "sensitivity": 0.6964560862865947,
+     "detected": 452,
+     "seizures": 649,
+     "fa_per_24h": 410.4920752081197,
+     "false_alarms": 74332,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.350": {
+     "sensitivity": 0.6779661016949152,
+     "detected": 440,
+     "seizures": 649,
+     "fa_per_24h": 346.133862803295,
+     "false_alarms": 62678,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.400": {
+     "sensitivity": 0.6594761171032357,
+     "detected": 428,
+     "seizures": 649,
+     "fa_per_24h": 294.17346976082075,
+     "false_alarms": 53269,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.450": {
+     "sensitivity": 0.637904468412943,
+     "detected": 414,
+     "seizures": 649,
+     "fa_per_24h": 249.67938040560603,
+     "false_alarms": 45212,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.500": {
+     "sensitivity": 0.6101694915254238,
+     "detected": 396,
+     "seizures": 649,
+     "fa_per_24h": 212.07726368478473,
+     "false_alarms": 38403,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.0
+    },
+    "0.550": {
+     "sensitivity": 0.5731895223420647,
+     "detected": 372,
+     "seizures": 649,
+     "fa_per_24h": 178.1641194958343,
+     "false_alarms": 32262,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.5
+    },
+    "0.600": {
+     "sensitivity": 0.5439137134052389,
+     "detected": 353,
+     "seizures": 649,
+     "fa_per_24h": 148.95607200921017,
+     "false_alarms": 26973,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.650": {
+     "sensitivity": 0.5208012326656395,
+     "detected": 338,
+     "seizures": 649,
+     "fa_per_24h": 122.07296080389989,
+     "false_alarms": 22105,
+     "hours": 4345.925555555555,
+     "latency_median_s": 15.5
+    },
+    "0.700": {
+     "sensitivity": 0.48228043143297383,
+     "detected": 313,
+     "seizures": 649,
+     "fa_per_24h": 96.99567896673592,
+     "false_alarms": 17564,
+     "hours": 4345.925555555555,
+     "latency_median_s": 17.0
+    },
+    "0.750": {
+     "sensitivity": 0.43759630200308164,
+     "detected": 284,
+     "seizures": 649,
+     "fa_per_24h": 75.23184551149188,
+     "false_alarms": 13623,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.5
+    },
+    "0.800": {
+     "sensitivity": 0.39445300462249616,
+     "detected": 256,
+     "seizures": 649,
+     "fa_per_24h": 55.31249832218327,
+     "false_alarms": 10016,
+     "hours": 4345.925555555555,
+     "latency_median_s": 20.0
+    },
+    "0.850": {
+     "sensitivity": 0.362095531587057,
+     "detected": 235,
+     "seizures": 649,
+     "fa_per_24h": 36.724052899612495,
+     "false_alarms": 6650,
+     "hours": 4345.925555555555,
+     "latency_median_s": 23.0
+    },
+    "0.900": {
+     "sensitivity": 0.3220338983050847,
+     "detected": 209,
+     "seizures": 649,
+     "fa_per_24h": 20.040840296645676,
+     "false_alarms": 3629,
+     "hours": 4345.925555555555,
+     "latency_median_s": 28.0
+    },
+    "0.950": {
+     "sensitivity": 0.23420647149460708,
+     "detected": 152,
+     "seizures": 649,
+     "fa_per_24h": 5.9310726036366646,
+     "false_alarms": 1074,
+     "hours": 4345.925555555555,
+     "latency_median_s": 33.0
+    },
+    "0.970": {
+     "sensitivity": 0.17257318952234207,
+     "detected": 112,
+     "seizures": 649,
+     "fa_per_24h": 1.9383673034231557,
+     "false_alarms": 351,
+     "hours": 4345.925555555555,
+     "latency_median_s": 39.0
+    },
+    "0.980": {
+     "sensitivity": 0.12172573189522343,
+     "detected": 79,
+     "seizures": 649,
+     "fa_per_24h": 0.673734504323718,
+     "false_alarms": 122,
+     "hours": 4345.925555555555,
+     "latency_median_s": 45.0
+    },
+    "0.990": {
+     "sensitivity": 0.05855161787365177,
+     "detected": 38,
+     "seizures": 649,
+     "fa_per_24h": 0.07731379557813156,
+     "false_alarms": 14,
+     "hours": 4345.925555555555,
+     "latency_median_s": 50.5
+    },
+    "0.995": {
+     "sensitivity": 0.01694915254237288,
+     "detected": 11,
+     "seizures": 649,
+     "fa_per_24h": 0.01656724190959962,
+     "false_alarms": 3,
+     "hours": 4345.925555555555,
+     "latency_median_s": 60.0
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.6517719568567026,
+     "detected": 423,
+     "seizures": 649,
+     "fa_per_24h": 792.074313283988,
+     "false_alarms": 143429,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.150": {
+     "sensitivity": 0.613251155624037,
+     "detected": 398,
+     "seizures": 649,
+     "fa_per_24h": 572.1331321061133,
+     "false_alarms": 103602,
+     "hours": 4345.925555555555,
+     "latency_median_s": 15.0
+    },
+    "0.200": {
+     "sensitivity": 0.5731895223420647,
+     "detected": 372,
+     "seizures": 649,
+     "fa_per_24h": 432.53755177582684,
+     "false_alarms": 78324,
+     "hours": 4345.925555555555,
+     "latency_median_s": 17.0
+    },
+    "0.250": {
+     "sensitivity": 0.5716486902927581,
+     "detected": 371,
+     "seizures": 649,
+     "fa_per_24h": 339.4462194857866,
+     "false_alarms": 61467,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.0
+    },
+    "0.300": {
+     "sensitivity": 0.5485362095531587,
+     "detected": 356,
+     "seizures": 649,
+     "fa_per_24h": 274.5523329258849,
+     "false_alarms": 49716,
+     "hours": 4345.925555555555,
+     "latency_median_s": 20.0
+    },
+    "0.350": {
+     "sensitivity": 0.5192604006163328,
+     "detected": 337,
+     "seizures": 649,
+     "fa_per_24h": 224.69597960592978,
+     "false_alarms": 40688,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.400": {
+     "sensitivity": 0.4946070878274268,
+     "detected": 321,
+     "seizures": 649,
+     "fa_per_24h": 185.5310197316363,
+     "false_alarms": 33596,
+     "hours": 4345.925555555555,
+     "latency_median_s": 23.0
+    },
+    "0.450": {
+     "sensitivity": 0.4761171032357473,
+     "detected": 309,
+     "seizures": 649,
+     "fa_per_24h": 153.55624284610903,
+     "false_alarms": 27806,
+     "hours": 4345.925555555555,
+     "latency_median_s": 25.0
+    },
+    "0.500": {
+     "sensitivity": 0.4514637904468413,
+     "detected": 293,
+     "seizures": 649,
+     "fa_per_24h": 126.41357818421498,
+     "false_alarms": 22891,
+     "hours": 4345.925555555555,
+     "latency_median_s": 26.0
+    },
+    "0.550": {
+     "sensitivity": 0.43143297380585516,
+     "detected": 280,
+     "seizures": 649,
+     "fa_per_24h": 103.82690504746083,
+     "false_alarms": 18801,
+     "hours": 4345.925555555555,
+     "latency_median_s": 27.0
+    },
+    "0.600": {
+     "sensitivity": 0.41910631741140214,
+     "detected": 272,
+     "seizures": 649,
+     "fa_per_24h": 83.89651303021247,
+     "false_alarms": 15192,
+     "hours": 4345.925555555555,
+     "latency_median_s": 28.0
+    },
+    "0.650": {
+     "sensitivity": 0.3975346687211094,
+     "detected": 258,
+     "seizures": 649,
+     "fa_per_24h": 66.47881936925342,
+     "false_alarms": 12038,
+     "hours": 4345.925555555555,
+     "latency_median_s": 29.0
+    },
+    "0.700": {
+     "sensitivity": 0.37596302003081666,
+     "detected": 244,
+     "seizures": 649,
+     "fa_per_24h": 51.1982999146327,
+     "false_alarms": 9271,
+     "hours": 4345.925555555555,
+     "latency_median_s": 30.0
+    },
+    "0.750": {
+     "sensitivity": 0.3559322033898305,
+     "detected": 231,
+     "seizures": 649,
+     "fa_per_24h": 37.65734086051994,
+     "false_alarms": 6819,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.800": {
+     "sensitivity": 0.32973805855161786,
+     "detected": 214,
+     "seizures": 649,
+     "fa_per_24h": 26.0934060076194,
+     "false_alarms": 4725,
+     "hours": 4345.925555555555,
+     "latency_median_s": 34.0
+    },
+    "0.850": {
+     "sensitivity": 0.3050847457627119,
+     "detected": 198,
+     "seizures": 649,
+     "fa_per_24h": 16.44022638829269,
+     "false_alarms": 2977,
+     "hours": 4345.925555555555,
+     "latency_median_s": 36.0
+    },
+    "0.900": {
+     "sensitivity": 0.2573189522342065,
+     "detected": 167,
+     "seizures": 649,
+     "fa_per_24h": 8.311233024649143,
+     "false_alarms": 1505,
+     "hours": 4345.925555555555,
+     "latency_median_s": 41.0
+    },
+    "0.950": {
+     "sensitivity": 0.17103235747303544,
+     "detected": 111,
+     "seizures": 649,
+     "fa_per_24h": 2.17030869015755,
+     "false_alarms": 393,
+     "hours": 4345.925555555555,
+     "latency_median_s": 48.0
+    },
+    "0.970": {
+     "sensitivity": 0.12326656394453005,
+     "detected": 80,
+     "seizures": 649,
+     "fa_per_24h": 0.7013465741730506,
+     "false_alarms": 127,
+     "hours": 4345.925555555555,
+     "latency_median_s": 52.0
+    },
+    "0.980": {
+     "sensitivity": 0.08936825885978428,
+     "detected": 58,
+     "seizures": 649,
+     "fa_per_24h": 0.1767172470357293,
+     "false_alarms": 32,
+     "hours": 4345.925555555555,
+     "latency_median_s": 58.0
+    },
+    "0.990": {
+     "sensitivity": 0.03543913713405239,
+     "detected": 23,
+     "seizures": 649,
+     "fa_per_24h": 0.03313448381919924,
+     "false_alarms": 6,
+     "hours": 4345.925555555555,
+     "latency_median_s": 64.0
+    },
+    "0.995": {
+     "sensitivity": 0.0030816640986132513,
+     "detected": 2,
+     "seizures": 649,
+     "fa_per_24h": 0.005522413969866541,
+     "false_alarms": 1,
+     "hours": 4345.925555555555,
+     "latency_median_s": 58.0
+    }
+   }
+  },
+  "finetuned": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7781201848998459,
+     "detected": 505,
+     "seizures": 649,
+     "fa_per_24h": 875.9984383840499,
+     "false_alarms": 158626,
+     "hours": 4345.925555555555,
+     "latency_median_s": 4.0
+    },
+    "0.150": {
+     "sensitivity": 0.8151001540832049,
+     "detected": 529,
+     "seizures": 649,
+     "fa_per_24h": 713.617378014094,
+     "false_alarms": 129222,
+     "hours": 4345.925555555555,
+     "latency_median_s": 4.0
+    },
+    "0.200": {
+     "sensitivity": 0.8089368258859785,
+     "detected": 525,
+     "seizures": 649,
+     "fa_per_24h": 593.2232310570337,
+     "false_alarms": 107421,
+     "hours": 4345.925555555555,
+     "latency_median_s": 4.0
+    },
+    "0.250": {
+     "sensitivity": 0.802773497688752,
+     "detected": 521,
+     "seizures": 649,
+     "fa_per_24h": 499.85025565453014,
+     "false_alarms": 90513,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.300": {
+     "sensitivity": 0.802773497688752,
+     "detected": 521,
+     "seizures": 649,
+     "fa_per_24h": 424.60736531509855,
+     "false_alarms": 76888,
+     "hours": 4345.925555555555,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.7796610169491526,
+     "detected": 506,
+     "seizures": 649,
+     "fa_per_24h": 362.8005081643522,
+     "false_alarms": 65696,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.400": {
+     "sensitivity": 0.7688751926040062,
+     "detected": 499,
+     "seizures": 649,
+     "fa_per_24h": 310.2547392410721,
+     "false_alarms": 56181,
+     "hours": 4345.925555555555,
+     "latency_median_s": 6.0
+    },
+    "0.450": {
+     "sensitivity": 0.7519260400616333,
+     "detected": 488,
+     "seizures": 649,
+     "fa_per_24h": 266.3184136968139,
+     "false_alarms": 48225,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.500": {
+     "sensitivity": 0.724191063174114,
+     "detected": 470,
+     "seizures": 649,
+     "fa_per_24h": 227.37435038131508,
+     "false_alarms": 41173,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.550": {
+     "sensitivity": 0.7057010785824345,
+     "detected": 458,
+     "seizures": 649,
+     "fa_per_24h": 192.51687340351748,
+     "false_alarms": 34861,
+     "hours": 4345.925555555555,
+     "latency_median_s": 7.0
+    },
+    "0.600": {
+     "sensitivity": 0.6841294298921418,
+     "detected": 444,
+     "seizures": 649,
+     "fa_per_24h": 161.3649361995003,
+     "false_alarms": 29220,
+     "hours": 4345.925555555555,
+     "latency_median_s": 8.0
+    },
+    "0.650": {
+     "sensitivity": 0.662557781201849,
+     "detected": 430,
+     "seizures": 649,
+     "fa_per_24h": 133.10674391569322,
+     "false_alarms": 24103,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.700": {
+     "sensitivity": 0.6286594761171033,
+     "detected": 408,
+     "seizures": 649,
+     "fa_per_24h": 107.23423446686847,
+     "false_alarms": 19418,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.750": {
+     "sensitivity": 0.5901386748844376,
+     "detected": 383,
+     "seizures": 649,
+     "fa_per_24h": 82.84725437593784,
+     "false_alarms": 15002,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.800": {
+     "sensitivity": 0.5300462249614792,
+     "detected": 344,
+     "seizures": 649,
+     "fa_per_24h": 60.514612281797554,
+     "false_alarms": 10958,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.850": {
+     "sensitivity": 0.4560862865947612,
+     "detected": 296,
+     "seizures": 649,
+     "fa_per_24h": 40.47929439912174,
+     "false_alarms": 7330,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.900": {
+     "sensitivity": 0.37442218798151,
+     "detected": 243,
+     "seizures": 649,
+     "fa_per_24h": 22.271895540471757,
+     "false_alarms": 4033,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.0
+    },
+    "0.950": {
+     "sensitivity": 0.2711864406779661,
+     "detected": 176,
+     "seizures": 649,
+     "fa_per_24h": 7.002420913790773,
+     "false_alarms": 1268,
+     "hours": 4345.925555555555,
+     "latency_median_s": 24.0
+    },
+    "0.970": {
+     "sensitivity": 0.20955315870570107,
+     "detected": 136,
+     "seizures": 649,
+     "fa_per_24h": 2.3635931791028795,
+     "false_alarms": 428,
+     "hours": 4345.925555555555,
+     "latency_median_s": 33.5
+    },
+    "0.980": {
+     "sensitivity": 0.14175654853620956,
+     "detected": 92,
+     "seizures": 649,
+     "fa_per_24h": 0.8725414072389133,
+     "false_alarms": 158,
+     "hours": 4345.925555555555,
+     "latency_median_s": 36.0
+    },
+    "0.990": {
+     "sensitivity": 0.06471494607087827,
+     "detected": 42,
+     "seizures": 649,
+     "fa_per_24h": 0.14358276321653005,
+     "false_alarms": 26,
+     "hours": 4345.925555555555,
+     "latency_median_s": 45.5
+    },
+    "0.995": {
+     "sensitivity": 0.023112480739599383,
+     "detected": 15,
+     "seizures": 649,
+     "fa_per_24h": 0.027612069849332697,
+     "false_alarms": 5,
+     "hours": 4345.925555555555,
+     "latency_median_s": 51.0
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7627118644067796,
+     "detected": 495,
+     "seizures": 649,
+     "fa_per_24h": 597.757132926294,
+     "false_alarms": 108242,
+     "hours": 4345.925555555555,
+     "latency_median_s": 9.0
+    },
+    "0.150": {
+     "sensitivity": 0.7272727272727273,
+     "detected": 472,
+     "seizures": 649,
+     "fa_per_24h": 446.4319453240111,
+     "false_alarms": 80840,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.200": {
+     "sensitivity": 0.6964560862865947,
+     "detected": 452,
+     "seizures": 649,
+     "fa_per_24h": 349.6682077440096,
+     "false_alarms": 63318,
+     "hours": 4345.925555555555,
+     "latency_median_s": 10.0
+    },
+    "0.250": {
+     "sensitivity": 0.6779661016949152,
+     "detected": 440,
+     "seizures": 649,
+     "fa_per_24h": 282.1290848925418,
+     "false_alarms": 51088,
+     "hours": 4345.925555555555,
+     "latency_median_s": 11.0
+    },
+    "0.300": {
+     "sensitivity": 0.6533127889060092,
+     "detected": 424,
+     "seizures": 649,
+     "fa_per_24h": 231.5106384447451,
+     "false_alarms": 41922,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.350": {
+     "sensitivity": 0.6194144838212635,
+     "detected": 402,
+     "seizures": 649,
+     "fa_per_24h": 191.56149578673055,
+     "false_alarms": 34688,
+     "hours": 4345.925555555555,
+     "latency_median_s": 12.0
+    },
+    "0.400": {
+     "sensitivity": 0.5947611710323575,
+     "detected": 386,
+     "seizures": 649,
+     "fa_per_24h": 159.89597408351582,
+     "false_alarms": 28954,
+     "hours": 4345.925555555555,
+     "latency_median_s": 13.0
+    },
+    "0.450": {
+     "sensitivity": 0.559322033898305,
+     "detected": 363,
+     "seizures": 649,
+     "fa_per_24h": 132.65390597016417,
+     "false_alarms": 24021,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.500": {
+     "sensitivity": 0.5377503852080123,
+     "detected": 349,
+     "seizures": 649,
+     "fa_per_24h": 109.90708282828388,
+     "false_alarms": 19902,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.0
+    },
+    "0.550": {
+     "sensitivity": 0.5069337442218799,
+     "detected": 329,
+     "seizures": 649,
+     "fa_per_24h": 89.97669081103555,
+     "false_alarms": 16293,
+     "hours": 4345.925555555555,
+     "latency_median_s": 15.0
+    },
+    "0.600": {
+     "sensitivity": 0.46533127889060094,
+     "detected": 302,
+     "seizures": 649,
+     "fa_per_24h": 73.07258164927406,
+     "false_alarms": 13232,
+     "hours": 4345.925555555555,
+     "latency_median_s": 17.0
+    },
+    "0.650": {
+     "sensitivity": 0.4422187981510015,
+     "detected": 287,
+     "seizures": 649,
+     "fa_per_24h": 58.07370530711654,
+     "false_alarms": 10516,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.0
+    },
+    "0.700": {
+     "sensitivity": 0.41448382126348227,
+     "detected": 269,
+     "seizures": 649,
+     "fa_per_24h": 44.714985914009375,
+     "false_alarms": 8097,
+     "hours": 4345.925555555555,
+     "latency_median_s": 20.0
+    },
+    "0.750": {
+     "sensitivity": 0.37750385208012327,
+     "detected": 245,
+     "seizures": 649,
+     "fa_per_24h": 33.20075278683764,
+     "false_alarms": 6012,
+     "hours": 4345.925555555555,
+     "latency_median_s": 21.0
+    },
+    "0.800": {
+     "sensitivity": 0.34514637904468415,
+     "detected": 224,
+     "seizures": 649,
+     "fa_per_24h": 23.188616259469605,
+     "false_alarms": 4199,
+     "hours": 4345.925555555555,
+     "latency_median_s": 24.0
+    },
+    "0.850": {
+     "sensitivity": 0.29738058551617874,
+     "detected": 193,
+     "seizures": 649,
+     "fa_per_24h": 14.148424590798076,
+     "false_alarms": 2562,
+     "hours": 4345.925555555555,
+     "latency_median_s": 27.0
+    },
+    "0.900": {
+     "sensitivity": 0.2727272727272727,
+     "detected": 177,
+     "seizures": 649,
+     "fa_per_24h": 6.980331257911306,
+     "false_alarms": 1264,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.950": {
+     "sensitivity": 0.19568567026194145,
+     "detected": 127,
+     "seizures": 649,
+     "fa_per_24h": 1.6456793630202289,
+     "false_alarms": 298,
+     "hours": 4345.925555555555,
+     "latency_median_s": 38.0
+    },
+    "0.970": {
+     "sensitivity": 0.12942989214175654,
+     "detected": 84,
+     "seizures": 649,
+     "fa_per_24h": 0.46388277346878937,
+     "false_alarms": 84,
+     "hours": 4345.925555555555,
+     "latency_median_s": 44.5
+    },
+    "0.980": {
+     "sensitivity": 0.09090909090909091,
+     "detected": 59,
+     "seizures": 649,
+     "fa_per_24h": 0.16015000512612965,
+     "false_alarms": 29,
+     "hours": 4345.925555555555,
+     "latency_median_s": 46.0
+    },
+    "0.990": {
+     "sensitivity": 0.04160246533127889,
+     "detected": 27,
+     "seizures": 649,
+     "fa_per_24h": 0.03313448381919924,
+     "false_alarms": 6,
+     "hours": 4345.925555555555,
+     "latency_median_s": 54.0
+    },
+    "0.995": {
+     "sensitivity": 0.012326656394453005,
+     "detected": 8,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": 62.0
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.6101694915254238,
+     "detected": 396,
+     "seizures": 649,
+     "fa_per_24h": 456.7975163454506,
+     "false_alarms": 82717,
+     "hours": 4345.925555555555,
+     "latency_median_s": 14.5
+    },
+    "0.150": {
+     "sensitivity": 0.5731895223420647,
+     "detected": 372,
+     "seizures": 649,
+     "fa_per_24h": 318.8641826200941,
+     "false_alarms": 57740,
+     "hours": 4345.925555555555,
+     "latency_median_s": 18.0
+    },
+    "0.200": {
+     "sensitivity": 0.5439137134052389,
+     "detected": 353,
+     "seizures": 649,
+     "fa_per_24h": 238.5406714283852,
+     "false_alarms": 43195,
+     "hours": 4345.925555555555,
+     "latency_median_s": 20.0
+    },
+    "0.250": {
+     "sensitivity": 0.5285053929121726,
+     "detected": 343,
+     "seizures": 649,
+     "fa_per_24h": 186.65759218148906,
+     "false_alarms": 33800,
+     "hours": 4345.925555555555,
+     "latency_median_s": 22.0
+    },
+    "0.300": {
+     "sensitivity": 0.5038520801232665,
+     "detected": 327,
+     "seizures": 649,
+     "fa_per_24h": 149.01129614890885,
+     "false_alarms": 26983,
+     "hours": 4345.925555555555,
+     "latency_median_s": 23.0
+    },
+    "0.350": {
+     "sensitivity": 0.47303543913713403,
+     "detected": 307,
+     "seizures": 649,
+     "fa_per_24h": 119.65966589906819,
+     "false_alarms": 21668,
+     "hours": 4345.925555555555,
+     "latency_median_s": 24.0
+    },
+    "0.400": {
+     "sensitivity": 0.46070878274268107,
+     "detected": 299,
+     "seizures": 649,
+     "fa_per_24h": 96.99567896673592,
+     "false_alarms": 17564,
+     "hours": 4345.925555555555,
+     "latency_median_s": 25.0
+    },
+    "0.450": {
+     "sensitivity": 0.43759630200308164,
+     "detected": 284,
+     "seizures": 649,
+     "fa_per_24h": 77.93230594275661,
+     "false_alarms": 14112,
+     "hours": 4345.925555555555,
+     "latency_median_s": 26.0
+    },
+    "0.500": {
+     "sensitivity": 0.41448382126348227,
+     "detected": 269,
+     "seizures": 649,
+     "fa_per_24h": 62.690443385924965,
+     "false_alarms": 11352,
+     "hours": 4345.925555555555,
+     "latency_median_s": 28.0
+    },
+    "0.550": {
+     "sensitivity": 0.3913713405238829,
+     "detected": 254,
+     "seizures": 649,
+     "fa_per_24h": 49.91709987362366,
+     "false_alarms": 9039,
+     "hours": 4345.925555555555,
+     "latency_median_s": 29.0
+    },
+    "0.600": {
+     "sensitivity": 0.3697996918335901,
+     "detected": 240,
+     "seizures": 649,
+     "fa_per_24h": 38.75630124052338,
+     "false_alarms": 7018,
+     "hours": 4345.925555555555,
+     "latency_median_s": 31.0
+    },
+    "0.650": {
+     "sensitivity": 0.35130970724191063,
+     "detected": 228,
+     "seizures": 649,
+     "fa_per_24h": 29.765811297580655,
+     "false_alarms": 5390,
+     "hours": 4345.925555555555,
+     "latency_median_s": 32.0
+    },
+    "0.700": {
+     "sensitivity": 0.3235747303543914,
+     "detected": 210,
+     "seizures": 649,
+     "fa_per_24h": 21.923983460370167,
+     "false_alarms": 3970,
+     "hours": 4345.925555555555,
+     "latency_median_s": 34.0
+    },
+    "0.750": {
+     "sensitivity": 0.300462249614792,
+     "detected": 195,
+     "seizures": 649,
+     "fa_per_24h": 15.457236701656445,
+     "false_alarms": 2799,
+     "hours": 4345.925555555555,
+     "latency_median_s": 35.0
+    },
+    "0.800": {
+     "sensitivity": 0.27426810477657937,
+     "detected": 178,
+     "seizures": 649,
+     "fa_per_24h": 10.067360667066703,
+     "false_alarms": 1823,
+     "hours": 4345.925555555555,
+     "latency_median_s": 37.0
+    },
+    "0.850": {
+     "sensitivity": 0.24807395993836673,
+     "detected": 161,
+     "seizures": 649,
+     "fa_per_24h": 5.837191566148933,
+     "false_alarms": 1057,
+     "hours": 4345.925555555555,
+     "latency_median_s": 40.0
+    },
+    "0.900": {
+     "sensitivity": 0.1941448382126348,
+     "detected": 126,
+     "seizures": 649,
+     "fa_per_24h": 2.6341914636263395,
+     "false_alarms": 477,
+     "hours": 4345.925555555555,
+     "latency_median_s": 44.5
+    },
+    "0.950": {
+     "sensitivity": 0.1325115562403698,
+     "detected": 86,
+     "seizures": 649,
+     "fa_per_24h": 0.5356741550770544,
+     "false_alarms": 97,
+     "hours": 4345.925555555555,
+     "latency_median_s": 52.0
+    },
+    "0.970": {
+     "sensitivity": 0.08320493066255778,
+     "detected": 54,
+     "seizures": 649,
+     "fa_per_24h": 0.12701552130693045,
+     "false_alarms": 23,
+     "hours": 4345.925555555555,
+     "latency_median_s": 57.0
+    },
+    "0.980": {
+     "sensitivity": 0.05855161787365177,
+     "detected": 38,
+     "seizures": 649,
+     "fa_per_24h": 0.049701725728798864,
+     "false_alarms": 9,
+     "hours": 4345.925555555555,
+     "latency_median_s": 60.0
+    },
+    "0.990": {
+     "sensitivity": 0.03389830508474576,
+     "detected": 22,
+     "seizures": 649,
+     "fa_per_24h": 0.01656724190959962,
+     "false_alarms": 3,
+     "hours": 4345.925555555555,
+     "latency_median_s": 65.5
+    },
+    "0.995": {
+     "sensitivity": 0.0061633281972265025,
+     "detected": 4,
+     "seizures": 649,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 4345.925555555555,
+     "latency_median_s": 75.0
+    }
+   }
+  }
+ },
+ "EEG only (ear) | k=1": {
+  "patients": 97,
+  "general": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7496671105193076,
+     "detected": 563,
+     "seizures": 751,
+     "fa_per_24h": 1395.3711422462843,
+     "false_alarms": 375998,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.150": {
+     "sensitivity": 0.7270306258322237,
+     "detected": 546,
+     "seizures": 751,
+     "fa_per_24h": 1319.5493883879292,
+     "false_alarms": 355567,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.200": {
+     "sensitivity": 0.7350199733688415,
+     "detected": 552,
+     "seizures": 751,
+     "fa_per_24h": 1220.9562439136048,
+     "false_alarms": 329000,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.250": {
+     "sensitivity": 0.7230359520639148,
+     "detected": 543,
+     "seizures": 751,
+     "fa_per_24h": 1118.533230613387,
+     "false_alarms": 301401,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.300": {
+     "sensitivity": 0.7563249001331558,
+     "detected": 568,
+     "seizures": 751,
+     "fa_per_24h": 1011.6420370162942,
+     "false_alarms": 272598,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.7749667110519307,
+     "detected": 582,
+     "seizures": 751,
+     "fa_per_24h": 906.6991778509785,
+     "false_alarms": 244320,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.400": {
+     "sensitivity": 0.7723035952063915,
+     "detected": 580,
+     "seizures": 751,
+     "fa_per_24h": 804.2167867395067,
+     "false_alarms": 216705,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.450": {
+     "sensitivity": 0.7816245006657789,
+     "detected": 587,
+     "seizures": 751,
+     "fa_per_24h": 704.9816196809967,
+     "false_alarms": 189965,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.500": {
+     "sensitivity": 0.7762982689747004,
+     "detected": 583,
+     "seizures": 751,
+     "fa_per_24h": 612.9979678219006,
+     "false_alarms": 165179,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.550": {
+     "sensitivity": 0.7842876165113183,
+     "detected": 589,
+     "seizures": 751,
+     "fa_per_24h": 526.7591192016444,
+     "false_alarms": 141941,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.600": {
+     "sensitivity": 0.7656458055925432,
+     "detected": 575,
+     "seizures": 751,
+     "fa_per_24h": 444.1608726339084,
+     "false_alarms": 119684,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.650": {
+     "sensitivity": 0.7456724367509987,
+     "detected": 560,
+     "seizures": 751,
+     "fa_per_24h": 366.1347175327426,
+     "false_alarms": 98659,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.700": {
+     "sensitivity": 0.7243675099866844,
+     "detected": 544,
+     "seizures": 751,
+     "fa_per_24h": 291.8048311821481,
+     "false_alarms": 78630,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.750": {
+     "sensitivity": 0.6897470039946738,
+     "detected": 518,
+     "seizures": 751,
+     "fa_per_24h": 222.98594793858013,
+     "false_alarms": 60086,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.800": {
+     "sensitivity": 0.6031957390146472,
+     "detected": 453,
+     "seizures": 751,
+     "fa_per_24h": 158.39402263366736,
+     "false_alarms": 42681,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.850": {
+     "sensitivity": 0.5046604527296937,
+     "detected": 379,
+     "seizures": 751,
+     "fa_per_24h": 100.8198123963553,
+     "false_alarms": 27167,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.900": {
+     "sensitivity": 0.3981358189081225,
+     "detected": 299,
+     "seizures": 751,
+     "fa_per_24h": 50.31156169828796,
+     "false_alarms": 13557,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.950": {
+     "sensitivity": 0.2103861517976032,
+     "detected": 158,
+     "seizures": 751,
+     "fa_per_24h": 12.176162420305584,
+     "false_alarms": 3281,
+     "hours": 6467.062222222211,
+     "latency_median_s": 20.0
+    },
+    "0.970": {
+     "sensitivity": 0.12383488681757657,
+     "detected": 93,
+     "seizures": 751,
+     "fa_per_24h": 3.288046298198948,
+     "false_alarms": 886,
+     "hours": 6467.062222222211,
+     "latency_median_s": 26.0
+    },
+    "0.980": {
+     "sensitivity": 0.06125166444740346,
+     "detected": 46,
+     "seizures": 751,
+     "fa_per_24h": 0.9240671876428193,
+     "false_alarms": 249,
+     "hours": 6467.062222222211,
+     "latency_median_s": 35.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.007422226406769633,
+     "false_alarms": 2,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7336884154460719,
+     "detected": 551,
+     "seizures": 751,
+     "fa_per_24h": 1287.0919923111255,
+     "false_alarms": 346821,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.150": {
+     "sensitivity": 0.7230359520639148,
+     "detected": 543,
+     "seizures": 751,
+     "fa_per_24h": 1090.8483261161364,
+     "false_alarms": 293941,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.200": {
+     "sensitivity": 0.7523302263648469,
+     "detected": 565,
+     "seizures": 751,
+     "fa_per_24h": 895.6511938445017,
+     "false_alarms": 241343,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.250": {
+     "sensitivity": 0.7443408788282291,
+     "detected": 559,
+     "seizures": 751,
+     "fa_per_24h": 731.5754568964524,
+     "false_alarms": 197131,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.300": {
+     "sensitivity": 0.7549933422103862,
+     "detected": 567,
+     "seizures": 751,
+     "fa_per_24h": 595.2848245021448,
+     "false_alarms": 160406,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.350": {
+     "sensitivity": 0.7390146471371505,
+     "detected": 555,
+     "seizures": 751,
+     "fa_per_24h": 483.1127168166354,
+     "false_alarms": 130180,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.400": {
+     "sensitivity": 0.7243675099866844,
+     "detected": 544,
+     "seizures": 751,
+     "fa_per_24h": 391.74139863609787,
+     "false_alarms": 105559,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.450": {
+     "sensitivity": 0.7057256990679095,
+     "detected": 530,
+     "seizures": 751,
+     "fa_per_24h": 317.53397902121503,
+     "false_alarms": 85563,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.500": {
+     "sensitivity": 0.6697736351531292,
+     "detected": 503,
+     "seizures": 751,
+     "fa_per_24h": 257.38425622075397,
+     "false_alarms": 69355,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.550": {
+     "sensitivity": 0.644474034620506,
+     "detected": 484,
+     "seizures": 751,
+     "fa_per_24h": 206.57169424000904,
+     "false_alarms": 55663,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.600": {
+     "sensitivity": 0.6098535286284953,
+     "detected": 458,
+     "seizures": 751,
+     "fa_per_24h": 162.6543805911531,
+     "false_alarms": 43829,
+     "hours": 6467.062222222211,
+     "latency_median_s": 13.0
+    },
+    "0.650": {
+     "sensitivity": 0.5659121171770972,
+     "detected": 425,
+     "seizures": 751,
+     "fa_per_24h": 124.22951448330673,
+     "false_alarms": 33475,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.700": {
+     "sensitivity": 0.5153129161118508,
+     "detected": 387,
+     "seizures": 751,
+     "fa_per_24h": 90.25056199311535,
+     "false_alarms": 24319,
+     "hours": 6467.062222222211,
+     "latency_median_s": 15.0
+    },
+    "0.750": {
+     "sensitivity": 0.4434087882822903,
+     "detected": 333,
+     "seizures": 751,
+     "fa_per_24h": 62.39865740171231,
+     "false_alarms": 16814,
+     "hours": 6467.062222222211,
+     "latency_median_s": 17.0
+    },
+    "0.800": {
+     "sensitivity": 0.3808255659121172,
+     "detected": 286,
+     "seizures": 751,
+     "fa_per_24h": 39.77571131387846,
+     "false_alarms": 10718,
+     "hours": 6467.062222222211,
+     "latency_median_s": 19.0
+    },
+    "0.850": {
+     "sensitivity": 0.3155792276964048,
+     "detected": 237,
+     "seizures": 751,
+     "fa_per_24h": 22.32976814476644,
+     "false_alarms": 6017,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.900": {
+     "sensitivity": 0.22769640479360853,
+     "detected": 171,
+     "seizures": 751,
+     "fa_per_24h": 9.671161008020832,
+     "false_alarms": 2606,
+     "hours": 6467.062222222211,
+     "latency_median_s": 27.0
+    },
+    "0.950": {
+     "sensitivity": 0.12117177097203728,
+     "detected": 91,
+     "seizures": 751,
+     "fa_per_24h": 1.7293787527773246,
+     "false_alarms": 466,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.970": {
+     "sensitivity": 0.06790945406125166,
+     "detected": 51,
+     "seizures": 751,
+     "fa_per_24h": 0.34513352791478796,
+     "false_alarms": 93,
+     "hours": 6467.062222222211,
+     "latency_median_s": 41.0
+    },
+    "0.980": {
+     "sensitivity": 0.03462050599201065,
+     "detected": 26,
+     "seizures": 751,
+     "fa_per_24h": 0.10020005649139005,
+     "false_alarms": 27,
+     "hours": 6467.062222222211,
+     "latency_median_s": 44.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.7283621837549934,
+     "detected": 547,
+     "seizures": 751,
+     "fa_per_24h": 1218.2100201430999,
+     "false_alarms": 328260,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.150": {
+     "sensitivity": 0.7057256990679095,
+     "detected": 530,
+     "seizures": 751,
+     "fa_per_24h": 937.9096398914447,
+     "false_alarms": 252730,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.200": {
+     "sensitivity": 0.6857523302263648,
+     "detected": 515,
+     "seizures": 751,
+     "fa_per_24h": 693.3324353355717,
+     "false_alarms": 186826,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.250": {
+     "sensitivity": 0.644474034620506,
+     "detected": 484,
+     "seizures": 751,
+     "fa_per_24h": 513.3248894053912,
+     "false_alarms": 138321,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.300": {
+     "sensitivity": 0.5978695073235686,
+     "detected": 449,
+     "seizures": 751,
+     "fa_per_24h": 385.9557731520209,
+     "false_alarms": 104000,
+     "hours": 6467.062222222211,
+     "latency_median_s": 18.0
+    },
+    "0.350": {
+     "sensitivity": 0.5818908122503329,
+     "detected": 437,
+     "seizures": 751,
+     "fa_per_24h": 295.04834412190644,
+     "false_alarms": 79504,
+     "hours": 6467.062222222211,
+     "latency_median_s": 21.0
+    },
+    "0.400": {
+     "sensitivity": 0.5419440745672437,
+     "detected": 407,
+     "seizures": 751,
+     "fa_per_24h": 227.2166169904388,
+     "false_alarms": 61226,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.450": {
+     "sensitivity": 0.5233022636484687,
+     "detected": 393,
+     "seizures": 751,
+     "fa_per_24h": 175.1200098413227,
+     "false_alarms": 47188,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.500": {
+     "sensitivity": 0.49267643142476697,
+     "detected": 370,
+     "seizures": 751,
+     "fa_per_24h": 134.36456464175066,
+     "false_alarms": 36206,
+     "hours": 6467.062222222211,
+     "latency_median_s": 24.0
+    },
+    "0.550": {
+     "sensitivity": 0.47137150466045274,
+     "detected": 354,
+     "seizures": 751,
+     "fa_per_24h": 101.91459079135382,
+     "false_alarms": 27462,
+     "hours": 6467.062222222211,
+     "latency_median_s": 25.0
+    },
+    "0.600": {
+     "sensitivity": 0.43009320905459386,
+     "detected": 323,
+     "seizures": 751,
+     "fa_per_24h": 74.93479780274622,
+     "false_alarms": 20192,
+     "hours": 6467.062222222211,
+     "latency_median_s": 27.0
+    },
+    "0.650": {
+     "sensitivity": 0.3941411451398136,
+     "detected": 296,
+     "seizures": 751,
+     "fa_per_24h": 53.280452260995816,
+     "false_alarms": 14357,
+     "hours": 6467.062222222211,
+     "latency_median_s": 28.0
+    },
+    "0.700": {
+     "sensitivity": 0.36617842876165113,
+     "detected": 275,
+     "seizures": 751,
+     "fa_per_24h": 35.786264620239784,
+     "false_alarms": 9643,
+     "hours": 6467.062222222211,
+     "latency_median_s": 30.0
+    },
+    "0.750": {
+     "sensitivity": 0.3169107856191744,
+     "detected": 238,
+     "seizures": 751,
+     "fa_per_24h": 22.170190277020893,
+     "false_alarms": 5974,
+     "hours": 6467.062222222211,
+     "latency_median_s": 32.0
+    },
+    "0.800": {
+     "sensitivity": 0.2822902796271638,
+     "detected": 212,
+     "seizures": 751,
+     "fa_per_24h": 12.484184816186524,
+     "false_alarms": 3364,
+     "hours": 6467.062222222211,
+     "latency_median_s": 34.0
+    },
+    "0.850": {
+     "sensitivity": 0.23435419440745672,
+     "detected": 176,
+     "seizures": 751,
+     "fa_per_24h": 6.023136729093558,
+     "false_alarms": 1623,
+     "hours": 6467.062222222211,
+     "latency_median_s": 37.5
+    },
+    "0.900": {
+     "sensitivity": 0.1611185086551265,
+     "detected": 121,
+     "seizures": 751,
+     "fa_per_24h": 2.11904563913273,
+     "false_alarms": 571,
+     "hours": 6467.062222222211,
+     "latency_median_s": 40.0
+    },
+    "0.950": {
+     "sensitivity": 0.07190412782956059,
+     "detected": 54,
+     "seizures": 751,
+     "fa_per_24h": 0.34884464111817276,
+     "false_alarms": 94,
+     "hours": 6467.062222222211,
+     "latency_median_s": 50.0
+    },
+    "0.970": {
+     "sensitivity": 0.04660452729693742,
+     "detected": 35,
+     "seizures": 751,
+     "fa_per_24h": 0.07793337727108114,
+     "false_alarms": 21,
+     "hours": 6467.062222222211,
+     "latency_median_s": 56.0
+    },
+    "0.980": {
+     "sensitivity": 0.02130492676431425,
+     "detected": 16,
+     "seizures": 751,
+     "fa_per_24h": 0.018555566016924083,
+     "false_alarms": 5,
+     "hours": 6467.062222222211,
+     "latency_median_s": 56.5
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    }
+   }
+  },
+  "finetuned": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7403462050599201,
+     "detected": 556,
+     "seizures": 751,
+     "fa_per_24h": 1301.4502892950213,
+     "false_alarms": 350690,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.150": {
+     "sensitivity": 0.7430093209054593,
+     "detected": 558,
+     "seizures": 751,
+     "fa_per_24h": 1169.9284373670635,
+     "false_alarms": 315250,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.200": {
+     "sensitivity": 0.7416777629826897,
+     "detected": 557,
+     "seizures": 751,
+     "fa_per_24h": 1039.2898303815111,
+     "false_alarms": 280048,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.250": {
+     "sensitivity": 0.7563249001331558,
+     "detected": 568,
+     "seizures": 751,
+     "fa_per_24h": 915.7060495955934,
+     "false_alarms": 246747,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.300": {
+     "sensitivity": 0.7683089214380826,
+     "detected": 577,
+     "seizures": 751,
+     "fa_per_24h": 799.1585394432932,
+     "false_alarms": 215342,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.7549933422103862,
+     "detected": 567,
+     "seizures": 751,
+     "fa_per_24h": 691.2059674700322,
+     "false_alarms": 186253,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.400": {
+     "sensitivity": 0.7816245006657789,
+     "detected": 587,
+     "seizures": 751,
+     "fa_per_24h": 592.6016896560977,
+     "false_alarms": 159683,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.450": {
+     "sensitivity": 0.7736351531291611,
+     "detected": 581,
+     "seizures": 751,
+     "fa_per_24h": 503.89866186879385,
+     "false_alarms": 135781,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.500": {
+     "sensitivity": 0.7603195739014648,
+     "detected": 571,
+     "seizures": 751,
+     "fa_per_24h": 424.2693058637658,
+     "false_alarms": 114324,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.550": {
+     "sensitivity": 0.7470039946737683,
+     "detected": 561,
+     "seizures": 751,
+     "fa_per_24h": 352.1104207371514,
+     "false_alarms": 94880,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.600": {
+     "sensitivity": 0.7123834886817576,
+     "detected": 535,
+     "seizures": 751,
+     "fa_per_24h": 286.7836950179685,
+     "false_alarms": 77277,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.650": {
+     "sensitivity": 0.6897470039946738,
+     "detected": 518,
+     "seizures": 751,
+     "fa_per_24h": 227.56175051835356,
+     "false_alarms": 61319,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.700": {
+     "sensitivity": 0.6391478029294274,
+     "detected": 480,
+     "seizures": 751,
+     "fa_per_24h": 175.4206100107969,
+     "false_alarms": 47269,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.750": {
+     "sensitivity": 0.5818908122503329,
+     "detected": 437,
+     "seizures": 751,
+     "fa_per_24h": 129.05767276091038,
+     "false_alarms": 34776,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.800": {
+     "sensitivity": 0.5059920106524634,
+     "detected": 380,
+     "seizures": 751,
+     "fa_per_24h": 87.93111624099984,
+     "false_alarms": 23694,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.850": {
+     "sensitivity": 0.40612516644474034,
+     "detected": 305,
+     "seizures": 751,
+     "fa_per_24h": 53.77774143024938,
+     "false_alarms": 14491,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.900": {
+     "sensitivity": 0.3022636484687084,
+     "detected": 227,
+     "seizures": 751,
+     "fa_per_24h": 25.539881065694306,
+     "false_alarms": 6882,
+     "hours": 6467.062222222211,
+     "latency_median_s": 15.0
+    },
+    "0.950": {
+     "sensitivity": 0.1677762982689747,
+     "detected": 126,
+     "seizures": 751,
+     "fa_per_24h": 5.7262476728227725,
+     "false_alarms": 1543,
+     "hours": 6467.062222222211,
+     "latency_median_s": 25.0
+    },
+    "0.970": {
+     "sensitivity": 0.09187749667110519,
+     "detected": 69,
+     "seizures": 751,
+     "fa_per_24h": 1.4621786021336178,
+     "false_alarms": 394,
+     "hours": 6467.062222222211,
+     "latency_median_s": 28.0
+    },
+    "0.980": {
+     "sensitivity": 0.04660452729693742,
+     "detected": 35,
+     "seizures": 751,
+     "fa_per_24h": 0.34884464111817276,
+     "false_alarms": 94,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7416777629826897,
+     "detected": 557,
+     "seizures": 751,
+     "fa_per_24h": 1076.987318301494,
+     "false_alarms": 290206,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.150": {
+     "sensitivity": 0.7376830892143809,
+     "detected": 554,
+     "seizures": 751,
+     "fa_per_24h": 838.9639396627988,
+     "false_alarms": 226068,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.200": {
+     "sensitivity": 0.762982689747004,
+     "detected": 573,
+     "seizures": 751,
+     "fa_per_24h": 651.8941453065769,
+     "false_alarms": 175660,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.250": {
+     "sensitivity": 0.7549933422103862,
+     "detected": 567,
+     "seizures": 751,
+     "fa_per_24h": 510.14446539009043,
+     "false_alarms": 137464,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.300": {
+     "sensitivity": 0.7203728362183754,
+     "detected": 541,
+     "seizures": 751,
+     "fa_per_24h": 400.32149236232357,
+     "false_alarms": 107871,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.350": {
+     "sensitivity": 0.6897470039946738,
+     "detected": 518,
+     "seizures": 751,
+     "fa_per_24h": 313.7189546481355,
+     "false_alarms": 84535,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.400": {
+     "sensitivity": 0.6644474034620506,
+     "detected": 499,
+     "seizures": 751,
+     "fa_per_24h": 246.911494760802,
+     "false_alarms": 66533,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.450": {
+     "sensitivity": 0.6311584553928096,
+     "detected": 474,
+     "seizures": 751,
+     "fa_per_24h": 194.75179868722842,
+     "false_alarms": 52478,
+     "hours": 6467.062222222211,
+     "latency_median_s": 13.0
+    },
+    "0.500": {
+     "sensitivity": 0.5938748335552596,
+     "detected": 446,
+     "seizures": 751,
+     "fa_per_24h": 152.52675265911597,
+     "false_alarms": 41100,
+     "hours": 6467.062222222211,
+     "latency_median_s": 13.0
+    },
+    "0.550": {
+     "sensitivity": 0.5406125166444741,
+     "detected": 406,
+     "seizures": 751,
+     "fa_per_24h": 118.61831131978889,
+     "false_alarms": 31963,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.600": {
+     "sensitivity": 0.49533954727030627,
+     "detected": 372,
+     "seizures": 751,
+     "fa_per_24h": 89.9722285028615,
+     "false_alarms": 24244,
+     "hours": 6467.062222222211,
+     "latency_median_s": 15.0
+    },
+    "0.650": {
+     "sensitivity": 0.4474034620505992,
+     "detected": 336,
+     "seizures": 751,
+     "fa_per_24h": 66.55881530270669,
+     "false_alarms": 17935,
+     "hours": 6467.062222222211,
+     "latency_median_s": 17.0
+    },
+    "0.700": {
+     "sensitivity": 0.3968042609853529,
+     "detected": 298,
+     "seizures": 751,
+     "fa_per_24h": 47.08660432454655,
+     "false_alarms": 12688,
+     "hours": 6467.062222222211,
+     "latency_median_s": 18.0
+    },
+    "0.750": {
+     "sensitivity": 0.33688415446071907,
+     "detected": 253,
+     "seizures": 751,
+     "fa_per_24h": 31.414573266652475,
+     "false_alarms": 8465,
+     "hours": 6467.062222222211,
+     "latency_median_s": 21.0
+    },
+    "0.800": {
+     "sensitivity": 0.29427430093209056,
+     "detected": 221,
+     "seizures": 751,
+     "fa_per_24h": 19.620655506295527,
+     "false_alarms": 5287,
+     "hours": 6467.062222222211,
+     "latency_median_s": 24.0
+    },
+    "0.850": {
+     "sensitivity": 0.23302263648468707,
+     "detected": 175,
+     "seizures": 751,
+     "fa_per_24h": 10.546983724019649,
+     "false_alarms": 2842,
+     "hours": 6467.062222222211,
+     "latency_median_s": 30.0
+    },
+    "0.900": {
+     "sensitivity": 0.15712383488681758,
+     "detected": 118,
+     "seizures": 751,
+     "fa_per_24h": 4.364269127180544,
+     "false_alarms": 1176,
+     "hours": 6467.062222222211,
+     "latency_median_s": 32.0
+    },
+    "0.950": {
+     "sensitivity": 0.085219707057257,
+     "detected": 64,
+     "seizures": 751,
+     "fa_per_24h": 0.7756226595074266,
+     "false_alarms": 209,
+     "hours": 6467.062222222211,
+     "latency_median_s": 34.0
+    },
+    "0.970": {
+     "sensitivity": 0.04660452729693742,
+     "detected": 35,
+     "seizures": 751,
+     "fa_per_24h": 0.18926677337262565,
+     "false_alarms": 51,
+     "hours": 6467.062222222211,
+     "latency_median_s": 42.0
+    },
+    "0.980": {
+     "sensitivity": 0.017310252996005325,
+     "detected": 13,
+     "seizures": 751,
+     "fa_per_24h": 0.033400018830463354,
+     "false_alarms": 9,
+     "hours": 6467.062222222211,
+     "latency_median_s": 42.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.6950732356857523,
+     "detected": 522,
+     "seizures": 751,
+     "fa_per_24h": 942.4149313203538,
+     "false_alarms": 253944,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.150": {
+     "sensitivity": 0.6790945406125166,
+     "detected": 510,
+     "seizures": 751,
+     "fa_per_24h": 653.9167020024215,
+     "false_alarms": 176205,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.200": {
+     "sensitivity": 0.6338215712383488,
+     "detected": 476,
+     "seizures": 751,
+     "fa_per_24h": 456.08096824318045,
+     "false_alarms": 122896,
+     "hours": 6467.062222222211,
+     "latency_median_s": 16.0
+    },
+    "0.250": {
+     "sensitivity": 0.5778961384820239,
+     "detected": 434,
+     "seizures": 751,
+     "fa_per_24h": 324.97104988079826,
+     "false_alarms": 87567,
+     "hours": 6467.062222222211,
+     "latency_median_s": 19.0
+    },
+    "0.300": {
+     "sensitivity": 0.5499334221038615,
+     "detected": 413,
+     "seizures": 751,
+     "fa_per_24h": 236.68366677227345,
+     "false_alarms": 63777,
+     "hours": 6467.062222222211,
+     "latency_median_s": 21.0
+    },
+    "0.350": {
+     "sensitivity": 0.5126498002663116,
+     "detected": 385,
+     "seizures": 751,
+     "fa_per_24h": 175.1237209545261,
+     "false_alarms": 47189,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.400": {
+     "sensitivity": 0.47536617842876167,
+     "detected": 357,
+     "seizures": 751,
+     "fa_per_24h": 130.69798479680645,
+     "false_alarms": 35218,
+     "hours": 6467.062222222211,
+     "latency_median_s": 24.0
+    },
+    "0.450": {
+     "sensitivity": 0.4380825565912117,
+     "detected": 329,
+     "seizures": 751,
+     "fa_per_24h": 97.31652153236004,
+     "false_alarms": 26223,
+     "hours": 6467.062222222211,
+     "latency_median_s": 25.0
+    },
+    "0.500": {
+     "sensitivity": 0.41278295605858856,
+     "detected": 310,
+     "seizures": 751,
+     "fa_per_24h": 71.89168497597066,
+     "false_alarms": 19372,
+     "hours": 6467.062222222211,
+     "latency_median_s": 26.0
+    },
+    "0.550": {
+     "sensitivity": 0.3781624500665779,
+     "detected": 284,
+     "seizures": 751,
+     "fa_per_24h": 52.59760743157301,
+     "false_alarms": 14173,
+     "hours": 6467.062222222211,
+     "latency_median_s": 28.0
+    },
+    "0.600": {
+     "sensitivity": 0.340878828229028,
+     "detected": 256,
+     "seizures": 751,
+     "fa_per_24h": 37.55646561825435,
+     "false_alarms": 10120,
+     "hours": 6467.062222222211,
+     "latency_median_s": 30.0
+    },
+    "0.650": {
+     "sensitivity": 0.3062583222370173,
+     "detected": 230,
+     "seizures": 751,
+     "fa_per_24h": 25.69574782023647,
+     "false_alarms": 6924,
+     "hours": 6467.062222222211,
+     "latency_median_s": 32.5
+    },
+    "0.700": {
+     "sensitivity": 0.2769640479360852,
+     "detected": 208,
+     "seizures": 751,
+     "fa_per_24h": 16.844742830163682,
+     "false_alarms": 4539,
+     "hours": 6467.062222222211,
+     "latency_median_s": 34.0
+    },
+    "0.750": {
+     "sensitivity": 0.24234354194407456,
+     "detected": 182,
+     "seizures": 751,
+     "fa_per_24h": 10.198139082901475,
+     "false_alarms": 2748,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.800": {
+     "sensitivity": 0.2010652463382157,
+     "detected": 151,
+     "seizures": 751,
+     "fa_per_24h": 5.444203069365526,
+     "false_alarms": 1467,
+     "hours": 6467.062222222211,
+     "latency_median_s": 37.0
+    },
+    "0.850": {
+     "sensitivity": 0.16910785619174434,
+     "detected": 127,
+     "seizures": 751,
+     "fa_per_24h": 2.5606681103355236,
+     "false_alarms": 690,
+     "hours": 6467.062222222211,
+     "latency_median_s": 40.0
+    },
+    "0.900": {
+     "sensitivity": 0.10652463382157124,
+     "detected": 80,
+     "seizures": 751,
+     "fa_per_24h": 0.8980893952191256,
+     "false_alarms": 242,
+     "hours": 6467.062222222211,
+     "latency_median_s": 46.0
+    },
+    "0.950": {
+     "sensitivity": 0.05459387483355526,
+     "detected": 41,
+     "seizures": 751,
+     "fa_per_24h": 0.15586675454216228,
+     "false_alarms": 42,
+     "hours": 6467.062222222211,
+     "latency_median_s": 52.0
+    },
+    "0.970": {
+     "sensitivity": 0.02663115845539281,
+     "detected": 20,
+     "seizures": 751,
+     "fa_per_24h": 0.033400018830463354,
+     "false_alarms": 9,
+     "hours": 6467.062222222211,
+     "latency_median_s": 57.0
+    },
+    "0.980": {
+     "sensitivity": 0.007989347536617843,
+     "detected": 6,
+     "seizures": 751,
+     "fa_per_24h": 0.007422226406769633,
+     "false_alarms": 2,
+     "hours": 6467.062222222211,
+     "latency_median_s": 64.0
+    },
+    "0.990": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    },
+    "0.995": {
+     "sensitivity": 0.0,
+     "detected": 0,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": null
+    }
+   }
+  }
+ },
+ "EEG + ECG | k=1": {
+  "patients": 97,
+  "general": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7523302263648469,
+     "detected": 565,
+     "seizures": 751,
+     "fa_per_24h": 1186.3426910656344,
+     "false_alarms": 319673,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.150": {
+     "sensitivity": 0.7723035952063915,
+     "detected": 580,
+     "seizures": 751,
+     "fa_per_24h": 1034.3985831794498,
+     "false_alarms": 278730,
+     "hours": 6467.062222222211,
+     "latency_median_s": 4.0
+    },
+    "0.200": {
+     "sensitivity": 0.8029294274300932,
+     "detected": 603,
+     "seizures": 751,
+     "fa_per_24h": 903.2738203642541,
+     "false_alarms": 243397,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.250": {
+     "sensitivity": 0.7989347536617842,
+     "detected": 600,
+     "seizures": 751,
+     "fa_per_24h": 787.4277106073937,
+     "false_alarms": 212181,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.300": {
+     "sensitivity": 0.8069241011984021,
+     "detected": 606,
+     "seizures": 751,
+     "fa_per_24h": 686.4965648149368,
+     "false_alarms": 184984,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.350": {
+     "sensitivity": 0.8055925432756325,
+     "detected": 605,
+     "seizures": 751,
+     "fa_per_24h": 598.9848043659196,
+     "false_alarms": 161403,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.400": {
+     "sensitivity": 0.7936085219707057,
+     "detected": 596,
+     "seizures": 751,
+     "fa_per_24h": 521.934672037244,
+     "false_alarms": 140641,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.450": {
+     "sensitivity": 0.7922769640479361,
+     "detected": 595,
+     "seizures": 751,
+     "fa_per_24h": 453.91738924560707,
+     "false_alarms": 122313,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.500": {
+     "sensitivity": 0.7762982689747004,
+     "detected": 583,
+     "seizures": 751,
+     "fa_per_24h": 393.47077738887515,
+     "false_alarms": 106025,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.550": {
+     "sensitivity": 0.7616511318242344,
+     "detected": 572,
+     "seizures": 751,
+     "fa_per_24h": 339.4777913928295,
+     "false_alarms": 91476,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.600": {
+     "sensitivity": 0.7576564580559254,
+     "detected": 569,
+     "seizures": 751,
+     "fa_per_24h": 289.9195856748286,
+     "false_alarms": 78122,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.650": {
+     "sensitivity": 0.7203728362183754,
+     "detected": 541,
+     "seizures": 751,
+     "fa_per_24h": 243.66427070784027,
+     "false_alarms": 65658,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.700": {
+     "sensitivity": 0.6924101198402131,
+     "detected": 520,
+     "seizures": 751,
+     "fa_per_24h": 199.5391347195948,
+     "false_alarms": 53768,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.750": {
+     "sensitivity": 0.640479360852197,
+     "detected": 481,
+     "seizures": 751,
+     "fa_per_24h": 158.70946725595508,
+     "false_alarms": 42766,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.800": {
+     "sensitivity": 0.596537949400799,
+     "detected": 448,
+     "seizures": 751,
+     "fa_per_24h": 119.77246752604158,
+     "false_alarms": 32274,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.850": {
+     "sensitivity": 0.5472703062583223,
+     "detected": 411,
+     "seizures": 751,
+     "fa_per_24h": 83.19573579348082,
+     "false_alarms": 22418,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.900": {
+     "sensitivity": 0.4567243675099867,
+     "detected": 343,
+     "seizures": 751,
+     "fa_per_24h": 48.77516083208664,
+     "false_alarms": 13143,
+     "hours": 6467.062222222211,
+     "latency_median_s": 15.0
+    },
+    "0.950": {
+     "sensitivity": 0.33688415446071907,
+     "detected": 253,
+     "seizures": 751,
+     "fa_per_24h": 17.616654376467725,
+     "false_alarms": 4747,
+     "hours": 6467.062222222211,
+     "latency_median_s": 23.0
+    },
+    "0.970": {
+     "sensitivity": 0.26897470039946736,
+     "detected": 202,
+     "seizures": 751,
+     "fa_per_24h": 6.446203634279427,
+     "false_alarms": 1737,
+     "hours": 6467.062222222211,
+     "latency_median_s": 29.0
+    },
+    "0.980": {
+     "sensitivity": 0.19307589880159787,
+     "detected": 145,
+     "seizures": 751,
+     "fa_per_24h": 2.4827347330644423,
+     "false_alarms": 669,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.990": {
+     "sensitivity": 0.10652463382157124,
+     "detected": 80,
+     "seizures": 751,
+     "fa_per_24h": 0.3340001883046335,
+     "false_alarms": 90,
+     "hours": 6467.062222222211,
+     "latency_median_s": 41.5
+    },
+    "0.995": {
+     "sensitivity": 0.03462050599201065,
+     "detected": 26,
+     "seizures": 751,
+     "fa_per_24h": 0.04082224523723298,
+     "false_alarms": 11,
+     "hours": 6467.062222222211,
+     "latency_median_s": 51.5
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7656458055925432,
+     "detected": 575,
+     "seizures": 751,
+     "fa_per_24h": 932.2353478034693,
+     "false_alarms": 251201,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.150": {
+     "sensitivity": 0.7470039946737683,
+     "detected": 561,
+     "seizures": 751,
+     "fa_per_24h": 731.0076565763344,
+     "false_alarms": 196978,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.200": {
+     "sensitivity": 0.7430093209054593,
+     "detected": 558,
+     "seizures": 751,
+     "fa_per_24h": 586.8977086624952,
+     "false_alarms": 158146,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.250": {
+     "sensitivity": 0.7350199733688415,
+     "detected": 552,
+     "seizures": 751,
+     "fa_per_24h": 479.63540374506385,
+     "false_alarms": 129243,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.300": {
+     "sensitivity": 0.7137150466045273,
+     "detected": 536,
+     "seizures": 751,
+     "fa_per_24h": 397.50846855415784,
+     "false_alarms": 107113,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.350": {
+     "sensitivity": 0.6964047936085219,
+     "detected": 523,
+     "seizures": 751,
+     "fa_per_24h": 333.39156573927835,
+     "false_alarms": 89836,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.400": {
+     "sensitivity": 0.681757656458056,
+     "detected": 512,
+     "seizures": 751,
+     "fa_per_24h": 281.2875363637556,
+     "false_alarms": 75796,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.450": {
+     "sensitivity": 0.6631158455392809,
+     "detected": 498,
+     "seizures": 751,
+     "fa_per_24h": 237.29228933762857,
+     "false_alarms": 63941,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.500": {
+     "sensitivity": 0.6378162450066578,
+     "detected": 479,
+     "seizures": 751,
+     "fa_per_24h": 200.6747353598306,
+     "false_alarms": 54074,
+     "hours": 6467.062222222211,
+     "latency_median_s": 13.0
+    },
+    "0.550": {
+     "sensitivity": 0.5992010652463382,
+     "detected": 450,
+     "seizures": 751,
+     "fa_per_24h": 167.74602790619707,
+     "false_alarms": 45201,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.600": {
+     "sensitivity": 0.5685752330226365,
+     "detected": 427,
+     "seizures": 751,
+     "fa_per_24h": 139.35972301350662,
+     "false_alarms": 37552,
+     "hours": 6467.062222222211,
+     "latency_median_s": 15.0
+    },
+    "0.650": {
+     "sensitivity": 0.5446071904127829,
+     "detected": 409,
+     "seizures": 751,
+     "fa_per_24h": 113.79386415538863,
+     "false_alarms": 30663,
+     "hours": 6467.062222222211,
+     "latency_median_s": 16.0
+    },
+    "0.700": {
+     "sensitivity": 0.5099866844207723,
+     "detected": 383,
+     "seizures": 751,
+     "fa_per_24h": 90.2394286535052,
+     "false_alarms": 24316,
+     "hours": 6467.062222222211,
+     "latency_median_s": 18.0
+    },
+    "0.750": {
+     "sensitivity": 0.46870838881491345,
+     "detected": 352,
+     "seizures": 751,
+     "fa_per_24h": 69.53883920502469,
+     "false_alarms": 18738,
+     "hours": 6467.062222222211,
+     "latency_median_s": 19.0
+    },
+    "0.800": {
+     "sensitivity": 0.4141145139813582,
+     "detected": 311,
+     "seizures": 751,
+     "fa_per_24h": 50.75318416949075,
+     "false_alarms": 13676,
+     "hours": 6467.062222222211,
+     "latency_median_s": 20.0
+    },
+    "0.850": {
+     "sensitivity": 0.3821571238348868,
+     "detected": 287,
+     "seizures": 751,
+     "fa_per_24h": 33.64495230188675,
+     "false_alarms": 9066,
+     "hours": 6467.062222222211,
+     "latency_median_s": 24.0
+    },
+    "0.900": {
+     "sensitivity": 0.3355525965379494,
+     "detected": 252,
+     "seizures": 751,
+     "fa_per_24h": 18.15847690416191,
+     "false_alarms": 4893,
+     "hours": 6467.062222222211,
+     "latency_median_s": 28.0
+    },
+    "0.950": {
+     "sensitivity": 0.24900133155792276,
+     "detected": 187,
+     "seizures": 751,
+     "fa_per_24h": 5.065669522620274,
+     "false_alarms": 1365,
+     "hours": 6467.062222222211,
+     "latency_median_s": 34.0
+    },
+    "0.970": {
+     "sensitivity": 0.18508655126498003,
+     "detected": 139,
+     "seizures": 751,
+     "fa_per_24h": 1.6069120170656255,
+     "false_alarms": 433,
+     "hours": 6467.062222222211,
+     "latency_median_s": 40.0
+    },
+    "0.980": {
+     "sensitivity": 0.13315579227696406,
+     "detected": 100,
+     "seizures": 751,
+     "fa_per_24h": 0.5492447541009529,
+     "false_alarms": 148,
+     "hours": 6467.062222222211,
+     "latency_median_s": 45.0
+    },
+    "0.990": {
+     "sensitivity": 0.06657789613848203,
+     "detected": 50,
+     "seizures": 751,
+     "fa_per_24h": 0.07051115086431152,
+     "false_alarms": 19,
+     "hours": 6467.062222222211,
+     "latency_median_s": 52.0
+    },
+    "0.995": {
+     "sensitivity": 0.017310252996005325,
+     "detected": 13,
+     "seizures": 751,
+     "fa_per_24h": 0.014844452813539267,
+     "false_alarms": 4,
+     "hours": 6467.062222222211,
+     "latency_median_s": 60.0
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.6684420772303595,
+     "detected": 502,
+     "seizures": 751,
+     "fa_per_24h": 777.3705938262208,
+     "false_alarms": 209471,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.5
+    },
+    "0.150": {
+     "sensitivity": 0.6338215712383488,
+     "detected": 476,
+     "seizures": 751,
+     "fa_per_24h": 557.7172255442804,
+     "false_alarms": 150283,
+     "hours": 6467.062222222211,
+     "latency_median_s": 16.0
+    },
+    "0.200": {
+     "sensitivity": 0.5992010652463382,
+     "detected": 450,
+     "seizures": 751,
+     "fa_per_24h": 418.4985248325024,
+     "false_alarms": 112769,
+     "hours": 6467.062222222211,
+     "latency_median_s": 17.5
+    },
+    "0.250": {
+     "sensitivity": 0.5938748335552596,
+     "detected": 446,
+     "seizures": 751,
+     "fa_per_24h": 325.3273167483232,
+     "false_alarms": 87663,
+     "hours": 6467.062222222211,
+     "latency_median_s": 19.0
+    },
+    "0.300": {
+     "sensitivity": 0.5739014647137151,
+     "detected": 431,
+     "seizures": 751,
+     "fa_per_24h": 260.59065802847846,
+     "false_alarms": 70219,
+     "hours": 6467.062222222211,
+     "latency_median_s": 21.0
+    },
+    "0.350": {
+     "sensitivity": 0.5459387483355526,
+     "detected": 410,
+     "seizures": 751,
+     "fa_per_24h": 211.3070746875281,
+     "false_alarms": 56939,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.400": {
+     "sensitivity": 0.5233022636484687,
+     "detected": 393,
+     "seizures": 751,
+     "fa_per_24h": 173.01951976820692,
+     "false_alarms": 46622,
+     "hours": 6467.062222222211,
+     "latency_median_s": 24.0
+    },
+    "0.450": {
+     "sensitivity": 0.5046604527296937,
+     "detected": 379,
+     "seizures": 751,
+     "fa_per_24h": 142.5475692552142,
+     "false_alarms": 38411,
+     "hours": 6467.062222222211,
+     "latency_median_s": 25.0
+    },
+    "0.500": {
+     "sensitivity": 0.4793608521970706,
+     "detected": 360,
+     "seizures": 751,
+     "fa_per_24h": 116.82955475575741,
+     "false_alarms": 31481,
+     "hours": 6467.062222222211,
+     "latency_median_s": 26.0
+    },
+    "0.550": {
+     "sensitivity": 0.4580559254327563,
+     "detected": 344,
+     "seizures": 751,
+     "fa_per_24h": 95.57600943997257,
+     "false_alarms": 25754,
+     "hours": 6467.062222222211,
+     "latency_median_s": 27.0
+    },
+    "0.600": {
+     "sensitivity": 0.4434087882822903,
+     "detected": 333,
+     "seizures": 751,
+     "fa_per_24h": 76.83117664967585,
+     "false_alarms": 20703,
+     "hours": 6467.062222222211,
+     "latency_median_s": 28.0
+    },
+    "0.650": {
+     "sensitivity": 0.4207723035952064,
+     "detected": 316,
+     "seizures": 751,
+     "fa_per_24h": 60.758345365816226,
+     "false_alarms": 16372,
+     "hours": 6467.062222222211,
+     "latency_median_s": 29.0
+    },
+    "0.700": {
+     "sensitivity": 0.3941411451398136,
+     "detected": 296,
+     "seizures": 751,
+     "fa_per_24h": 46.593026268496374,
+     "false_alarms": 12555,
+     "hours": 6467.062222222211,
+     "latency_median_s": 30.0
+    },
+    "0.750": {
+     "sensitivity": 0.37283621837549935,
+     "detected": 280,
+     "seizures": 751,
+     "fa_per_24h": 34.21646373520801,
+     "false_alarms": 9220,
+     "hours": 6467.062222222211,
+     "latency_median_s": 32.0
+    },
+    "0.800": {
+     "sensitivity": 0.34620505992010653,
+     "detected": 260,
+     "seizures": 751,
+     "fa_per_24h": 23.595257747120662,
+     "false_alarms": 6358,
+     "hours": 6467.062222222211,
+     "latency_median_s": 34.0
+    },
+    "0.850": {
+     "sensitivity": 0.3209054593874834,
+     "detected": 241,
+     "seizures": 751,
+     "fa_per_24h": 14.792497228691879,
+     "false_alarms": 3986,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.900": {
+     "sensitivity": 0.2729693741677763,
+     "detected": 205,
+     "seizures": 751,
+     "fa_per_24h": 7.359137482312091,
+     "false_alarms": 1983,
+     "hours": 6467.062222222211,
+     "latency_median_s": 42.0
+    },
+    "0.950": {
+     "sensitivity": 0.18375499334221038,
+     "detected": 138,
+     "seizures": 751,
+     "fa_per_24h": 1.7924676772348662,
+     "false_alarms": 483,
+     "hours": 6467.062222222211,
+     "latency_median_s": 49.0
+    },
+    "0.970": {
+     "sensitivity": 0.1318242343541944,
+     "detected": 99,
+     "seizures": 751,
+     "fa_per_24h": 0.5640892069144922,
+     "false_alarms": 152,
+     "hours": 6467.062222222211,
+     "latency_median_s": 52.0
+    },
+    "0.980": {
+     "sensitivity": 0.0985352862849534,
+     "detected": 74,
+     "seizures": 751,
+     "fa_per_24h": 0.16328898094893193,
+     "false_alarms": 44,
+     "hours": 6467.062222222211,
+     "latency_median_s": 58.0
+    },
+    "0.990": {
+     "sensitivity": 0.03994673768308921,
+     "detected": 30,
+     "seizures": 751,
+     "fa_per_24h": 0.029688905627078533,
+     "false_alarms": 8,
+     "hours": 6467.062222222211,
+     "latency_median_s": 64.5
+    },
+    "0.995": {
+     "sensitivity": 0.002663115845539281,
+     "detected": 2,
+     "seizures": 751,
+     "fa_per_24h": 0.0037111132033848166,
+     "false_alarms": 1,
+     "hours": 6467.062222222211,
+     "latency_median_s": 58.0
+    }
+   }
+  },
+  "finetuned": {
+   "6 s smoothing": {
+    "0.100": {
+     "sensitivity": 0.7896138482023968,
+     "detected": 593,
+     "seizures": 751,
+     "fa_per_24h": 958.3986958873323,
+     "false_alarms": 258251,
+     "hours": 6467.062222222211,
+     "latency_median_s": 4.0
+    },
+    "0.150": {
+     "sensitivity": 0.8069241011984021,
+     "detected": 606,
+     "seizures": 751,
+     "fa_per_24h": 795.009514881909,
+     "false_alarms": 214224,
+     "hours": 6467.062222222211,
+     "latency_median_s": 4.0
+    },
+    "0.200": {
+     "sensitivity": 0.8242343541944075,
+     "detected": 619,
+     "seizures": 751,
+     "fa_per_24h": 667.7443097982334,
+     "false_alarms": 179931,
+     "hours": 6467.062222222211,
+     "latency_median_s": 4.0
+    },
+    "0.250": {
+     "sensitivity": 0.8122503328894807,
+     "detected": 610,
+     "seizures": 751,
+     "fa_per_24h": 565.7703411956254,
+     "false_alarms": 152453,
+     "hours": 6467.062222222211,
+     "latency_median_s": 5.0
+    },
+    "0.300": {
+     "sensitivity": 0.8149134487350199,
+     "detected": 612,
+     "seizures": 751,
+     "fa_per_24h": 481.15324904524823,
+     "false_alarms": 129652,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.350": {
+     "sensitivity": 0.7976031957390146,
+     "detected": 599,
+     "seizures": 751,
+     "fa_per_24h": 410.7051871053942,
+     "false_alarms": 110669,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.400": {
+     "sensitivity": 0.7869507323568575,
+     "detected": 591,
+     "seizures": 751,
+     "fa_per_24h": 351.0564645873901,
+     "false_alarms": 94596,
+     "hours": 6467.062222222211,
+     "latency_median_s": 6.0
+    },
+    "0.450": {
+     "sensitivity": 0.7643142476697736,
+     "detected": 574,
+     "seizures": 751,
+     "fa_per_24h": 299.7763023430187,
+     "false_alarms": 80778,
+     "hours": 6467.062222222211,
+     "latency_median_s": 7.0
+    },
+    "0.500": {
+     "sensitivity": 0.748335552596538,
+     "detected": 562,
+     "seizures": 751,
+     "fa_per_24h": 255.71796639243416,
+     "false_alarms": 68906,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.550": {
+     "sensitivity": 0.729693741677763,
+     "detected": 548,
+     "seizures": 751,
+     "fa_per_24h": 217.03703347355423,
+     "false_alarms": 58483,
+     "hours": 6467.062222222211,
+     "latency_median_s": 8.0
+    },
+    "0.600": {
+     "sensitivity": 0.7003994673768309,
+     "detected": 526,
+     "seizures": 751,
+     "fa_per_24h": 181.79259138100863,
+     "false_alarms": 48986,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.650": {
+     "sensitivity": 0.6644474034620506,
+     "detected": 499,
+     "seizures": 751,
+     "fa_per_24h": 150.22957358622074,
+     "false_alarms": 40481,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.700": {
+     "sensitivity": 0.6165113182423435,
+     "detected": 463,
+     "seizures": 751,
+     "fa_per_24h": 121.42391290154781,
+     "false_alarms": 32719,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.750": {
+     "sensitivity": 0.5778961384820239,
+     "detected": 434,
+     "seizures": 751,
+     "fa_per_24h": 94.37360876207589,
+     "false_alarms": 25430,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.800": {
+     "sensitivity": 0.5246338215712384,
+     "detected": 394,
+     "seizures": 751,
+     "fa_per_24h": 70.08437284592226,
+     "false_alarms": 18885,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.850": {
+     "sensitivity": 0.4633821571238349,
+     "detected": 348,
+     "seizures": 751,
+     "fa_per_24h": 47.728626908732124,
+     "false_alarms": 12861,
+     "hours": 6467.062222222211,
+     "latency_median_s": 15.0
+    },
+    "0.900": {
+     "sensitivity": 0.41145139813581894,
+     "detected": 309,
+     "seizures": 751,
+     "fa_per_24h": 26.938970743370383,
+     "false_alarms": 7259,
+     "hours": 6467.062222222211,
+     "latency_median_s": 19.0
+    },
+    "0.950": {
+     "sensitivity": 0.2956058588548602,
+     "detected": 222,
+     "seizures": 751,
+     "fa_per_24h": 9.10707180110634,
+     "false_alarms": 2454,
+     "hours": 6467.062222222211,
+     "latency_median_s": 26.0
+    },
+    "0.970": {
+     "sensitivity": 0.22503328894806923,
+     "detected": 169,
+     "seizures": 751,
+     "fa_per_24h": 3.3251574302327955,
+     "false_alarms": 896,
+     "hours": 6467.062222222211,
+     "latency_median_s": 30.0
+    },
+    "0.980": {
+     "sensitivity": 0.151797603195739,
+     "detected": 114,
+     "seizures": 751,
+     "fa_per_24h": 1.2766229419643769,
+     "false_alarms": 344,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.990": {
+     "sensitivity": 0.08788282290279627,
+     "detected": 66,
+     "seizures": 751,
+     "fa_per_24h": 0.15215564133877746,
+     "false_alarms": 41,
+     "hours": 6467.062222222211,
+     "latency_median_s": 46.0
+    },
+    "0.995": {
+     "sensitivity": 0.03062583222370173,
+     "detected": 23,
+     "seizures": 751,
+     "fa_per_24h": 0.037111132033848165,
+     "false_alarms": 10,
+     "hours": 6467.062222222211,
+     "latency_median_s": 55.0
+    }
+   },
+   "sustained 10 s": {
+    "0.100": {
+     "sensitivity": 0.7696404793608522,
+     "detected": 578,
+     "seizures": 751,
+     "fa_per_24h": 678.5176714276596,
+     "false_alarms": 182834,
+     "hours": 6467.062222222211,
+     "latency_median_s": 9.0
+    },
+    "0.150": {
+     "sensitivity": 0.7563249001331558,
+     "detected": 568,
+     "seizures": 751,
+     "fa_per_24h": 508.03655309056785,
+     "false_alarms": 136896,
+     "hours": 6467.062222222211,
+     "latency_median_s": 10.0
+    },
+    "0.200": {
+     "sensitivity": 0.7336884154460719,
+     "detected": 551,
+     "seizures": 751,
+     "fa_per_24h": 396.22813449899013,
+     "false_alarms": 106768,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.250": {
+     "sensitivity": 0.7083888149134487,
+     "detected": 532,
+     "seizures": 751,
+     "fa_per_24h": 316.9587564746904,
+     "false_alarms": 85408,
+     "hours": 6467.062222222211,
+     "latency_median_s": 11.0
+    },
+    "0.300": {
+     "sensitivity": 0.6750998668442078,
+     "detected": 507,
+     "seizures": 751,
+     "fa_per_24h": 258.8204570304639,
+     "false_alarms": 69742,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.0
+    },
+    "0.350": {
+     "sensitivity": 0.6498002663115846,
+     "detected": 488,
+     "seizures": 751,
+     "fa_per_24h": 213.47065368510144,
+     "false_alarms": 57522,
+     "hours": 6467.062222222211,
+     "latency_median_s": 12.5
+    },
+    "0.400": {
+     "sensitivity": 0.6151797603195739,
+     "detected": 462,
+     "seizures": 751,
+     "fa_per_24h": 177.11287763154039,
+     "false_alarms": 47725,
+     "hours": 6467.062222222211,
+     "latency_median_s": 13.0
+    },
+    "0.450": {
+     "sensitivity": 0.5885486018641811,
+     "detected": 442,
+     "seizures": 751,
+     "fa_per_24h": 147.17903853303847,
+     "false_alarms": 39659,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.500": {
+     "sensitivity": 0.5525965379494008,
+     "detected": 415,
+     "seizures": 751,
+     "fa_per_24h": 122.40364678724141,
+     "false_alarms": 32983,
+     "hours": 6467.062222222211,
+     "latency_median_s": 16.0
+    },
+    "0.550": {
+     "sensitivity": 0.521970705725699,
+     "detected": 392,
+     "seizures": 751,
+     "fa_per_24h": 100.88661243401626,
+     "false_alarms": 27185,
+     "hours": 6467.062222222211,
+     "latency_median_s": 17.0
+    },
+    "0.600": {
+     "sensitivity": 0.4993342210386152,
+     "detected": 375,
+     "seizures": 751,
+     "fa_per_24h": 82.0044684551943,
+     "false_alarms": 22097,
+     "hours": 6467.062222222211,
+     "latency_median_s": 18.0
+    },
+    "0.650": {
+     "sensitivity": 0.4647137150466045,
+     "detected": 349,
+     "seizures": 751,
+     "fa_per_24h": 65.27477013433554,
+     "false_alarms": 17589,
+     "hours": 6467.062222222211,
+     "latency_median_s": 19.0
+    },
+    "0.700": {
+     "sensitivity": 0.4394141145139814,
+     "detected": 330,
+     "seizures": 751,
+     "fa_per_24h": 50.8385397731686,
+     "false_alarms": 13699,
+     "hours": 6467.062222222211,
+     "latency_median_s": 20.0
+    },
+    "0.750": {
+     "sensitivity": 0.4007989347536618,
+     "detected": 301,
+     "seizures": 751,
+     "fa_per_24h": 38.21704376845684,
+     "false_alarms": 10298,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.800": {
+     "sensitivity": 0.36351531291611183,
+     "detected": 273,
+     "seizures": 751,
+     "fa_per_24h": 26.924126290556842,
+     "false_alarms": 7255,
+     "hours": 6467.062222222211,
+     "latency_median_s": 26.0
+    },
+    "0.850": {
+     "sensitivity": 0.33422103861517977,
+     "detected": 251,
+     "seizures": 751,
+     "fa_per_24h": 17.015454037519383,
+     "false_alarms": 4585,
+     "hours": 6467.062222222211,
+     "latency_median_s": 28.0
+    },
+    "0.900": {
+     "sensitivity": 0.29027962716378164,
+     "detected": 218,
+     "seizures": 751,
+     "fa_per_24h": 8.791627178818631,
+     "false_alarms": 2369,
+     "hours": 6467.062222222211,
+     "latency_median_s": 32.0
+    },
+    "0.950": {
+     "sensitivity": 0.20639147802929428,
+     "detected": 155,
+     "seizures": 751,
+     "fa_per_24h": 2.3788235633696675,
+     "false_alarms": 641,
+     "hours": 6467.062222222211,
+     "latency_median_s": 37.0
+    },
+    "0.970": {
+     "sensitivity": 0.13981358189081225,
+     "detected": 105,
+     "seizures": 751,
+     "fa_per_24h": 0.7385115274735785,
+     "false_alarms": 199,
+     "hours": 6467.062222222211,
+     "latency_median_s": 42.0
+    },
+    "0.980": {
+     "sensitivity": 0.10652463382157124,
+     "detected": 80,
+     "seizures": 751,
+     "fa_per_24h": 0.2597779242369372,
+     "false_alarms": 70,
+     "hours": 6467.062222222211,
+     "latency_median_s": 48.0
+    },
+    "0.990": {
+     "sensitivity": 0.05059920106524634,
+     "detected": 38,
+     "seizures": 751,
+     "fa_per_24h": 0.0445333584406178,
+     "false_alarms": 12,
+     "hours": 6467.062222222211,
+     "latency_median_s": 52.0
+    },
+    "0.995": {
+     "sensitivity": 0.015978695073235686,
+     "detected": 12,
+     "seizures": 751,
+     "fa_per_24h": 0.0037111132033848166,
+     "false_alarms": 1,
+     "hours": 6467.062222222211,
+     "latency_median_s": 60.5
+    }
+   },
+   "sustained 20 s": {
+    "0.100": {
+     "sensitivity": 0.6418109187749668,
+     "detected": 482,
+     "seizures": 751,
+     "fa_per_24h": 528.7742536710823,
+     "false_alarms": 142484,
+     "hours": 6467.062222222211,
+     "latency_median_s": 14.0
+    },
+    "0.150": {
+     "sensitivity": 0.6018641810918774,
+     "detected": 452,
+     "seizures": 751,
+     "fa_per_24h": 364.7987167795241,
+     "false_alarms": 98299,
+     "hours": 6467.062222222211,
+     "latency_median_s": 18.0
+    },
+    "0.200": {
+     "sensitivity": 0.5858854860186418,
+     "detected": 440,
+     "seizures": 751,
+     "fa_per_24h": 268.55470696294225,
+     "false_alarms": 72365,
+     "hours": 6467.062222222211,
+     "latency_median_s": 20.0
+    },
+    "0.250": {
+     "sensitivity": 0.5712383488681758,
+     "detected": 429,
+     "seizures": 751,
+     "fa_per_24h": 205.751538222061,
+     "false_alarms": 55442,
+     "hours": 6467.062222222211,
+     "latency_median_s": 22.0
+    },
+    "0.300": {
+     "sensitivity": 0.525965379494008,
+     "detected": 395,
+     "seizures": 751,
+     "fa_per_24h": 163.15538087361008,
+     "false_alarms": 43964,
+     "hours": 6467.062222222211,
+     "latency_median_s": 23.0
+    },
+    "0.350": {
+     "sensitivity": 0.5059920106524634,
+     "detected": 380,
+     "seizures": 751,
+     "fa_per_24h": 130.67571811758617,
+     "false_alarms": 35212,
+     "hours": 6467.062222222211,
+     "latency_median_s": 25.0
+    },
+    "0.400": {
+     "sensitivity": 0.49001331557922767,
+     "detected": 368,
+     "seizures": 751,
+     "fa_per_24h": 105.68508180599281,
+     "false_alarms": 28478,
+     "hours": 6467.062222222211,
+     "latency_median_s": 26.0
+    },
+    "0.450": {
+     "sensitivity": 0.4567243675099867,
+     "detected": 343,
+     "seizures": 751,
+     "fa_per_24h": 85.22571471573231,
+     "false_alarms": 22965,
+     "hours": 6467.062222222211,
+     "latency_median_s": 27.0
+    },
+    "0.500": {
+     "sensitivity": 0.4340878828229028,
+     "detected": 326,
+     "seizures": 751,
+     "fa_per_24h": 68.49601639487355,
+     "false_alarms": 18457,
+     "hours": 6467.062222222211,
+     "latency_median_s": 29.0
+    },
+    "0.550": {
+     "sensitivity": 0.41145139813581894,
+     "detected": 309,
+     "seizures": 751,
+     "fa_per_24h": 54.820564240400515,
+     "false_alarms": 14772,
+     "hours": 6467.062222222211,
+     "latency_median_s": 29.0
+    },
+    "0.600": {
+     "sensitivity": 0.3954727030625832,
+     "detected": 297,
+     "seizures": 751,
+     "fa_per_24h": 42.974690895196176,
+     "false_alarms": 11580,
+     "hours": 6467.062222222211,
+     "latency_median_s": 31.0
+    },
+    "0.650": {
+     "sensitivity": 0.3754993342210386,
+     "detected": 282,
+     "seizures": 751,
+     "fa_per_24h": 32.90272966120979,
+     "false_alarms": 8866,
+     "hours": 6467.062222222211,
+     "latency_median_s": 32.0
+    },
+    "0.700": {
+     "sensitivity": 0.34620505992010653,
+     "detected": 260,
+     "seizures": 751,
+     "fa_per_24h": 24.411702651865323,
+     "false_alarms": 6578,
+     "hours": 6467.062222222211,
+     "latency_median_s": 34.0
+    },
+    "0.750": {
+     "sensitivity": 0.33155792276964047,
+     "detected": 249,
+     "seizures": 751,
+     "fa_per_24h": 17.32718754660371,
+     "false_alarms": 4669,
+     "hours": 6467.062222222211,
+     "latency_median_s": 36.0
+    },
+    "0.800": {
+     "sensitivity": 0.3009320905459387,
+     "detected": 226,
+     "seizures": 751,
+     "fa_per_24h": 11.523006496509856,
+     "false_alarms": 3105,
+     "hours": 6467.062222222211,
+     "latency_median_s": 38.0
+    },
+    "0.850": {
+     "sensitivity": 0.27030625832223704,
+     "detected": 203,
+     "seizures": 751,
+     "fa_per_24h": 6.891537218685604,
+     "false_alarms": 1857,
+     "hours": 6467.062222222211,
+     "latency_median_s": 40.0
+    },
+    "0.900": {
+     "sensitivity": 0.21304926764314247,
+     "detected": 160,
+     "seizures": 751,
+     "fa_per_24h": 3.332579656639565,
+     "false_alarms": 898,
+     "hours": 6467.062222222211,
+     "latency_median_s": 46.0
+    },
+    "0.950": {
+     "sensitivity": 0.14247669773635152,
+     "detected": 107,
+     "seizures": 751,
+     "fa_per_24h": 0.7533559802871178,
+     "false_alarms": 203,
+     "hours": 6467.062222222211,
+     "latency_median_s": 55.0
+    },
+    "0.970": {
+     "sensitivity": 0.1051930758988016,
+     "detected": 79,
+     "seizures": 751,
+     "fa_per_24h": 0.263489037440322,
+     "false_alarms": 71,
+     "hours": 6467.062222222211,
+     "latency_median_s": 58.0
+    },
+    "0.980": {
+     "sensitivity": 0.07723035952063914,
+     "detected": 58,
+     "seizures": 751,
+     "fa_per_24h": 0.07422226406769633,
+     "false_alarms": 20,
+     "hours": 6467.062222222211,
+     "latency_median_s": 61.5
+    },
+    "0.990": {
+     "sensitivity": 0.03195739014647137,
+     "detected": 24,
+     "seizures": 751,
+     "fa_per_24h": 0.018555566016924083,
+     "false_alarms": 5,
+     "hours": 6467.062222222211,
+     "latency_median_s": 67.0
+    },
+    "0.995": {
+     "sensitivity": 0.002663115845539281,
+     "detected": 2,
+     "seizures": 751,
+     "fa_per_24h": 0.0,
+     "false_alarms": 0,
+     "hours": 6467.062222222211,
+     "latency_median_s": 82.0
+    }
+   }
+  }
+ }
+}

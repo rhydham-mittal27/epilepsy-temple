@@ -18,6 +18,7 @@ Steps
 Usage (run in your own terminal, from epilepsy_sim/):
     uv run detect/seizeit2.py fetch     # ~1.5-2.5 h at ~20 MB/s (126 GB streamed), resumable
     uv run detect/seizeit2.py run       # ~30-60 min
+    uv run detect/seizeit2.py finetune  # personal fine-tuning + sustained-alarm rules (~2-3 h)
 
 Data: SeizeIT2 (CC0), Bhagubai et al. 2025, doi:10.18112/openneuro.ds005873.v1.1.0.
 """
@@ -549,6 +550,205 @@ def figure(out):
     plt.close(fig)
 
 
+# ------------------------------------------------------------------ personal fine-tuning
+FT_CONFIGS = ["EEG only (ear)", "EEG + ECG"]
+PATIENT_W = 10.0  # weight of the user's own windows when fine-tuning (as in the CHB-MIT study)
+TUNE_MARGIN = 600  # s after the k-th seizure that still belongs to the tuning period
+POST = {  # alarm rule: (smoothing windows, consecutive smoothed windows above threshold); 1 window = 2 s
+    "6 s smoothing": (3, 1),
+    "sustained 10 s": (3, 5),
+    "sustained 20 s": (5, 10),
+}
+FT_THR = np.round(np.r_[np.arange(0.1, 0.95, 0.05), 0.95, 0.97, 0.98, 0.99, 0.995], 3)
+
+
+def run_no(r):
+    return int(re.search(r"run-(\d+)", r["run"]).group(1))
+
+
+def subject_folds(runs, folds=5):
+    """Same patient-wise folds as run(): round-robin over patients sorted by seizure count."""
+    subs = sorted({r["sub"] for r in runs})
+    nsz = {s: sum(len(r["seizures"]) for r in runs if r["sub"] == s) for s in subs}
+    return subs, {s: i % folds for i, s in enumerate(sorted(subs, key=lambda s: (-nsz[s], zlib.crc32(s.encode()))))}
+
+
+def split_patient(rs, k):
+    """Chronological split of one patient's runs. Tune = everything up to TUNE_MARGIN after the k-th
+    seizure; test = everything after (windows that straddle the cut are dropped). None if no test seizure."""
+    rs = sorted(rs, key=run_no)
+    sz = [(i, a, b) for i, r in enumerate(rs) for a, b in r["seizures"]]
+    if len(sz) < k + 1:
+        return None
+    ri, _, e = sz[k - 1]
+    cut = e + TUNE_MARGIN
+    if not any(i > ri or (i == ri and a > cut) for i, a, _ in sz):
+        return None
+    tune = [(r, None) for r in rs[:ri]] + [(rs[ri], cut)]
+    test = [(rs[ri], cut)] + [(r, None) for r in rs[ri + 1:]]
+    return tune, test
+
+
+def score_fast(recs, thresholds, smooth=3, persist=1):
+    """Event-level scoring for many thresholds at once, with the same rules as detect.score()
+    (caught = alarm from PRE s before onset to seizure end; alarms up to POST s after a seizure are
+    not false; REFRACT s between alarms) plus a persistence rule: the smoothed probability must stay
+    above threshold for `persist` consecutive windows before an alarm fires."""
+    from detect import POST as POST_S, PRE, REFRACT
+
+    P, T, S, hours, off = [], [], [], 0.0, 0.0
+    pad = np.full(persist + smooth, -1.0)
+    for p, t, sz, h in recs:
+        if not len(t):
+            continue
+        P += [np.convolve(p, np.ones(smooth) / smooth)[: len(p)], pad]  # causal smoothing, per record
+        T += [t.astype(np.float64) + off, np.full(len(pad), np.nan)]
+        S += [(a + off, b + off) for a, b in sz]
+        hours += h
+        off += float(t[-1]) + 10_000  # records never interact
+    P, T = np.concatenate(P), np.concatenate(T)
+    S = np.array(sorted(S), float).reshape(-1, 2)
+    lo, hi = S[:, 0] - PRE, S[:, 1] + POST_S  # merged "not a false alarm" intervals
+    mlo, mhi = [], []
+    for a, b in zip(lo, hi):
+        if mlo and a <= mhi[-1]:
+            mhi[-1] = max(mhi[-1], b)
+        else:
+            mlo.append(a)
+            mhi.append(b)
+    mlo, mhi = np.array(mlo), np.array(mhi)
+    out = {}
+    for thr in thresholds:
+        above = P > thr
+        if persist > 1:
+            above = np.convolve(above.astype(np.int32), np.ones(persist, np.int32))[: len(above)] >= persist
+        cand = T[above]
+        al, i = [], 0
+        while i < len(cand):  # refractory: next alarm = first candidate >= last + REFRACT
+            al.append(cand[i])
+            i = int(np.searchsorted(cand, cand[i] + REFRACT, side="left"))
+        al = np.array(al)
+        j = np.searchsorted(al, S[:, 0] - PRE, side="left")
+        hit = (j < len(al)) & (al[np.minimum(j, max(len(al) - 1, 0))] <= S[:, 1]) if len(al) else np.zeros(len(S), bool)
+        lat = (al[j[hit]] - S[hit, 0]) if len(al) else np.array([])
+        m = np.searchsorted(mlo, al, side="right") - 1
+        covered = (m >= 0) & (al <= mhi[np.maximum(m, 0)]) if len(al) else np.array([], bool)
+        fa = int((~covered).sum())
+        out[f"{thr:.3f}"] = {"sensitivity": float(hit.mean()) if len(S) else 0.0, "detected": int(hit.sum()),
+                             "seizures": int(len(S)), "fa_per_24h": fa / max(hours, 1e-9) * 24, "false_alarms": fa,
+                             "hours": hours, "latency_median_s": float(np.median(lat)) if len(lat) else None}
+    return out
+
+
+def finetune(configs=None, ks=(1, 2), folds=5):
+    """General model vs general + the user's own first k seizures, on the same later data."""
+    RES.mkdir(exist_ok=True)
+    path = RES / "finetune.json"
+    out = json.loads(path.read_text()) if path.exists() else {}
+    runs = [r for r in json.loads((FEAT / "index.json").read_text()) if (FEAT / f"{r['run']}.npz").exists()]
+    subs, fold = subject_folds(runs, folds)
+    by = {s: [r for r in runs if r["sub"] == s] for s in subs}
+    t0 = time.time()
+    names = FT_CONFIGS if not configs else [c for c in CONFIGS if any(o.lower() in c.lower() for o in configs)]
+    for cname in names:
+        groups = CONFIGS[cname]
+        todo = [k for k in ks if f"{cname} | k={k}" not in out]
+        if not todo:
+            tqdm.write(f"{cname}: fine-tuning already in finetune.json, skipping")
+            continue
+        rng = np.random.default_rng(zlib.crc32(cname.encode()))  # same training pool as run()
+        Xs, ys, fs_ = [], [], []
+        for r in tqdm(runs, desc=f"{cname}: loading pool", unit="run", leave=False):
+            X, y, _ = load(r["run"])
+            keep = (y == 1) | (rng.random(len(y)) < NEG_FRAC)
+            Xs.append(design(X, groups)[keep])
+            ys.append(y[keep])
+            fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
+        Xp, yp, fp = np.vstack(Xs), np.concatenate(ys), np.concatenate(fs_)
+        del Xs, ys, fs_
+        gen = {f: clf().fit(Xp[fp != f], yp[fp != f]) for f in tqdm(range(folds), desc=f"{cname}: general models", unit="fold")}
+        for k in todo:
+            recs = {"general": [], "finetuned": []}
+            elig = [s for s in subs if split_patient(by[s], k)]
+            for s in tqdm(elig, desc=f"{cname} | k={k}: fine-tuning", unit="patient"):
+                tune, test = split_patient(by[s], k)
+                Xt, yt = [], []
+                for r, cut in tune:
+                    X, y, t = load(r["run"])
+                    sel = np.ones(len(t), bool) if cut is None else (t <= cut)
+                    Xt.append(design(X, groups)[sel])
+                    yt.append(y[sel])
+                Xt, yt = np.vstack(Xt), np.concatenate(yt)
+                tr = fp != fold[s]  # exactly the general model's training data ...
+                w = np.r_[np.ones(tr.sum()), np.full(len(yt), PATIENT_W)]  # ... plus the user's own, upweighted
+                fin = clf().fit(np.vstack([Xp[tr], Xt]), np.r_[yp[tr], yt], sample_weight=w)
+                for r, cut in test:
+                    X, _, t = load(r["run"])
+                    sel = np.ones(len(t), bool) if cut is None else (t - WIN > cut)
+                    if not sel.any():
+                        continue
+                    Z = design(X, groups)[sel]
+                    szs = [tuple(v) for v in r["seizures"] if cut is None or v[0] > cut]
+                    h = sel.sum() * STEP / 3600
+                    for name, mdl in (("general", gen[fold[s]]), ("finetuned", fin)):
+                        recs[name].append((mdl.predict_proba(Z)[:, 1].astype(np.float32), t[sel].astype(np.int32), szs, h))
+            key = f"{cname} | k={k}"
+            out[key] = {"patients": len(elig),
+                        **{name: {pp: score_fast(v, FT_THR, *rule) for pp, rule in POST.items()} for name, v in recs.items()}}
+            path.write_text(json.dumps(out, indent=1))  # saved per block: a stop loses at most one block
+            ft_summary({key: out[key]})
+            tqdm.write(f"({time.time() - t0:.0f} s)")
+            del recs
+        del Xp, yp, fp, gen
+    ft_summary(out)
+    ft_figure(out)
+    best = []
+    for key, d in out.items():
+        v = fa_at_sensitivity(d["finetuned"]["sustained 10 s"], 0.6)
+        best.append(f"{key.split(' (')[0]}: {v:.0f}" if v is not None else f"{key}: -")
+    notify("SeizeIT2 fine-tuning DONE", "FA/24h at 60% caught (fine-tuned, 10 s rule): " + "; ".join(best), "tada")
+    print(f"saved {path} and {RES / 'finetune.png'}")
+
+
+def ft_summary(out):
+    for key, d in out.items():
+        print(f"\n=== {key}  ({d['patients']} patients; tested only on data AFTER their first seizures)")
+        print(f"{'model | alarm rule':42s}" + "".join(f"{f'@{t}%':>8s}" for t in (40, 50, 60, 70))
+              + "".join(f"{f'<={b}/d':>8s}" for b in (1, 5, 20)) + f"{'delay':>8s}")
+        for name in ("general", "finetuned"):
+            for pp, curve in d[name].items():
+                fa = [fa_at_sensitivity(curve, t / 100) for t in (40, 50, 60, 70)]
+                se = [sens_at_fa(curve, b) for b in (1, 5, 20)]
+                ok = [v for v in curve.values() if v["sensitivity"] >= 0.6 and v["latency_median_s"] is not None]
+                lat = min(ok, key=lambda v: v["fa_per_24h"])["latency_median_s"] if ok else None
+                print(f"{name + ' | ' + pp:42s}" + "".join(f"{v:8.1f}" if v is not None else f"{'-':>8s}" for v in fa)
+                      + "".join(f"{v:8.0%}" if v is not None else f"{'-':>8s}" for v in se)
+                      + (f"{lat:7.0f}s" if lat is not None else f"{'-':>8s}"))
+
+
+def ft_figure(out):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    keys = list(out)
+    fig, ax = plt.subplots(1, len(keys), figsize=(6.5 * len(keys), 5.5), squeeze=False)
+    for a, key in zip(ax[0], keys):
+        for name, ls in (("general", ":"), ("finetuned", "-")):
+            for (pp, curve), c in zip(out[key][name].items(), ["tab:blue", "tab:orange", "tab:green"]):
+                a.plot([v["fa_per_24h"] for v in curve.values()], [100 * v["sensitivity"] for v in curve.values()],
+                       ls, color=c, marker="o", ms=2.5, label=f"{name}, {pp}")
+        a.set_xscale("symlog", linthresh=1)
+        a.axvline(1, color="grey", lw=0.8, ls="--")
+        a.set(xlabel="false alarms per 24 h", ylabel="seizures detected (%)", title=f"{key}\n({out[key]['patients']} patients)")
+        a.legend(fontsize=7)
+    fig.suptitle("SeizeIT2: personal fine-tuning + sustained-alarm rules (tested on each patient's later data)", fontsize=13)
+    fig.tight_layout()
+    fig.savefig(RES / "finetune.png", dpi=110)
+    plt.close(fig)
+
+
 def main(a):
     if a.cmd == "fetch":
         fetch(a.workers)
@@ -569,17 +769,21 @@ def main(a):
         out = json.loads((RES / "metrics.json").read_text())
         summary(out)
         figure(out)
+    elif a.cmd == "finetune":
+        finetune(a.configs, tuple(a.k))
     else:
         run(a.configs, snapshot=a.snapshot)
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["fetch", "run", "report", "test"])
+    ap.add_argument("cmd", choices=["fetch", "run", "report", "finetune", "test"])
     ap.add_argument("--workers", type=int, default=3, help="runs streamed in parallel (each uses 4 connections)")
     ap.add_argument("--configs", nargs="*", default=None, help="re-run only configs containing these words")
     ap.add_argument("--snapshot", action="store_true",
                     help="run: interim results on the patients streamed so far (separate folder; fetch can keep running)")
+    ap.add_argument("--k", type=int, nargs="+", default=[1, 2],
+                    help="finetune: number of the user's own seizures used for tuning (default: 1 2)")
     a = ap.parse_args()
     try:
         main(a)

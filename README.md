@@ -51,7 +51,7 @@
 | 6 | **On real EEG, temple and ear electrodes catch seizures as well as a full cap, but with more false alarms.** Patient-specific (3 patients, 19 seizures): both temples caught 100% with 9.8 false alarms/day; the full cap caught 95% with 5.2/day. | `epilepsy_sim/detect/` |
 | 7 | **The ear-hook (2 channels) catches as many seizures as a full 18-channel cap, but with ~2× the false alarms.** On 23 subjects and 185 seizures: new user 88% vs 85%; after fine-tuning on 2 own seizures 86% (162 FA/day) vs 89% (88 FA/day). Both ears beat one ear on every measure. | `epilepsy_sim/detect/general.py` |
 | 8 | **False alarms are the real problem.** EEG-only models give 90–600 false alarms/day for new users. Per-person normalisation and fine-tuning cut them by 40–60%, but reaching ≤1/day needs multimodal fusion plus personal tuning. | §7 |
-| 9 | **The heart is the body signal that pays off.** On SeizeIT2 (125 patients, 883 seizures), adding ECG to 2-channel behind-the-ear EEG cut false alarms by **18–31% at the same sensitivity** (−34% at the default setting) and helped **115/125 patients**, for about 1 s more delay. Shoulder EMG and motion added no consistent gain for these mostly focal seizures. | `Multimodal_Detection_SeizeIT2.md` |
+| 9 | **The heart is the body signal that pays off.** On SeizeIT2 (125 patients, 883 seizures), adding ECG to 2-channel behind-the-ear EEG cut false alarms by **18–31% at the same sensitivity** (−34% at the default setting) and helped **115/125 patients**, for about 1 s more delay. Shoulder EMG and motion added no consistent gain for these mostly focal seizures. **With personal fine-tuning on 2 own seizures, the cut reaches 52–62%**, but at ≤1 false alarm/day only 14% of seizures are caught. | `Multimodal_Detection_SeizeIT2.md` |
 
 ---
 
@@ -280,7 +280,16 @@ Takeaways:
 1. **Heart rate is worth adding to the ear-hook** (in-ear PPG in the device).
 2. **For focal seizures the heart carries about as much information as a behind-the-ear electrode pair.** Under a strict budget of 20 or fewer false alarms a day, ECG alone catches 29% of seizures vs 23% for the ear EEG.
 3. **EMG and motion don't pay off overall for focal seizures.** They should matter for convulsive seizures and for artefact rejection in daily life, which remain to be tested separately.
-4. **Absolute false-alarm rates are still far too high** for a general model. Personal fine-tuning and event-level post-processing are next.
+4. **Personal fine-tuning adds to the ECG gain.** Tested on each patient's later data (71 patients):
+
+| At 50% of seizures caught | False alarms / 24 h |
+|---|---|
+| Ear EEG, general | 158 |
+| Ear EEG, fine-tuned on 2 own seizures | 92 (−42%) |
+| Ear EEG + ECG, general | 89 (−44%) |
+| **Ear EEG + ECG, fine-tuned** | **61 (−62%)** |
+
+   One seizure is not enough for EEG-only tuning. Requiring a sustained 10–20 s alarm does not help. At ≤1 false alarm/day the best setup still catches only 14% of seizures, so absolute rates remain far from usable.
 
 ### 6.7 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
@@ -343,7 +352,8 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | Priority | Next step |
 |---|---|
 | ✅ | ~~Multimodal detection on SeizeIT2: measure the false-alarm reduction~~ (done, §6.6: ECG −18–31%) |
-| ★★★ | Personal fine-tuning + event-level post-processing on SeizeIT2, aiming for ≤1 false alarm/day |
+| ✅ | ~~Personal fine-tuning + sustained-alarm rules on SeizeIT2~~ (done: −62% with ECG; sustained rules don't help) |
+| ★★★ | Personal alarm thresholds and 5–10 min context features (HR/HRV trends), aiming for ≤1 false alarm/day |
 | ★★ | SeizeIT2 split by seizure type; degrade ECG to PPG-like beat timing (what the ear-hook would see) |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |
