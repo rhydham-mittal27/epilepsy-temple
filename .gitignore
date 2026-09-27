@@ -19,3 +19,6 @@ __pycache__/
 build/
 dist/
 *.egg-info
+
+# --- interim SeizeIT2 snapshot results (superseded by results_seizeit2/) ---
+epilepsy_sim/detect/results_seizeit2_partial/

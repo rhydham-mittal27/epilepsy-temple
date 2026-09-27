@@ -12,12 +12,13 @@
 > - mathematics for inferring hidden brain chemistry from non-invasive sensors;
 > - a cross-check against **The Virtual Brain**;
 > - seizure detectors trained and tested on **real hospital EEG** (CHB-MIT, 23 subjects, 185 seizures);
+> - a **multimodal** detector (behind-the-ear EEG + heart + muscle + motion) on **SeizeIT2** (125 patients, 883 seizures, 11,626 h), streamed straight from the cloud;
 > - a live, single-screen visual lab of the whole thing.
 >
 > ⚠️ **Research prototype, not a medical device.** Nothing here is validated for clinical use.
 
 ![Epilepsy Live Lab](docs/images/live_lab.png)
-<sub>The live lab (`epilepsy_sim/viz/epilepsy_live.html`) during a simulated seizure. The orb field shows neurons, K⁺, Na⁺, Cl⁻, adenosine and blood; nine live charts show the hidden variables; a virtual ear-hook EEG and detector alarm sit below.</sub>
+<sub>The live lab (`epilepsy_sim/viz/epilepsy_live.html`, Stark-lab style HUD) at the seizure peak. The 100 simulated neurons rise off a 3D plane as K⁺ floods out, and the targeting reticle turns red at the ictal threshold. Around it: arc-reactor gauges for the hidden variables, nine live charts, the virtual ear-hook EEG with its detector, and the body sensors (ECG, heart rate, EMG, motion) with EEG-only vs multimodal detection.</sub>
 
 ---
 
@@ -49,7 +50,8 @@
 | 5 | **Our Epileptor matches The Virtual Brain's official implementation.** First seizure onset is identical (886.2), and differences vanish as the time step shrinks. | `epilepsy_sim/COMPARISON.md` |
 | 6 | **On real EEG, temple and ear electrodes catch seizures as well as a full cap, but with more false alarms.** Patient-specific (3 patients, 19 seizures): both temples caught 100% with 9.8 false alarms/day; the full cap caught 95% with 5.2/day. | `epilepsy_sim/detect/` |
 | 7 | **The ear-hook (2 channels) catches as many seizures as a full 18-channel cap, but with ~2× the false alarms.** On 23 subjects and 185 seizures: new user 88% vs 85%; after fine-tuning on 2 own seizures 86% (162 FA/day) vs 89% (88 FA/day). Both ears beat one ear on every measure. | `epilepsy_sim/detect/general.py` |
-| 8 | **False alarms are the real problem.** EEG-only models give 90–550 false alarms/day. Per-person normalisation and fine-tuning cut them by 40–60%, but reaching ≤1/day needs multimodal fusion (heart rate, motion, jaw EMG). | §7 |
+| 8 | **False alarms are the real problem.** EEG-only models give 90–600 false alarms/day for new users. Per-person normalisation and fine-tuning cut them by 40–60%, but reaching ≤1/day needs multimodal fusion plus personal tuning. | §7 |
+| 9 | **The heart is the body signal that pays off.** On SeizeIT2 (125 patients, 883 seizures), adding ECG to 2-channel behind-the-ear EEG cut false alarms by **18–31% at the same sensitivity** (−34% at the default setting) and helped **115/125 patients**, for about 1 s more delay. Shoulder EMG and motion added no consistent gain for these mostly focal seizures. | `Multimodal_Detection_SeizeIT2.md` |
 
 ---
 
@@ -78,6 +80,8 @@ flowchart LR
 | 6 | How well do temple or ear electrodes detect seizures on real EEG? | `detect/detect.py` |
 | 7 | Can one model work for new users? How much does personal fine-tuning help? | `detect/general.py` |
 | 8 | What should the device look like? | §5 |
+| 9 | Which physiological signals change during seizures? | `Seizure_Physiological_Signals.md` |
+| 10 | Do heart, muscle and motion signals cut false alarms on real wearable data? | `detect/seizeit2.py`, `Multimodal_Detection_SeizeIT2.md` |
 
 ---
 
@@ -106,8 +110,10 @@ epilepsy_temple/
     │   ├── general.py               general model on all CHB-MIT subjects + per-person fine-tuning
     │   ├── notify_watch.sh          optional: ring your phone (ntfy) when a long run finishes
     │   ├── notify_final.sh          optional: ring your phone when general.py finishes / crashes / stops
+    │   ├── seizeit2.py              multimodal detector on SeizeIT2: ear-EEG + ECG + EMG + motion (streamed)
     │   ├── results/                 3-patient detection metrics + figure
-    │   └── results_general/         23-subject general-model metrics
+    │   ├── results_general/         23-subject general-model metrics
+    │   └── results_seizeit2/        125-patient multimodal metrics + figure
     └── viz/
         ├── epilepsy_live.html       Epilepsy Live Lab (open in a browser, works offline)
         ├── data.js                  data for the lab (regenerate with export_data.py)
@@ -136,6 +142,7 @@ uv sync                                    # numpy, scipy, matplotlib, numba, mn
 | Download CHB-MIT subset (3 patients) | `uv run detect/fetch_chbmit.py` | ~4 min, 1.4 GB |
 | Temple vs full-cap detection | `uv run detect/detect.py --configs 4` (then 2, 3, 1, 0) | ~2–40 min each |
 | General model, all subjects (streaming, ~1 GB disk) | `uv run detect/general.py fetch` then `run` (add `--configs "Full cap"` to re-run one setup; progress bars show time left) | ~1 h + 2–3 h |
+| Multimodal detector, SeizeIT2 (125 patients; streamed from OpenNeuro into RAM, only 1.8 GB of features stored) | `uv run detect/seizeit2.py fetch` then `run` (`run --snapshot` gives interim results while fetch runs; `report` redraws tables) | ~2–4 h (126 GB streamed) + ~1 h |
 | Rebuild live-lab data | `uv run viz/export_data.py` | ~2 min |
 
 > **Memory:** network simulations use ~1–2 GB. On machines with little free RAM, run one long job at a time.
@@ -250,16 +257,56 @@ Takeaways:
 4. **Both ears > one ear:** about 6% more seizures caught and 25–30% fewer false alarms.
 5. **Patient-only models** have few false alarms but miss a third of seizures. Two examples are too few to learn from alone.
 
-### 6.6 Epilepsy Live Lab (`viz/epilepsy_live.html`)
+### 6.6 Multimodal detection on wearable data: SeizeIT2, 125 patients, 883 seizures, 11,626 h (`detect/seizeit2.py`)
+
+The SeizeIT2 wearable carries almost exactly the proposed ear-hook's sensors: **2-channel behind-the-ear EEG, chest ECG, shoulder EMG and motion**. All 126 GB were streamed from OpenNeuro into RAM, and only features were kept. Each patient was tested by a model that never saw them (patient-wise 5-fold CV).
+
+**False alarms per 24 h with the same share of seizures caught (lower is better):**
+
+| Setup | 50% caught | 60% | 70% | 80% |
+|---|---|---|---|---|
+| Ear EEG only | 104 | 162 | 294 | not reached |
+| ECG only | 133 | 226 | 378 | 678 |
+| Body only (ECG + EMG + motion) | 116 | 194 | 284 | 583 |
+| **Ear EEG + ECG** | **86 (−18%)** | **123 (−24%)** | **204 (−31%)** | **459** |
+| Ear EEG + ECG + EMG + motion | 75 (−27%) | 139 (−14%) | 212 (−28%) | 540 |
+
+At the default threshold, EEG + ECG catches the same seizures as EEG alone (78.7% vs 79.4%) with **34% fewer false alarms** (399 vs 608 a day). It is better for **115 of 125 patients**, at a cost of about 1 s of delay (median 7 s vs 6 s). Full write-up: [`Multimodal_Detection_SeizeIT2.md`](Multimodal_Detection_SeizeIT2.md).
+
+![SeizeIT2](epilepsy_sim/detect/results_seizeit2/seizeit2.png)
+
+Takeaways:
+
+1. **Heart rate is worth adding to the ear-hook** (in-ear PPG in the device).
+2. **For focal seizures the heart carries about as much information as a behind-the-ear electrode pair.** Under a strict budget of 20 or fewer false alarms a day, ECG alone catches 29% of seizures vs 23% for the ear EEG.
+3. **EMG and motion don't pay off overall for focal seizures.** They should matter for convulsive seizures and for artefact rejection in daily life, which remain to be tested separately.
+4. **Absolute false-alarm rates are still far too high** for a general model. Personal fine-tuning and event-level post-processing are next.
+
+### 6.7 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
 A single-screen, offline dashboard:
 
-- a glowing orb field (neurons, K⁺, Na⁺, Cl⁻, adenosine, blood vessels) driven by the simulation;
+- a **3D neuron plane** (default): the 100 simulated neurons on a 10×10 grid. Each neuron keeps its x, y and rises on z from its **own** data: local K⁺, spikes, or both. It has a K⁺-coloured landscape, spike ripples, rising K⁺ vapour, Cl⁻ satellites and blood vessels underneath. Drag to rotate and scroll to zoom. The original glowing ring is one click away;
 - 9 live charts of hidden variables, including **true vs device-inferred** K⁺ and Cl⁻;
 - a **virtual ear-hook EEG** computed from the simulated neurons by a forward model (synaptic currents, glial K⁺ DC shift, 1/f noise), with a live detector;
-- a switch to the **real CHB-MIT patient EEG** and its trained detector.
+- a switch to the **real CHB-MIT patient EEG** and its trained detector;
+- **body sensors**, the SeizeIT2 modalities, driven by the simulated seizure: chest **ECG** (beat-by-beat, with heart-rate variability), a **heart-rate** trend against "what movement explains", shoulder **EMG** and an **accelerometer**. There are four seizure types: focal non-motor, focal motor (hyperkinetic), tonic-clonic, and no heart-rate response (about 18% of patients);
+- a **🚶 Walk** episode whose electrode motion fools the ear-EEG detector;
+- **EEG-only vs multimodal** detectors side by side, with a live score (caught / latency / false alarms).
 
-Deep links: `?scen=healthy&t=9&speed=0.5&paused=1`.
+| Body setting (walk on) | EEG-only | Multimodal (EEG confirmed by body) |
+|---|---|---|
+| Focal non-motor | caught +1 s · **1 false alarm** (walk) | caught +9 s · **0 false** |
+| Focal motor | caught +1 s · 1 false | caught +5 s · 0 false |
+| Tonic-clonic | caught +1 s · 1 false | caught +6 s · 0 false |
+| No heart-rate response | caught +1 s · 1 false | **missed** · 0 false |
+| Healthy tissue | 1 false | 0 false |
+
+The same trade-off shows up on real data in §6.6: requiring body confirmation removes movement false alarms, but costs a few seconds of delay and misses seizures without a body sign. The body module uses literature timings (ictal HR +53%, tonic → clonic 4 → 1 Hz), because the 100-neuron patch models only the onset zone. The fusion rule is hand-set for illustration.
+
+The interface is a JARVIS-style HUD, with a boot sequence, holographic panels, arc-reactor gauges and a targeting reticle. It needs no internet and no libraries.
+
+Deep links: `?scen=healthy&t=9&speed=0.5&paused=1&type=fbtc&walk=0&view=ring&h=k&boot=0` (`type` = nonmotor / motor / fbtc / nohr; `h` = both / k / spk).
 
 ---
 
@@ -275,7 +322,7 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | **Personal learning** | Every confirmed false alarm teaches that person's model |
 | **Risk forecasting** | Multi-day seizure cycles adjust sensitivity |
 
-A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/day** ([Jeppesen 2024](https://onlinelibrary.wiley.com/doi/10.1002/epd2.20196)). The next planned step is testing this on **SeizeIT2**, a public dataset recorded with a behind-the-ear EEG + ECG + EMG + motion device ([dataset](https://www.nature.com/articles/s41597-025-05580-x)).
+**Measured on SeizeIT2 (§6.6):** adding heart rate to behind-the-ear EEG removes 18–31% of false alarms at the same sensitivity, for 115 of 125 patients. That is the first layer working on real wearable data. A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/day** ([Jeppesen 2024](https://onlinelibrary.wiley.com/doi/10.1002/epd2.20196)). Closing the gap between our general model and that result is the job of the remaining layers (personal learning, longer decision windows, tiered alerts) must close.
 
 ---
 
@@ -287,6 +334,7 @@ A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/
 - **The small-sample figures are coarse.** With 36.6 h of data, one false alarm counts as 0.66 per day, and the tuned thresholds in the 3-patient study were picked after seeing results.
 - **The inference results are simulation-only.** The "perfect" TVB localisation is an inverse crime.
 - **Virtual EEG detector threshold:** tuned on the model itself, not independently validated.
+- **SeizeIT2 uses chest ECG, not ear PPG,** and hospital patients move less than people in daily life. The live lab's body signals are generated from literature timings, not from the neuron model.
 
 ---
 
@@ -294,7 +342,9 @@ A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/
 
 | Priority | Next step |
 |---|---|
-| ★★★ | Multimodal detection on SeizeIT2 (behind-the-ear EEG + ECG + EMG + motion): measure the false-alarm reduction |
+| ✅ | ~~Multimodal detection on SeizeIT2: measure the false-alarm reduction~~ (done, §6.6: ECG −18–31%) |
+| ★★★ | Personal fine-tuning + event-level post-processing on SeizeIT2, aiming for ≤1 false alarm/day |
+| ★★ | SeizeIT2 split by seizure type; degrade ECG to PPG-like beat timing (what the ear-hook would see) |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |
 | ★★ | Deep-learning detector and a larger training set (e.g. TUH EEG, requires registration) |
@@ -311,6 +361,7 @@ A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/
 | [`Epilepsy_Overview.md`](Epilepsy_Overview.md) | Definition (ILAE 2014), prevalence, causes (6 aetiologies), 2025 seizure classification, diagnosis, drugs, surgery, SUDEP, wearables |
 | [`Seizure_Neurophysiology.md`](Seizure_Neurophysiology.md) | Seizure life cycle; second-by-second ions, synapses, spread, energy, termination; what each sensor can see |
 | [`Seizure_Physiological_Signals.md`](Seizure_Physiological_Signals.md) | Heart rate (↑ in 82% of patients), HRV (pre-ictal in 41%), apnea (36.5% of focal seizures, often **before** EEG), SpO₂, blood pressure, sweat, temperature, EMG/motion, blood markers; which are measurable from the ear; multimodal ear-hook design and benchmarks |
+| [`Multimodal_Detection_SeizeIT2.md`](Multimodal_Detection_SeizeIT2.md) | SeizeIT2 multimodal detector: streaming 126 GB through RAM, features for ear-EEG / ECG / EMG / motion, patient-wise CV, matched-sensitivity results, snapshots, limitations |
 | [`Inference_Formulas.md`](Inference_Formulas.md) | Measured vs inferred; Bayes, least squares, Kalman, ABC; derivations for K⁺, Cl⁻, E/I, fNIRS; verification audit |
 | [`epilepsy_sim/SIMULATION.md`](epilepsy_sim/SIMULATION.md) | Full model documentation: equations, parameters with sources, validation, results, 14-step calibration log |
 | [`epilepsy_sim/COMPARISON.md`](epilepsy_sim/COMPARISON.md) | Twin experiments E1–E7, TVB cross-validation and whole-brain inference, head-to-head comparison |
@@ -321,6 +372,7 @@ A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/
 
 - **The full patient dataset is not in this repository.** The scripts download it from PhysioNet: the **CHB-MIT Scalp EEG Database** ([PhysioNet](https://physionet.org/content/chbmit/1.0.0/), Open Data Commons Attribution licence v1.0; cite Shoeb 2009 and Goldberger et al. 2000).
 - **The one exception** is `epilepsy_sim/viz/data.js`. It includes a 3-minute, 5-channel excerpt of CHB-MIT recording `chb01_03.edf` (2926–3106 s, band-passed, 128 Hz) so the live lab works out of the box. It is redistributed under that licence, with attribution to the source above.
+- **SeizeIT2** (OpenNeuro [ds005873](https://openneuro.org/datasets/ds005873), v1.1.0, **CC0**; Bhagubai et al. 2025) is streamed by `detect/seizeit2.py`. Neither raw data nor extracted features are stored in this repository.
 - **The Virtual Brain** (`tvb-library`, `tvb-data`) is an optional dependency under its own licence.
 - **No licence has been chosen for this code yet.** Until one is added, default copyright applies.
 - **Medical disclaimer:** this is a research and educational project. It is **not** a medical device, has not been clinically validated, and must not be used to diagnose, monitor or treat epilepsy.

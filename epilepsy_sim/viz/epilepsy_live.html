@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Epilepsy Live Lab</title>
+<title>Epilepsy Live Lab · Neuro-HUD</title>
 <style>
   :root {
     --bg: #05070d; --panel: #0b1020; --panel2: #0f1629; --line: #1c2540; --text: #d8e1f5;
@@ -30,7 +30,7 @@
 
   /* ---------- one-screen dashboard ---------- */
   .dash { height: calc(100vh - var(--hdr)); padding: var(--gap); display: grid; gap: var(--gap);
-    grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); }
+    grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 6px 8px 5px;
     display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
   .card h2 { font-size: 10.5px; margin: 0 0 2px; color: var(--muted); font-weight: 600; letter-spacing: .35px;
@@ -63,6 +63,12 @@
   #pEeg   { grid-column: 6 / 10; grid-row: 5 / 7; }
   #pProb  { grid-column: 10 / 13; grid-row: 5 / 6; }
   #pBands { grid-column: 10 / 13; grid-row: 6 / 7; }
+  #pEcg   { grid-column: 1 / 4;  grid-row: 7 / 8; }
+  #pHR    { grid-column: 4 / 6;  grid-row: 7 / 8; }
+  #pEmg   { grid-column: 6 / 8;  grid-row: 7 / 8; }
+  #pAcc   { grid-column: 8 / 10; grid-row: 7 / 8; }
+  #pFuse  { grid-column: 10 / 13; grid-row: 7 / 8; }
+  .tag.body { background: #16392c; color: #7ff0bf; }
 
   /* orb field */
   #pField .plot { position: absolute; inset: 0; }
@@ -70,6 +76,9 @@
     border-radius: 7px; padding: 5px 8px; font-size: 11px; backdrop-filter: blur(4px); z-index: 2; }
   .legend label { display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 1px 0; user-select: none; }
   .dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 7px currentColor; flex: none; }
+  .viewCtl { position: absolute; right: 8px; top: 7px; z-index: 3; display: flex; gap: 5px; }
+  .viewCtl button, .viewCtl select { background: rgba(5,7,13,.78); font-size: 11px; padding: 3px 8px; }
+  #pField canvas { touch-action: none; }
   .fieldNote { position: absolute; right: 8px; bottom: 7px; font-size: 10px; color: var(--muted); z-index: 2;
     background: rgba(5,7,13,.72); padding: 3px 7px; border-radius: 6px; border: 1px solid var(--line); }
 
@@ -103,11 +112,128 @@
     #pField { height: 420px; } #pRead { height: auto; } #pEeg { height: 300px; }
     .readouts { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ================================================================ STARK-LAB HUD THEME */
+  :root { --hud: #29e6ff; --hud2: #7ff3ff; --amber: #ffb000; --alert: #ff3b4e; --text: #cfefff;
+    --muted: #6fa8bf; --dim: #4d7d93; --line: rgba(41,230,255,.2); --panel: rgba(6,18,32,.72); --panel2: rgba(8,26,44,.7); }
+  html, body { font-family: Bahnschrift, "Segoe UI", system-ui, sans-serif; }
+  body { background:
+      radial-gradient(ellipse 70% 55% at 28% 18%, rgba(0,140,220,.20), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 85% 95%, rgba(255,50,90,.10), transparent 60%),
+      radial-gradient(ellipse at 50% 50%, #041222, #01040a 80%); }
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60;
+    background: repeating-linear-gradient(0deg, rgba(160,240,255,.025) 0 1px, transparent 1px 3px),
+                radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.55)); }
+  body::before { content: ""; position: fixed; left: 0; right: 0; height: 140px; top: -140px; pointer-events: none; z-index: 61;
+    background: linear-gradient(180deg, transparent, rgba(41,230,255,.025) 70%, rgba(41,230,255,.07)); animation: sweep 7s linear infinite; }
+  @keyframes sweep { to { top: 100%; } }
+
+  /* header = HUD command bar */
+  header { background: linear-gradient(180deg, rgba(4,20,36,.95), rgba(2,8,16,.9)); border-bottom: 1px solid rgba(41,230,255,.35);
+    box-shadow: 0 0 22px rgba(41,230,255,.12); position: relative; }
+  header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--hud), transparent); animation: glint 4s ease-in-out infinite; }
+  @keyframes glint { 50% { opacity: .25; } }
+  h1 { font-size: 16px; letter-spacing: 3px; text-transform: uppercase; color: #eafcff; text-shadow: 0 0 12px rgba(41,230,255,.7); display: flex; align-items: center; gap: 8px; }
+  h1 span { color: var(--muted); letter-spacing: 1.5px; font-size: 11px; text-shadow: none; }
+  h1 .reactor { width: 22px; height: 22px; border-radius: 50%; flex: none; position: relative;
+    background: radial-gradient(circle, #fff 0 18%, #9ff6ff 26%, rgba(41,230,255,.5) 45%, transparent 62%);
+    box-shadow: 0 0 14px var(--hud), inset 0 0 6px var(--hud); animation: reactor 2.4s ease-in-out infinite; }
+  h1 .reactor::after { content: ""; position: absolute; inset: -3px; border-radius: 50%;
+    border: 2px dashed rgba(41,230,255,.75); animation: spin 6s linear infinite; }
+  @keyframes reactor { 50% { box-shadow: 0 0 22px var(--hud), inset 0 0 10px var(--hud); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  button, select { background: rgba(8,30,50,.75); color: var(--hud2); border: 1px solid rgba(41,230,255,.35); border-radius: 0;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    letter-spacing: .6px; text-transform: uppercase; font-size: 10.5px; padding: 4px 9px; transition: all .15s; }
+  select option { background: #06121f; color: var(--text); text-transform: none; }
+  button:hover, select:hover { border-color: var(--hud); color: #fff; background: rgba(41,230,255,.14); }
+  button.on { background: rgba(41,230,255,.22); border-color: var(--hud); color: #fff; box-shadow: inset 0 0 10px rgba(41,230,255,.4); }
+  #seek { accent-color: var(--hud); }
+  .clock { color: var(--hud2); font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+  .badge { border-radius: 0; text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; padding: 4px 12px;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+  .badge.alert { animation: alertPulse .9s steps(2) infinite; }
+  @keyframes alertPulse { 50% { filter: brightness(1.8); box-shadow: 0 0 18px currentColor; } }
+
+  /* grid backdrop */
+  .dash { background-image: linear-gradient(rgba(41,230,255,.035) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(41,230,255,.035) 1px, transparent 1px);
+    background-size: 28px 28px; }
+
+  /* holographic panels with corner brackets */
+  .card { background: linear-gradient(160deg, rgba(8,30,52,.62), rgba(3,10,20,.78)); border: 1px solid rgba(41,230,255,.16);
+    border-radius: 0; box-shadow: inset 0 0 22px rgba(41,230,255,.05), 0 0 16px rgba(0,0,0,.4); position: relative;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    animation: boot .7s ease-out both; }
+  .card::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5; --b: var(--hud);
+    background:
+      linear-gradient(var(--b), var(--b)) right 0 top 0 / 16px 2px no-repeat,
+      linear-gradient(var(--b), var(--b)) right 0 top 0 / 2px 16px no-repeat,
+      linear-gradient(var(--b), var(--b)) left 0 bottom 0 / 16px 2px no-repeat,
+      linear-gradient(var(--b), var(--b)) left 0 bottom 0 / 2px 16px no-repeat,
+      linear-gradient(135deg, var(--b) 0 1.5px, transparent 1.5px) left 0 top 0 / 14px 14px no-repeat,
+      linear-gradient(-45deg, var(--b) 0 1.5px, transparent 1.5px) right 0 bottom 0 / 14px 14px no-repeat;
+    opacity: .75; filter: drop-shadow(0 0 3px var(--hud)); }
+  .card:hover { border-color: rgba(41,230,255,.35); }
+  @keyframes boot { from { opacity: 0; transform: translateY(8px) scale(.985); filter: brightness(2.2) blur(2px); } }
+  .card h2 { color: var(--hud2); letter-spacing: 1.6px; font-weight: 600; font-size: 10.5px; }
+  .card h2 > span::before { content: "▸ "; color: var(--hud); }
+  .card h2 em { color: var(--dim); letter-spacing: .5px; }
+  .tag { border-radius: 0; letter-spacing: 1px; clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); padding: 0 7px; }
+  .tag.model { background: rgba(41,230,255,.16); color: var(--hud2); }
+  .tag.real { background: rgba(255,59,78,.2); color: #ff8c98; }
+  .tag.body { background: rgba(60,255,160,.14); color: #7dffc4; }
+  .keys { color: var(--muted); letter-spacing: .4px; }
+
+  /* orb-field overlays */
+  .legend, .fieldNote, #info { background: rgba(2,12,22,.8); border: 1px solid rgba(41,230,255,.28); border-radius: 0;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+  .legend { text-transform: uppercase; font-size: 10px; letter-spacing: .8px; color: var(--hud2); }
+  .fieldNote { color: var(--muted); letter-spacing: .4px; }
+
+  /* arc-reactor gauges */
+  .readouts { gap: 6px; }
+  .ro { display: flex; align-items: center; gap: 8px; background: rgba(8,28,48,.5); border: 1px solid rgba(41,230,255,.14);
+    border-radius: 0; padding: 4px 7px; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+  .gauge { --p: 0; --c: var(--hud); width: clamp(40px, 5.2vh, 58px); aspect-ratio: 1; flex: none; position: relative; border-radius: 50%;
+    display: grid; place-items: center; }
+  .gauge::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(from 225deg, var(--c) calc(var(--p) * 2.7deg), rgba(41,230,255,.1) 0 270deg, transparent 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+    filter: drop-shadow(0 0 4px var(--c)); transition: background .2s; }
+  .gauge::after { content: ""; position: absolute; inset: 7px; border-radius: 50%;
+    background: repeating-conic-gradient(from 225deg, rgba(41,230,255,.35) 0 1.5deg, transparent 1.5deg 13.5deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); }
+  .gauge .core { width: 34%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fff, var(--c) 45%, transparent 72%);
+    opacity: calc(.25 + var(--p) / 140); box-shadow: 0 0 10px var(--c); }
+  .ro .txt { min-width: 0; }
+  .ro .lab { font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .ro .val { font-size: clamp(14px, 2.3vh, 21px); color: #eafcff; text-shadow: 0 0 10px rgba(41,230,255,.55); letter-spacing: .5px; }
+  .ro .val small { color: var(--dim); }
+  #explain { background: rgba(4,16,28,.7); border: 1px solid rgba(41,230,255,.14); border-left: 3px solid var(--hud); border-radius: 0;
+    color: #b9dcea; letter-spacing: .2px; }
+  #explain::before { content: "JARVIS ▸ "; color: var(--hud); font-weight: 700; letter-spacing: 1.5px; font-size: 10px; }
+  #explain b { color: #fff; text-shadow: 0 0 8px rgba(41,230,255,.6); }
+
+  /* boot overlay */
+  #boot { position: fixed; inset: 0; z-index: 80; background: radial-gradient(circle at 50% 45%, #06233a, #01050b 70%);
+    display: grid; place-items: center; transition: opacity .6s, visibility .6s; }
+  #boot.done { opacity: 0; visibility: hidden; }
+  #boot .ring { width: 170px; height: 170px; border-radius: 50%; position: relative; margin: 0 auto 22px;
+    border: 2px solid rgba(41,230,255,.25); box-shadow: 0 0 40px rgba(41,230,255,.25), inset 0 0 30px rgba(41,230,255,.2); }
+  #boot .ring::before, #boot .ring::after { content: ""; position: absolute; border-radius: 50%; }
+  #boot .ring::before { inset: 14px; border: 3px dashed rgba(41,230,255,.8); animation: spin 3s linear infinite; }
+  #boot .ring::after { inset: 52px; background: radial-gradient(circle, #fff 0 20%, #7ff3ff 35%, rgba(41,230,255,.2) 70%); box-shadow: 0 0 40px var(--hud); animation: reactor 1.2s infinite; }
+  #boot pre { margin: 0; font: 12px/1.7 Consolas, monospace; color: var(--hud2); letter-spacing: 1px; min-height: 120px; text-shadow: 0 0 8px rgba(41,230,255,.6); }
 </style>
 </head>
 <body>
+<div id="boot"><div><div class="ring"></div><pre id="bootLog"></pre></div></div>
 <header>
-  <h1>Epilepsy Live Lab <span>· ions, neurons, blood &amp; real EEG</span></h1>
+  <h1><i class="reactor"></i>Epilepsy Live Lab <span>// neuro-hud · ions → neurons → body → alarm</span></h1>
   <div class="ctrl">
     <select id="scen" title="Tissue">
       <option value="epileptic">Epileptic tissue</option>
@@ -117,6 +243,13 @@
       <option value="model">EEG: model (synced)</option>
       <option value="real">EEG: real patient</option>
     </select>
+    <select id="szType" title="Which kind of seizure the body shows (drives ECG / EMG / motion)">
+      <option value="nonmotor">Body: focal non-motor</option>
+      <option value="motor">Body: focal motor</option>
+      <option value="fbtc">Body: tonic-clonic</option>
+      <option value="nohr">Body: no HR response</option>
+    </select>
+    <button id="walkBtn" class="on" title="A walking episode that shakes the ear electrodes (false-alarm test)">🚶 Walk</button>
     <button id="play" title="Space">❚❚ Pause</button>
     <div id="speeds" class="ctrl"></div>
   </div>
@@ -130,7 +263,15 @@
   <div class="card" id="pField">
     <div class="plot"><canvas id="field"></canvas></div>
     <div class="legend" id="legend"></div>
-    <div class="fieldNote">Model: ionic.py · 100 neurons on a ring</div>
+    <div class="viewCtl">
+      <select id="hsrc" title="What lifts each neuron off the plane">
+        <option value="both">Height: K⁺ + spikes</option>
+        <option value="k">Height: local K⁺</option>
+        <option value="spk">Height: spikes</option>
+      </select>
+      <button id="viewBtn" title="Switch between the 3D plane and the ring">◎ Ring view</button>
+    </div>
+    <div class="fieldNote" id="fieldNote"></div>
   </div>
 
   <div class="card" id="pRead">
@@ -151,6 +292,11 @@
 
   <div class="card" id="pEeg"><h2><span id="tEeg"></span><em id="eegClock"></em></h2><div class="plot"><canvas id="cEeg"></canvas></div></div>
   <div class="card" id="pProb"><h2><span id="tProb"></span><em id="tProbSub"></em></h2><div class="plot"><canvas id="cProb"></canvas></div><div class="keys" id="kProb"></div></div>
+  <div class="card" id="pEcg"><h2><span><span class="tag body">BODY</span>ECG · chest</span><em id="hrNow"></em></h2><div class="plot"><canvas id="cEcg"></canvas></div></div>
+  <div class="card" id="pHR"><h2><span><span class="tag body">BODY</span>Heart rate</span><em>bpm · 60 s</em></h2><div class="plot"><canvas id="cHR"></canvas></div><div class="keys" id="kHR"></div></div>
+  <div class="card" id="pEmg"><h2><span><span class="tag body">BODY</span>EMG · shoulder</span><em>µV</em></h2><div class="plot"><canvas id="cEmg"></canvas></div></div>
+  <div class="card" id="pAcc"><h2><span><span class="tag body">BODY</span>Motion · accelerometer</span><em>g</em></h2><div class="plot"><canvas id="cAcc"></canvas></div></div>
+  <div class="card" id="pFuse"><h2><span><span class="tag body">BODY</span>EEG-only vs multimodal</span><em id="fuseScore"></em></h2><div class="plot"><canvas id="cFuse"></canvas></div><div class="keys" id="kFuse"></div></div>
   <div class="card" id="pBands"><h2><span id="tBands"></span><em>band power · line length</em></h2><div class="plot"><canvas id="cBands"></canvas></div><div class="keys" id="kBands"></div></div>
 </div>
 
@@ -163,7 +309,7 @@ const FPS = D.fps;
 const C = {
   k: "#ffb347", na: "#ffe066", cl: "#4df0ff", ado: "#b388ff", exc: "#9ad7ff", inh: "#ff6b9a",
   hbo: "#ff4d5e", hbr: "#5b7cff", cbf: "#e8ecf8", lfp: "#3ddc97", egaba: "#6f8cff", ek: "#ff8a5b",
-  pump: "#c8a26b", muted: "#7d8bab", grid: "#18203a", ok: "#3ddc97", warn: "#ffcc4d", bad: "#ff5470",
+  pump: "#c8a26b", muted: "#6fa8bf", grid: "rgba(41,230,255,0.09)", ok: "#3ddc97", warn: "#ffcc4d", bad: "#ff5470",
 };
 const decode = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 for (const k of ["epileptic", "healthy"]) {
@@ -214,7 +360,9 @@ $("info").innerHTML = `<h3>Sources &amp; notes</h3>
   <p><b>Device-inferred K⁺</b> (white dashed): Kalman filter on simulated scalp DC-EEG — RMSE ${D.inference.ekf_rmse.toFixed(2)} mM vs naive conversion ${D.inference.naive_rmse.toFixed(2)} mM. <b>Inferred Cl⁻</b> (white dots): inverse chord equation from a noisy E<sub>GABA</sub> estimate.</p>
   <p><b>EEG: model (synced)</b> — a <b>virtual EEG</b> computed from the simulated neurons by a forward model: distance-weighted synaptic currents from every spike, a glial K⁺ DC shift (51 mV/decade, 1% reaching the scalp) and 1/f background noise. Detector: ${D.epileptic.veeg.model}. It shares the model clock, so ions, neurons and EEG line up exactly.</p>
   <p><b>EEG: real patient</b> — CHB-MIT Scalp EEG Database (PhysioNet), chb01_03.edf, seizure marked by clinicians at 2996–3036 s (file time). Detector: ${D.eeg.model}. A different source from the model, shown on its own clock.</p>
-  <p>Model and patient timelines run side by side at the same speed; they are different sources. Keys: <b>Space</b> play/pause. Deep links: <code>?scen=healthy&amp;t=9&amp;eeg=65&amp;speed=0.5&amp;paused=1</code></p>`;
+  <p><b>3D plane</b> (default view): the same 100 simulated neurons on a 10×10 grid. Ring order snakes row by row, so ring neighbours stay neighbours. Each neuron's x, y is fixed, and its height is its <b>own</b> data: local extracellular K⁺ (slow swell), spikes (fast jolt, plus a ripple), or both. The coloured surface between neurons is a smooth interpolation, for looks only. Orange motes rise where K⁺ is high. Drag to rotate, scroll to zoom, double-click to reset.</p>
+  <p><b>BODY</b> panels: chest ECG, shoulder EMG and accelerometer (the SeizeIT2 modalities), generated from the simulated seizure. Sizes and timings come from the literature (Seizure_Physiological_Signals.md): ictal HR +53 % in focal seizures and about +100 % in tonic-clonic ones, vagal withdrawal, and tonic EMG followed by clonic bursts slowing from 4 to 1 Hz. The patch models only the onset zone, so the spread to the body is a literature-timed module, not a neuron simulation. <b>Walk</b> adds a 12 s walk whose electrode motion fools the EEG-only detector. <b>Multimodal rule</b> (illustrative, hand-set): an EEG alarm from the last 30 s must be confirmed by body evidence from the last 10 s, meaning heart rate at least 12 bpm above what the movement explains, or EMG at least 4× its baseline. Real fusion weights will come from the SeizeIT2 training.</p>
+  <p>Model and patient timelines run side by side at the same speed; they are different sources. Keys: <b>Space</b> play/pause. Deep links: <code>?scen=healthy&amp;t=9&amp;eeg=65&amp;speed=0.5&amp;paused=1&amp;type=fbtc&amp;walk=0&amp;view=ring&amp;h=k</code></p>`;
 
 // ---------------------------------------------------------------- readouts
 const RO = [
@@ -227,11 +375,25 @@ const RO = [
   { key: "cbf", lab: "Blood flow", unit: "%", col: C.cbf, lo: -60, hi: 60, ref: "vs pre-trigger baseline" },
   { key: "hbo", lab: "HbO", unit: "%", col: C.hbo, lo: -60, hi: 60, ref: "what fNIRS measures" },
 ];
-$("readouts").innerHTML = RO.map(r => `<div class="ro" title="${r.ref}"><div class="lab"><span class="dot" style="color:${r.col};background:${r.col}"></span>${r.lab}</div>
-  <div class="val" id="v_${r.key}">–</div><div class="bar"><i id="b_${r.key}" style="background:${r.col}"></i></div></div>`).join("");
+$("readouts").innerHTML = RO.map(r => `<div class="ro" title="${r.ref}"><div class="gauge" id="b_${r.key}" style="--c:${r.col}"><i class="core"></i></div>
+  <div class="txt"><div class="lab">${r.lab}</div><div class="val" id="v_${r.key}">–</div></div></div>`).join("");
 
 function phaseOf(m, i) {
-  const t = i / FPS, r = m.rate[i], base = m.baseRate;
+  const t = i / FPS, r = m.rate[i], base = m.baseRate, T = m.body.T, ty = S.szType;
+  if (inWin(t, T.walk)) return ["Walking (daily life)", "#7fa0ff",
+    "<b>The patient gets up and walks.</b> Each step rocks the ear electrodes and shifts the EEG baseline, so the <b>EEG-only detector raises a false alarm</b>. The body sensors explain it: rhythmic steps in the accelerometer, a heart-rate rise that matches the exercise, and only mild arm-swing EMG. The <b>multimodal detector stays silent</b>."];
+  if (T.sz && t >= m.stim_off && t < T.end) {
+    if (ty === "fbtc" && inWin(t, T.tonic)) return ["Tonic phase", C.bad,
+      "<b>The seizure has spread to both hemispheres.</b> Every muscle contracts at once: the EMG saturates with continuous activity and the accelerometer shows only a fine tremor. Heart rate is heading for ~140 bpm. (The simulated patch is the onset zone only; spread is not simulated, so body timings come from the literature.)"];
+    if (ty === "fbtc" && inWin(t, T.clonic)) return ["Clonic phase", C.bad,
+      "<b>Rhythmic jerks.</b> EMG bursts alternate with silence, and the jerks slow from about 4 Hz to 1 Hz as the seizure exhausts itself. The accelerometer sees each jerk. This convulsive pattern is exactly what wrist and arm EMG and motion detectors are built for."];
+    if (ty === "motor" && t >= T.on + 3) return ["Hyperkinetic seizure", C.bad,
+      "<b>Large, irregular, flailing movements.</b> They are frontal-lobe style, typically from sleep. EMG and motion surge. The heart races more than the movement alone would explain."];
+    if (ty === "nohr") return ["Seizure, no autonomic sign", C.warn,
+      "<b>A seizure without heart-rate change (about 18 % of patients).</b> The body sensors see nothing, so a detector that <b>requires</b> body confirmation <b>misses</b> this seizure. That is the sensitivity cost of fusion. The SeizeIT2 run measures how often this happens."];
+    return ["Ictal: autonomic spread", C.bad,
+      "<b>No movement, but the heart races.</b> The seizure has reached the autonomic centres (insula, amygdala). HR climbs about 50 % while the accelerometer is still, and the heart-rate-variability ripple flattens (vagal withdrawal). A tachycardia that no movement explains is the body evidence that <b>confirms</b> the EEG alarm. (The simulated patch has gone quiet: it is only the onset zone.)"];
+  }
   if (t >= m.stim_on && t < m.stim_off) return ["Trigger stimulus", C.warn,
     "<b>A burst of input hits the network.</b> Neurons fire hard; K⁺ pours out and Na⁺ rushes in. In <b>epileptic</b> tissue weak KCC2 lets Cl⁻ pile up, GABA inhibition fails and K⁺ climbs toward the ~12 mM ceiling. In <b>healthy</b> tissue glia and KCC2 hold K⁺ near 6 mM."];
   if (t >= m.stim_off && t < m.stim_off + 45 && r < 0.5 * base) return ["Postictal depression", "#8aa0ff",
@@ -252,12 +414,12 @@ function fitCanvas(cv) {
   return { ctx: cv.getContext("2d"), w, h, dpr };
 }
 const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
-const font = (px, dpr) => `${px * dpr}px Segoe UI, system-ui, sans-serif`;
+const font = (px, dpr) => `${px * dpr}px Bahnschrift, Segoe UI, system-ui, sans-serif`;
 
 // ---------------------------------------------------------------- orb field
 const field = $("field");
 let P = [];
-function resetParticles() { P = []; }
+function resetParticles() { P = []; if (typeof PL !== "undefined") { PL.motes = []; PL.ripples = []; } }
 function neuronPos(i, n, w, h) {
   const a = (i / n) * Math.PI * 2 - Math.PI / 2, inh = M().inh[i];
   const rx = w * 0.37 * (inh ? 0.9 : 1), ry = h * 0.36 * (inh ? 0.9 : 1);
@@ -266,7 +428,33 @@ function neuronPos(i, n, w, h) {
 const flash = new Float32Array(200);
 let vesselPhase = 0;
 
-function drawField(dt) {
+function drawField(dt) { S.view === "plane" ? drawPlane(dt) : drawRing(dt); hudReticle(); }
+function hudReticle() {  // Stark-lab targeting overlay: rotating arcs, tick ring, corner brackets, readout
+  const { ctx, w, h, dpr } = fitCanvas(field), m = M(), i = frame(), T = performance.now() / 1000;
+  const cx = w / 2, cy = h * 0.55, R = Math.min(w, h) * 0.47, hot = Math.min(1, Math.max(0, (m.ko[i] - 4) / 8));
+  const col = a => `rgba(${Math.round(41 + 214 * hot)},${Math.round(230 - 170 * hot)},${Math.round(255 - 177 * hot)},${a})`;
+  ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+  for (const [r, spd, segs, lw, a] of [[R, 0.25, 3, 2, 0.35], [R * 0.93, -0.4, 5, 1, 0.25], [R * 1.03, 0.12, 2, 3, 0.18]]) {
+    ctx.strokeStyle = col(a); ctx.lineWidth = lw * dpr;
+    for (let k = 0; k < segs; k++) { const a0 = T * spd + k * 2 * Math.PI / segs; ctx.beginPath(); ctx.arc(cx, cy, r, a0, a0 + Math.PI / segs * 0.9); ctx.stroke(); }
+  }
+  ctx.strokeStyle = col(0.3); ctx.lineWidth = 1 * dpr;
+  for (let k = 0; k < 72; k++) {
+    const a = k / 72 * 2 * Math.PI + T * 0.05, L = k % 6 ? 5 : 11;
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * (R * 0.97), cy + Math.sin(a) * (R * 0.97));
+    ctx.lineTo(cx + Math.cos(a) * (R * 0.97 - L * dpr), cy + Math.sin(a) * (R * 0.97 - L * dpr)); ctx.stroke();
+  }
+  const b = 22 * dpr, g = 10 * dpr;  // viewfinder brackets
+  ctx.strokeStyle = col(0.6); ctx.lineWidth = 2 * dpr;
+  for (const [x, y, sx, sy] of [[g, g, 1, 1], [w - g, g, -1, 1], [g, h - g, 1, -1], [w - g, h - g, -1, -1]]) {
+    ctx.beginPath(); ctx.moveTo(x, y + sy * b); ctx.lineTo(x, y); ctx.lineTo(x + sx * b, y); ctx.stroke();
+  }
+  ctx.globalCompositeOperation = "source-over"; ctx.font = font(10, dpr); ctx.textAlign = "left"; ctx.fillStyle = col(0.9);
+  const lines = [`NEURAL ARRAY · ${m.ncell} CELLS`, `K⁺ LOAD ${(hot * 100).toFixed(0).padStart(3, " ")}%`, `SPIKE RATE ${m.rate[i].toFixed(0)} HZ`, hot > 0.6 ? "⚠ ICTAL THRESHOLD" : "STATUS NOMINAL"];
+  lines.forEach((t, k) => ctx.fillText(t, 16 * dpr, h - (70 - k * 14) * dpr));
+  ctx.restore();
+}
+function drawRing(dt) {
   const { ctx, w, h, dpr } = fitCanvas(field);
   const m = M(), i = frame(), n = m.ncell;
   const s = Math.min(w, h) / (430 * dpr); // scale orbs with panel size
@@ -372,11 +560,201 @@ function orb(ctx, x, y, r, col, halo) {
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * halo, 0, Math.PI * 2); ctx.fill();
 }
 
+// ---------------------------------------------------------------- 3D neuron plane
+// The same 100 simulated neurons, laid out on a 10 x 10 plane. Ring order snakes row by row, so
+// neighbours on the model's ring stay neighbours on the plane. x, y are fixed; z is each neuron's
+// OWN data: its local extracellular K+ (slow swell) plus its spikes (fast jolt). The surface between
+// neurons is a smooth interpolation (visual only).
+const GN = 10, SUB = 3, NV = (GN - 1) * SUB + 1;
+const PL = { yaw: -0.62, pitch: 0.6, zoom: 1, auto: true, idleAt: 0, drag: null,
+  z: new Float32Array(GN * GN), act: new Float32Array(GN * GN), motes: [], ripples: [], lastFire: new Uint8Array(GN * GN) };
+S.view = "plane"; S.hsrc = "both";
+const cellAt = (r, col) => r * GN + (r % 2 ? GN - 1 - col : col);
+const CELL_RC = Array.from({ length: GN * GN }, (_, c) => { const r = Math.floor(c / GN), k = c % GN; return [r, r % 2 ? GN - 1 - k : k]; });
+const gxy = v => (v / (GN - 1)) * 2 - 1;  // grid index -> plane coordinate [-1, 1]
+
+function proj(X, Y, Z, w, h) {
+  const cy = Math.cos(PL.yaw), sy = Math.sin(PL.yaw), sp = Math.sin(PL.pitch), cp = Math.cos(PL.pitch);
+  const xr = X * cy - Y * sy, yr = X * sy + Y * cy;
+  const depth = yr * cp - Z * sp, p = 5 / (5 + depth), s = Math.min(w, h * 1.25) * 0.3 * PL.zoom;
+  return [w / 2 + s * xr * p, h * 0.64 - s * (yr * sp + Z * cp) * p, depth, p];
+}
+
+{ // rotate (drag), zoom (wheel), reset (double-click); auto-rotation resumes 5 s after the last touch
+  const cv = $("field");
+  cv.addEventListener("pointerdown", e => { if (S.view !== "plane") return; PL.drag = [e.clientX, e.clientY]; PL.auto = false; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", e => {
+    if (!PL.drag) return;
+    PL.yaw -= (e.clientX - PL.drag[0]) * 0.008;
+    PL.pitch = Math.max(0.12, Math.min(1.4, PL.pitch + (e.clientY - PL.drag[1]) * 0.006));
+    PL.drag = [e.clientX, e.clientY];
+  });
+  const up = () => { PL.drag = null; PL.idleAt = performance.now(); };
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  cv.addEventListener("wheel", e => { if (S.view !== "plane") return; e.preventDefault(); PL.zoom = Math.max(0.55, Math.min(2.4, PL.zoom * Math.exp(-e.deltaY * 0.001))); }, { passive: false });
+  cv.addEventListener("dblclick", () => { PL.yaw = -0.62; PL.pitch = 0.6; PL.zoom = 1; PL.auto = true; });
+}
+
+function drawPlane(dt) {
+  const { ctx, w, h, dpr } = fitCanvas(field);
+  const m = M(), i = frame(), n = m.ncell, row = i * n;
+  const s = Math.min(w, h) / (430 * dpr);
+  const cli = m.cli[i], nai = m.nai[i], ado = m.ado[i], cbf = m.cbf[i], hbo = m.hbo[i], hbr = m.hbr[i];
+  if (PL.auto) PL.yaw += 0.0025; else if (!PL.drag && performance.now() - PL.idleAt > 5000) PL.auto = true;
+
+  // ---- per-neuron height: own K+ (slow) + own spikes (fast)
+  const kl = new Float32Array(n);
+  for (let c = 0; c < n; c++) {
+    kl[c] = 3 + (m.komapU8[row + c] / 255) * 10;
+    const f = m.fireU8[row + c];
+    PL.act[c] = Math.max(PL.act[c] * Math.pow(0.08, dt), Math.min(1, f / 2));
+    if (f > 0 && PL.lastFire[c] === 0 && PL.ripples.length < 260) PL.ripples.push({ c, age: 0 });
+    PL.lastFire[c] = f;
+    const kz = Math.max(0, (kl[c] - 3.6) / 8);
+    const tgt = S.hsrc === "k" ? 0.75 * kz : S.hsrc === "spk" ? 0.6 * PL.act[c] : 0.6 * kz + 0.22 * PL.act[c];
+    PL.z[c] = dt > 0 ? PL.z[c] + (tgt - PL.z[c]) * Math.min(1, dt * 14) : tgt;
+  }
+  const H = (r, col) => PL.z[cellAt(r, col)], K = (r, col) => kl[cellAt(r, col)];
+  const bil = (fn, u, v) => {  // bilinear interpolation on the neuron grid (visual surface only)
+    const r0 = Math.min(GN - 2, Math.floor(v)), c0 = Math.min(GN - 2, Math.floor(u)), fv = v - r0, fu = u - c0;
+    return fn(r0, c0) * (1 - fu) * (1 - fv) + fn(r0, c0 + 1) * fu * (1 - fv) + fn(r0 + 1, c0) * (1 - fu) * fv + fn(r0 + 1, c0 + 1) * fu * fv;
+  };
+
+  // ---- background
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "rgba(4,6,12,0.6)"; ctx.fillRect(0, 0, w, h);
+  const act = Math.min(1, m.rate[i] / 120);
+  const g = ctx.createRadialGradient(w / 2, h * 0.58, 0, w / 2, h * 0.58, Math.max(w, h) * 0.6);
+  g.addColorStop(0, `rgba(60,90,200,${0.06 + 0.22 * act})`); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+
+  // ---- base plane frame + grid, blood vessels under the tissue
+  const line3 = (pts, col, lw) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); pts.forEach(([X, Y, Z], k) => { const [x, y] = proj(X, Y, Z, w, h); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); };
+  for (let q = -1.2; q <= 1.201; q += 0.3) {
+    line3([[q, -1.2, -0.02], [q, 1.2, -0.02]], "rgba(60,80,140,0.18)", 1 * dpr);
+    line3([[-1.2, q, -0.02], [1.2, q, -0.02]], "rgba(60,80,140,0.18)", 1 * dpr);
+  }
+  line3([[-1.2, -1.2, -0.02], [1.2, -1.2, -0.02], [1.2, 1.2, -0.02], [-1.2, 1.2, -0.02], [-1.2, -1.2, -0.02]], "rgba(111,140,255,0.35)", 1.4 * dpr);
+  ctx.globalCompositeOperation = "lighter";
+  if (S.show.blood) {
+    vesselPhase += dt * (0.6 + Math.max(0, 1 + cbf / 100));
+    const beat = 0.5 + 0.5 * Math.sin(S.t * 2 * Math.PI * 1.2), oxy = Math.max(0, Math.min(1, 0.5 + (hbo - hbr) / 120));
+    const rgb = [Math.round(255 * oxy + 90 * (1 - oxy)), Math.round(60 + 20 * oxy), Math.round(90 * oxy + 255 * (1 - oxy))];
+    const rgba = a => `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`;
+    const inten = Math.max(0.15, Math.min(1, 0.45 + cbf / 120)) * (0.75 + 0.25 * beat);
+    const vessels = [u => [-1.35 + 2.7 * u, -1.1 + 0.25 * Math.sin(u * 5), -0.05], u => [1.12 + 0.18 * Math.sin(u * 4), -1.3 + 2.6 * u, -0.05],
+                     u => [-1.3 + 2.6 * u, 1.15 - 0.2 * Math.sin(u * 6 + 1), -0.05]];
+    for (const vf of vessels) {
+      const pts = Array.from({ length: 41 }, (_, k) => vf(k / 40));
+      for (const [lw, a] of [[14, 0.06], [6, 0.14], [2, 0.55]]) line3(pts, rgba(a * inten), lw * dpr * s);
+      for (let c = 0; c < 8; c++) { const [x, y] = proj(...vf((vesselPhase * 0.12 + c / 8) % 1), w, h); orb(ctx, x, y, 3 * dpr * s, rgba(0.8 * inten), 3); }
+    }
+  }
+  ctx.globalCompositeOperation = "source-over";
+
+  // ---- interpolated K+ landscape (depth-sorted quads)
+  const V = [];
+  for (let a = 0; a < NV; a++) for (let b = 0; b < NV; b++) {
+    const u = b / SUB, v = a / SUB, Z = bil(H, u, v);
+    V.push([...proj(gxy(u), gxy(v), Z, w, h), bil(K, u, v)]);
+  }
+  const quads = [];
+  for (let a = 0; a < NV - 1; a++) for (let b = 0; b < NV - 1; b++) {
+    const q = [a * NV + b, a * NV + b + 1, (a + 1) * NV + b + 1, (a + 1) * NV + b];
+    quads.push([q, (V[q[0]][2] + V[q[1]][2] + V[q[2]][2] + V[q[3]][2]) / 4]);
+  }
+  quads.sort((A, B) => B[1] - A[1]);
+  for (const [q] of quads) {
+    const kk = (V[q[0]][4] + V[q[2]][4]) / 2, [r, gg, b] = magma(Math.min(0.92, Math.max(0, (kk - 3) / 9) * 1.2));
+    ctx.fillStyle = `rgba(${r},${gg},${b},0.42)`; ctx.strokeStyle = `rgba(${r},${gg},${b},0.22)`; ctx.lineWidth = 0.7 * dpr;
+    ctx.beginPath(); q.forEach((vi, k) => k ? ctx.lineTo(V[vi][0], V[vi][1]) : ctx.moveTo(V[vi][0], V[vi][1])); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.globalCompositeOperation = "lighter";
+  for (let a = 0; a < NV; a += SUB) {  // brighter lines through the neurons themselves
+    ctx.strokeStyle = "rgba(154,215,255,0.16)"; ctx.lineWidth = 1 * dpr;
+    ctx.beginPath(); for (let b = 0; b < NV; b++) { const p = V[a * NV + b]; b ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); } ctx.stroke();
+    ctx.beginPath(); for (let b = 0; b < NV; b++) { const p = V[b * NV + a]; b ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); } ctx.stroke();
+  }
+
+  // ---- adenosine fog floating above the tissue
+  if (S.show.ado && ado > 0.01) {
+    const a = Math.min(1, ado / 0.7);
+    for (let k = 0; k < 6; k++) {
+      const [x, y] = proj(0.8 * Math.sin(S.t * 0.13 + k * 1.7), 0.8 * Math.cos(S.t * 0.11 + k * 2.3), 0.5, w, h);
+      const gg = ctx.createRadialGradient(x, y, 0, x, y, h * 0.3);
+      gg.addColorStop(0, hexA(C.ado, 0.14 * a)); gg.addColorStop(1, hexA(C.ado, 0));
+      ctx.fillStyle = gg; ctx.fillRect(0, 0, w, h);
+    }
+  }
+
+  // ---- spike ripples on the surface
+  for (const rp of PL.ripples) {
+    rp.age += dt;
+    const [r0, c0] = CELL_RC[rp.c], X0 = gxy(c0), Y0 = gxy(r0), Z0 = PL.z[rp.c], rad = 0.04 + rp.age * 0.5, al = Math.max(0, 0.5 - rp.age * 1.4);
+    if (al <= 0) continue;
+    ctx.strokeStyle = hexA(m.inh[rp.c] ? C.inh : C.exc, al); ctx.lineWidth = 1.2 * dpr;
+    ctx.beginPath();
+    for (let k = 0; k <= 20; k++) { const th = k / 20 * Math.PI * 2, [x, y] = proj(X0 + rad * Math.cos(th), Y0 + rad * Math.sin(th), Z0, w, h); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+  }
+  PL.ripples = PL.ripples.filter(rp => rp.age < 0.36);
+
+  // ---- neurons: stem + orb, far to near
+  const order = Array.from({ length: n }, (_, c) => c).map(c => { const [r, col] = CELL_RC[c]; return [c, proj(gxy(col), gxy(r), PL.z[c], w, h), gxy(col), gxy(r)]; })
+    .sort((A, B) => B[1][2] - A[1][2]);
+  for (const [c, [x, y, , p], X, Y] of order) {
+    flash[c] = Math.max(flash[c] * Math.pow(0.02, dt), Math.min(1, m.fireU8[row + c] / 3));
+    const base = m.inh[c] ? C.inh : C.exc, ps = p * s;
+    const [bx, by] = proj(X, Y, -0.02, w, h);
+    ctx.strokeStyle = hexA(C.k, 0.08 + 0.5 * Math.min(1, PL.z[c])); ctx.lineWidth = 1.2 * dpr;
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(x, y); ctx.stroke();
+    if (S.show.neuron) {
+      orb(ctx, x, y, (3.5 + 3 * flash[c]) * dpr * ps, hexA(base, 0.2 + 0.28 * flash[c]), 2);
+      orb(ctx, x, y, 1.9 * dpr * ps, hexA("#ffffff", 0.3 + 0.4 * flash[c]), 1.4);
+    }
+    if (S.show.na) orb(ctx, x, y, Math.max(0.5, 1.5 + (nai - 22) * 0.55) * dpr * ps, hexA(C.na, Math.max(0, Math.min(0.9, 0.12 + (nai - 23) * 0.09))), 2);
+    if (S.show.cl) {
+      const ncl = Math.max(0, Math.min(6, Math.round((cli - 3.5) / 2)));
+      for (let q = 0; q < ncl; q++) {
+        const a2 = S.t * (1.6 + (c % 5) * 0.2) + q * (Math.PI * 2 / ncl) + c;
+        const [sx, sy] = proj(X + 0.055 * Math.cos(a2), Y + 0.055 * Math.sin(a2), PL.z[c] + 0.02, w, h);
+        orb(ctx, sx, sy, 1.3 * dpr * ps, hexA(C.cl, 0.7), 2);
+      }
+    }
+    // K+ vapour: motes rise from cells in proportion to their local K+ excess
+    if (S.show.k && dt > 0 && PL.motes.length < 700 && Math.random() < (kl[c] - 4.5) * dt * 1.2)
+      PL.motes.push({ X: X + (Math.random() - 0.5) * 0.12, Y: Y + (Math.random() - 0.5) * 0.12, Z: PL.z[c], life: 1 });
+  }
+  if (S.show.k) {
+    for (const mo of PL.motes) {
+      mo.Z += dt * 0.35; mo.X += (Math.random() - 0.5) * dt * 0.2; mo.Y += (Math.random() - 0.5) * dt * 0.2; mo.life -= dt * 0.7;
+      if (mo.life > 0) { const [x, y, , p] = proj(mo.X, mo.Y, mo.Z, w, h); orb(ctx, x, y, 1.5 * dpr * s * p, hexA(C.k, 0.4 * mo.life), 2.2); }
+    }
+    PL.motes = PL.motes.filter(mo => mo.life > 0);
+  } else PL.motes = [];
+
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "rgba(216,225,245,0.85)"; ctx.textAlign = "center"; ctx.font = font(13, dpr);
+  ctx.fillText(S.scen === "epileptic" ? "EPILEPTIC TISSUE" : "HEALTHY TISSUE", w / 2, 22 * dpr);
+  ctx.font = font(11, dpr); ctx.fillStyle = "rgba(125,139,171,0.95)";
+  ctx.fillText(`[K]o ${m.ko[i].toFixed(1)} mM · [Cl]i ${cli.toFixed(1)} mM · E_GABA ${m.egaba[i].toFixed(0)} mV`, w / 2, 38 * dpr);
+}
+
+function syncView() {
+  $("viewBtn").textContent = S.view === "plane" ? "◎ Ring view" : "▦ 3D plane";
+  $("hsrc").style.display = S.view === "plane" ? "" : "none";
+  $("fieldNote").textContent = S.view === "plane"
+    ? "ionic.py · 100 neurons on a 10×10 plane · height = each neuron's own K⁺ / spikes · drag to rotate, scroll to zoom"
+    : "Model: ionic.py · 100 neurons on a ring";
+}
+$("viewBtn").onclick = () => { S.view = S.view === "plane" ? "ring" : "plane"; resetParticles(); syncView(); };
+$("hsrc").onchange = e => { S.hsrc = e.target.value; };
+syncView();
+
 // ---------------------------------------------------------------- scrolling charts
-const WIN = 20;
 function lineChart(id, series, opt = {}) {
   const { ctx, w, h, dpr } = fitCanvas($(id));
-  const m = M(), t = S.t, t0 = Math.max(0, t - WIN);
+  const m = M(), t = S.t, WIN = opt.win || 20, t0 = Math.max(0, t - WIN);
   const padL = 30 * dpr, padR = (opt.right ? 30 : 6) * dpr, padT = 4 * dpr, padB = 13 * dpr;
   ctx.clearRect(0, 0, w, h);
   const X = tt => padL + ((tt - t0) / WIN) * (w - padL - padR);
@@ -409,15 +787,20 @@ function lineChart(id, series, opt = {}) {
     }
   }
   ctx.textAlign = "center";
-  for (let s = Math.ceil(t0 / 5) * 5; s <= t; s += 5) ctx.fillText(s + "s", X(s), h - 2 * dpr);
+  const every = WIN > 30 ? 15 : WIN > 12 ? 5 : 2;
+  for (let s = Math.ceil(t0 / every) * every; s <= t; s += every) ctx.fillText(s + "s", X(s), h - 2 * dpr);
   if (m.stim_off > t0 && m.stim_on < t) {
     ctx.fillStyle = "rgba(255,204,77,0.12)";
     ctx.fillRect(X(Math.max(t0, m.stim_on)), padT, X(Math.min(t, m.stim_off)) - X(Math.max(t0, m.stim_on)), h - padT - padB);
+  }
+  for (const [ea, eb, col] of opt.episodes || []) if (eb > t0 && ea < t) {
+    ctx.fillStyle = col; ctx.fillRect(X(Math.max(t0, ea)), padT, X(Math.min(t, eb)) - X(Math.max(t0, ea)), h - padT - padB);
   }
   for (const s of series) {
     const arr = s.data(m); if (!arr) continue;
     const rate = s.fs || FPS, side = s.side || "l";
     ctx.strokeStyle = s.col; ctx.lineWidth = (s.lw || 1.4) * dpr; ctx.setLineDash(s.dash ? [4 * dpr, 3 * dpr] : []);
+    ctx.shadowColor = s.col; ctx.shadowBlur = s.dash ? 0 : 6 * dpr;
     ctx.beginPath(); let first = true;
     const k0 = Math.floor(t0 * rate), k1 = Math.min(arr.length - 1, Math.floor(t * rate));
     const step = Math.max(1, Math.floor((k1 - k0) / (w / dpr)));
@@ -428,8 +811,8 @@ function lineChart(id, series, opt = {}) {
     }
     if (!s.dots) ctx.stroke();
   }
-  ctx.setLineDash([]);
-  ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.beginPath(); ctx.moveTo(X(t), padT); ctx.lineTo(X(t), h - padB); ctx.stroke();
+  ctx.setLineDash([]); ctx.shadowBlur = 0;
+  ctx.strokeStyle = "rgba(127,243,255,0.55)"; ctx.beginPath(); ctx.moveTo(X(t), padT); ctx.lineTo(X(t), h - padB); ctx.stroke();
 }
 const fmt = v => Math.abs(v) >= 10 ? v.toFixed(0) : Math.abs(v) >= 1 ? v.toFixed(1) : v.toFixed(2);
 function keys(id, items) { $(id).innerHTML = items.map(([lab, col, dash]) => `<span class="${dash ? "dsh" : ""}" style="--c:${col}">${lab}</span>`).join(""); }
@@ -467,7 +850,7 @@ function drawCharts() {
 const mapImg = { img: null, w: 0, cv: null };
 function drawMap() {
   const { ctx, w, h, dpr } = fitCanvas($("cMap"));
-  const m = M(), n = m.ncell, i1 = frame(), i0 = Math.max(0, i1 - WIN * FPS), cols = WIN * FPS;
+  const WIN = 20, m = M(), n = m.ncell, i1 = frame(), i0 = Math.max(0, i1 - WIN * FPS), cols = WIN * FPS;
   if (!mapImg.img || mapImg.w !== cols) { mapImg.img = new ImageData(cols, n); mapImg.w = cols; }
   const d = mapImg.img.data;
   for (let x = 0; x < cols; x++) {
@@ -584,16 +967,271 @@ function drawBands() {
   timeAxis(ctx, X, a, tt, h, dpr, 15);
 }
 
+// ---------------------------------------------------------------- body sensors (MODEL)
+// The SeizeIT2 modalities (chest ECG, deltoid EMG, accelerometer) generated from the simulated seizure.
+// The 100-neuron patch models only the onset zone; seizure spread to autonomic / motor areas is not
+// simulated, so body timings and sizes come from the literature (see Seizure_Physiological_Signals.md):
+// ictal HR +53 % in focal seizures (+~100 %, ~140 bpm, in tonic-clonic); vagal withdrawal (RSA/RMSSD drop);
+// tonic EMG then clonic bursts slowing 4 -> 1 Hz; ~18 % of patients show no HR change.
+const BFS = 128, AFS = 25, HR0 = 68, SZDUR = 40, WALK = { epileptic: 85, healthy: 50 }, WALKDUR = 12;
+const SZT = {
+  nonmotor: { lab: "focal non-motor", hr: 0.53 },
+  motor: { lab: "focal motor (hyperkinetic)", hr: 0.53, motor: "hyper" },
+  fbtc: { lab: "focal → bilateral tonic-clonic", hr: 1.0, motor: "tc" },
+  nohr: { lab: "non-motor, no HR response", hr: 0 },
+};
+S.szType = "nonmotor"; S.walk = true;
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(r) { let u = 0; while (!u) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r()); }
+const sig = x => 1 / (1 + Math.exp(-x));
+const inWin = (t, w) => !!w && t >= w[0] && t < w[1];
+
+function bodyTimeline(k) {
+  const m = D[k], on = m.stim_on;
+  let kmax = 0;
+  for (let i = Math.floor(on * FPS); i < Math.min(m.n, (m.stim_off + 5) * FPS); i++) kmax = Math.max(kmax, m.ko[i]);
+  return { sz: kmax > 8, on, end: on + SZDUR, tonic: [on + 10, on + 20], clonic: [on + 20, on + SZDUR],
+           walk: S.walk ? [WALK[k], WALK[k] + WALKDUR] : null };
+}
+
+function buildBody(k) {
+  const m = D[k], dur = m.dur, T = bodyTimeline(k), ty = SZT[S.szType], r = mulberry(k === "epileptic" ? 7 : 8);
+  const tc = T.sz && ty.motor === "tc", hyper = T.sz && ty.motor === "hyper";
+  // 1) sympathetic drive (rise tau 6 s, recovery tau 50 s) -> heart rate on a 10 Hz grid
+  const G = 10, nG = Math.ceil(dur * G) + 2, hrT = new Float32Array(nG), sym = new Float32Array(nG);
+  let s = 0, wv = 0, drift = 0;
+  for (let i = 0; i < nG; i++) {
+    const t = i / G, gs = T.sz && t >= T.on && t < T.end ? 1 : 0, gw = inWin(t, T.walk) ? 1 : 0;
+    s += (gs - s) / (G * (gs > s ? 6 : 50));
+    wv += (gw - wv) / (G * (gw > wv ? 8 : 20));
+    drift = drift * 0.998 + 0.08 * gauss(r);
+    sym[i] = s * (ty.hr > 0 ? 1 : 0);
+    hrT[i] = HR0 * (1 + ty.hr * s) + 18 * wv + drift;  // walking: +18 bpm, matched to the exercise
+  }
+  // 2) beats: respiratory sinus arrhythmia (0.25 Hz) shrinks with vagal withdrawal during the seizure
+  const beats = [];
+  for (let tb = 0.4; tb < dur + 1;) {
+    const i = Math.min(nG - 1, Math.round(tb * G)), vag = 1 - 0.8 * Math.min(1, sym[i]);
+    const rr = 60 / (hrT[i] + 3 * vag * Math.sin(2 * Math.PI * 0.25 * tb)) + 0.01 * vag * gauss(r);
+    beats.push(tb); tb += rr;
+  }
+  // 3) EMG (deltoid, uV) and accelerometer (dynamic |a|, g)
+  const nB = Math.floor(dur * BFS), emg = new Float32Array(nB), nA = Math.floor(dur * AFS), acc = new Float32Array(nA);
+  const fCl = t => 4 - 3 * Math.min(1, Math.max(0, (t - T.clonic[0]) / (T.clonic[1] - T.clonic[0])));  // clonic 4 -> 1 Hz
+  let ph = 0;
+  for (let i = 0; i < nB; i++) {
+    const t = i / BFS; let env = 5;
+    if (inWin(t, T.walk)) env += 16 * Math.sin(Math.PI * 0.9 * (t - T.walk[0])) ** 4;  // arm swing
+    if (hyper && t >= T.on + 3 && t < T.end) env += 45 * (0.6 + 0.4 * Math.sin(2 * Math.PI * 0.7 * t) * Math.sin(2 * Math.PI * 0.23 * t + 1));
+    if (tc) {
+      if (inWin(t, T.tonic)) env += 130;  // tonic: continuous high-amplitude EMG
+      else if (inWin(t, T.clonic)) { const f = fCl(t); ph = (ph + f / BFS) % 1; env += ph < 0.12 * f ? 160 : 0; }  // 120 ms bursts
+      else if (t >= T.clonic[1] && t < T.clonic[1] + 30) env = 2.5;  // postictal atonia
+    }
+    emg[i] = env * gauss(r);
+  }
+  ph = 0;
+  for (let i = 0; i < nA; i++) {
+    const t = i / AFS; let a = 0.004 * Math.abs(gauss(r));
+    if (inWin(t, T.walk)) { const q = (1.8 * (t - T.walk[0])) % 1; a += 0.28 * Math.exp(-q / 0.08) + 0.04 * Math.abs(gauss(r)); }
+    if (hyper && t >= T.on + 3 && t < T.end) a += Math.abs(0.3 * Math.sin(2 * Math.PI * 1.1 * t) + 0.2 * Math.sin(2 * Math.PI * 2.3 * t + 1) + 0.1 * gauss(r));
+    if (tc) {
+      if (inWin(t, T.tonic)) a += 0.06 * Math.abs(Math.sin(2 * Math.PI * 9 * t)) + 0.02 * Math.abs(gauss(r));
+      else if (inWin(t, T.clonic)) { const f = fCl(t); ph = (ph + f / AFS) % 1; a += 0.9 * Math.exp(-(ph / f) / 0.06); }
+    }
+    acc[i] = a;
+  }
+  // 4) ECG (mV): Gaussian P-Q-R-S-T per beat (ECGSYN-style), T wave placed by Bazett sqrt(RR)
+  const ecg = new Float32Array(nB), W = [[-0.2, 0.15, 0.025], [-0.035, -0.15, 0.01], [0, 1.2, 0.011], [0.035, -0.3, 0.011], [0.3, 0.32, 0.05]];
+  for (let b = 0; b < beats.length - 1; b++) {
+    const c = beats[b], sc = Math.sqrt(beats[b + 1] - c);
+    for (const [d, amp, wd] of W) {
+      const mu = c + (d > 0.1 ? d * sc : d), sd = d > 0.1 ? wd * sc : wd;
+      for (let i = Math.max(0, Math.floor((mu - 4 * sd) * BFS)); i < Math.min(nB, (mu + 4 * sd) * BFS); i++) {
+        const x = (i / BFS - mu) / sd; ecg[i] += amp * Math.exp(-0.5 * x * x);
+      }
+    }
+  }
+  for (let i = 0; i < nB; i++) {
+    const t = i / BFS;
+    ecg[i] += 0.06 * Math.sin(2 * Math.PI * 0.3 * t) + 0.015 * gauss(r) + 0.002 * emg[i];  // wander, noise, muscle
+    if (inWin(t, T.walk)) ecg[i] += 0.12 * Math.sin(2 * Math.PI * 0.9 * (t - T.walk[0]));
+  }
+  return { T, ecg, emg, acc, beats, ...fuse(k, T, beats, emg, acc) };
+}
+
+// Ear-EEG movement artefact: electrode rocking with each step + a slow electrode-pressure drift.
+function applyArtifact(k, T) {
+  const E = D[k].veeg, fs = E.fs;
+  E.data = D[k].veeg0.map(a => Float32Array.from(a));
+  if (!T.walk) return;
+  const r = mulberry(99), ease = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+  for (let i = Math.floor(T.walk[0] * fs); i < Math.min(E.data[0].length, T.walk[1] * fs); i++) {
+    const t = i / fs, q = (1.8 * (t - T.walk[0])) % 1, step = q < 0.15 ? Math.sin(2 * Math.PI * q / 0.15) : 0;
+    for (let c = 0; c < 4; c++) E.data[c][i] += (c < 2 ? 1 : -0.8) * 70 * step + 10 * gauss(r);
+    const env = ease((t - T.walk[0]) / 1.5) * ease((T.walk[1] - t) / 1.5);
+    E.data[4][i] += -240 * env + 60 * Math.exp(-q / 0.1);
+  }
+}
+
+// Recompute the virtual-EEG features + K+-DC detector from the (possibly artefacted) channels,
+// as export_data.py does: 2 s windows at 1 s step; DC 1 s mean < -150 uV; 60 s refractory.
+function veegFeatures(k) {
+  const E = D[k].veeg, fs = E.fs, x = E.data[0], dc = E.data[4], n = x.length, Wn = 2 * fs;
+  const hann = Float64Array.from({ length: Wn }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (Wn - 1)));
+  const B = [[0.5, 4], [4, 8], [8, 13], [13, 30], [30, 45]], names = ["delta", "theta", "alpha", "beta", "gamma"];
+  const kmax = Math.floor(45 * Wn / fs), cs = [], sn = [];
+  for (let q = 1; q <= kmax; q++) {
+    cs.push(Float64Array.from({ length: Wn }, (_, i) => Math.cos(2 * Math.PI * q * i / Wn)));
+    sn.push(Float64Array.from({ length: Wn }, (_, i) => Math.sin(2 * Math.PI * q * i / Wn)));
+  }
+  const ft = [], prob = [], ll = [], bands = Object.fromEntries(names.map(b => [b, []]));
+  for (let te = 2; te * fs <= n; te++) {
+    const a = (te - 2) * fs;
+    let l = 0, mu = 0;
+    for (let i = a; i < a + Wn; i++) { mu += x[i]; if (i > a) l += Math.abs(x[i] - x[i - 1]); }
+    mu /= Wn;
+    const bp = [1e-9, 1e-9, 1e-9, 1e-9, 1e-9];
+    for (let q = 1; q <= kmax; q++) {
+      let re = 0, im = 0; const cq = cs[q - 1], sq = sn[q - 1];
+      for (let i = 0; i < Wn; i++) { const v = (x[a + i] - mu) * hann[i]; re += v * cq[i]; im += v * sq[i]; }
+      const f = q * fs / Wn;
+      for (let b = 0; b < 5; b++) if (f >= B[b][0] && f < B[b][1]) bp[b] += re * re + im * im;
+    }
+    const tot = bp.reduce((p, v) => p + v, 0);
+    names.forEach((b, j) => bands[b].push(bp[j] / tot));
+    let d = 0; for (let i = (te - 1) * fs; i < te * fs; i++) d += dc[i];
+    ft.push(te); ll.push(Math.log(l / 2 + 1e-6)); prob.push(1 / (1 + Math.exp((d / fs + 150) / 15)));
+  }
+  const alarms = []; let last = -1e9;
+  ft.forEach((te, j) => { if (prob[j] > 0.5 && te - last >= 60) { alarms.push(te); last = te; } });
+  Object.assign(E, { feat_t: ft, prob, linelen: ll, bands, alarms });
+}
+
+// Multimodal detector (1 s grid, causal). Body evidence = heart rate that movement cannot explain,
+// or sustained muscle activity; an EEG alarm (last 30 s) must be confirmed by current body evidence (last 10 s).
+function fuse(k, T, beats, emg, acc) {
+  const dur = D[k].dur, nS = Math.floor(dur) + 1;
+  const hr10 = new Float32Array(nS), base = new Float32Array(nS), expect = new Float32Array(nS), act = new Float32Array(nS);
+  const emgR = new Float32Array(nS), body = new Float32Array(nS), eegP = new Float32Array(nS), fused = new Float32Array(nS);
+  const E = D[k].veeg;
+  let lbase = 0, lprev = 0;
+  for (let j = 0; j < nS; j++) {
+    let sum = 0, cnt = 0;  // mean instantaneous HR of the beats in the last 10 s
+    for (let b = 0; b < beats.length - 1; b++) {
+      if (beats[b + 1] > j) break;
+      if (beats[b + 1] > j - 10) { sum += 60 / (beats[b + 1] - beats[b]); cnt++; }
+    }
+    hr10[j] = cnt ? sum / cnt : (j ? hr10[j - 1] : HR0);
+    base[j] = j <= 10 ? hr10[j] : base[j - 1] + (hr10[j - 1] - base[j - 1]) / 60;  // causal 1-min baseline
+    let m1 = 0, m2 = 0, na = 0;
+    for (let i = Math.max(0, (j - 10) * AFS); i < Math.min(acc.length, j * AFS); i++) { m1 += acc[i]; m2 += acc[i] * acc[i]; na++; }
+    act[j] = na > 1 ? Math.sqrt(Math.max(0, m2 / na - (m1 / na) ** 2)) : 0;
+    expect[j] = base[j] + Math.min(20, 150 * act[j]);  // the HR that movement alone would explain
+    let e2 = 0, ne = 0;
+    for (let i = Math.max(0, (j - 4) * BFS); i < Math.min(emg.length, j * BFS); i++) { e2 += emg[i] * emg[i]; ne++; }
+    const lr = Math.log(Math.sqrt(e2 / Math.max(ne, 1)) + 1e-3);
+    lbase = j <= 10 ? lr : lbase + (lprev - lbase) / 120;  // causal 2-min EMG baseline (log RMS)
+    lprev = lr;
+    emgR[j] = Math.exp(lr - lbase);
+    body[j] = Math.max(sig((hr10[j] - expect[j] - 12) / 2.5), sig((emgR[j] - 4) / 0.6));
+    eegP[j] = j >= 2 && j - 2 < E.prob.length ? E.prob[j - 2] : 0;
+  }
+  const alarms = []; let last = -1e9;
+  for (let j = 0; j < nS; j++) {
+    let pe = 0, pb = 0;
+    for (let q = Math.max(0, j - 30); q <= j; q++) pe = Math.max(pe, eegP[q]);
+    for (let q = Math.max(0, j - 10); q <= j; q++) pb = Math.max(pb, body[q]);  // body evidence must be current (<= 10 s)
+    fused[j] = pe * pb;
+    if (fused[j] > 0.5 && j - last >= 60) { alarms.push(j); last = j; }
+  }
+  return { hr10, expect, base, act, emgR, body, eegP, fused, fAlarms: alarms };
+}
+
+function judge(alarms, T) {  // label each alarm: true detection or false alarm
+  let hit = null, fa = 0;
+  for (const a of alarms) {
+    if (T.sz && a >= T.on - 15 && a <= T.end) { if (hit === null) hit = a - T.on; }
+    else fa++;
+  }
+  return { hit, fa };
+}
+
+function rebuildBody() {
+  for (const k of ["epileptic", "healthy"]) {
+    if (!D[k].veeg0) D[k].veeg0 = D[k].veeg.data.map(a => Float32Array.from(a));
+    const T = bodyTimeline(k);
+    applyArtifact(k, T);
+    veegFeatures(k);
+    D[k].body = buildBody(k);
+  }
+}
+rebuildBody();
+$("szType").onchange = e => { S.szType = e.target.value; rebuildBody(); };
+$("walkBtn").onclick = () => { S.walk = !S.walk; $("walkBtn").classList.toggle("on", S.walk); rebuildBody(); };
+
+keys("kHR", [["HR (10 s)", C.hbo], ["explained by movement", C.muted, 1]]);
+keys("kFuse", [["EEG-only", C.warn], ["body evidence", C.ok], ["multimodal", "#ffffff"], ["✓ seizure", C.ok], ["✗ false alarm", C.bad]]);
+function episodes(T) {
+  const ep = [];
+  if (T.sz) ep.push([T.on, T.end, "rgba(255,84,112,0.10)"]);
+  if (T.walk) ep.push([T.walk[0], T.walk[1], "rgba(111,140,255,0.16)"]);
+  return ep;
+}
+function drawBody() {
+  const B = M().body, ep = episodes(B.T);
+  lineChart("cEcg", [{ data: m => m.body.ecg, fs: BFS, col: "#ff6b8a", lw: 1.1 }], { win: 6, yl: [-0.6, 1.5], episodes: ep });
+  lineChart("cHR", [{ data: m => m.body.hr10, fs: 1, col: C.hbo, lw: 2 }, { data: m => m.body.expect, fs: 1, col: C.muted, dash: 1 }],
+    { win: 60, yl: [55, S.szType === "fbtc" ? 150 : 115], episodes: ep });
+  lineChart("cEmg", [{ data: m => m.body.emg, fs: BFS, col: "#ffd166", lw: 0.8 }], { win: 10, yl: [-450, 450], episodes: ep });
+  lineChart("cAcc", [{ data: m => m.body.acc, fs: AFS, col: "#7fdbff", lw: 1.2 }], { win: 10, yl: [0, 1], episodes: ep });
+  const j = Math.min(B.hr10.length - 1, Math.floor(S.t));
+  $("hrNow").textContent = `HR ${B.hr10[j].toFixed(0)} bpm`;
+  drawFuse();
+}
+function drawFuse() {
+  const m = M(), B = m.body, E = m.veeg, T = B.T;
+  const { ctx, w, h, dpr } = fitCanvas($("cFuse"));
+  ctx.clearRect(0, 0, w, h);
+  const tt = S.t, a = tt - 60, padL = 24 * dpr, padB = 13 * dpr, padT = 4 * dpr;
+  const X = s => padL + ((s - a) / 60) * (w - padL - 6 * dpr), Y = v => padT + (1 - v) * (h - padT - padB);
+  for (const [ea, eb, col] of episodes(T)) if (eb > a && ea < tt) {
+    ctx.fillStyle = col; ctx.fillRect(X(Math.max(a, ea)), padT, X(Math.min(tt, eb)) - X(Math.max(a, ea)), h - padT - padB);
+  }
+  ctx.strokeStyle = C.muted; ctx.setLineDash([4 * dpr, 3 * dpr]); ctx.lineWidth = 1 * dpr;
+  ctx.beginPath(); ctx.moveTo(padL, Y(0.5)); ctx.lineTo(w, Y(0.5)); ctx.stroke(); ctx.setLineDash([]);
+  for (const [arr, col, lw] of [[B.eegP, C.warn, 1.3], [B.body, C.ok, 1.3], [B.fused, "#ffffff", 2.2]]) {
+    ctx.strokeStyle = col; ctx.lineWidth = lw * dpr; ctx.beginPath(); let f = true;
+    for (let s = Math.max(0, Math.ceil(a)); s <= Math.min(tt, arr.length - 1); s++) { const x = X(s), y = Y(arr[s]); f ? ctx.moveTo(x, y) : ctx.lineTo(x, y); f = false; }
+    ctx.stroke();
+  }
+  ctx.font = font(9, dpr); ctx.textAlign = "center";
+  for (const [al, row, lab] of [...E.alarms.map(v => [v, 0, "EEG"]), ...B.fAlarms.map(v => [v, 1, "MM"])]) {
+    if (al <= a || al > tt) continue;
+    const ok = T.sz && al >= T.on - 15 && al <= T.end;
+    ctx.fillStyle = ok ? C.ok : C.bad;
+    ctx.fillText(lab + (ok ? " ✓" : " ✗"), X(al), padT + 9 * dpr + row * 11 * dpr);
+    ctx.fillRect(X(al) - 0.75 * dpr, padT + 12 * dpr + row * 11 * dpr, 1.5 * dpr, h - padB - padT - 12 * dpr - row * 11 * dpr);
+  }
+  ctx.fillStyle = C.muted; ctx.textAlign = "right";
+  for (const v of [0, 0.5, 1]) ctx.fillText(v, padL - 3 * dpr, Y(v) + 3 * dpr);
+  timeAxis(ctx, X, a, tt, h, dpr, 15);
+  const je = judge(E.alarms.filter(v => v <= tt), T), jm = judge(B.fAlarms.filter(v => v <= tt), T);  // so far
+  const txt = r => (!T.sz ? "no seizure" : r.hit !== null ? `caught +${r.hit.toFixed(0)} s` : tt < T.on - 15 ? "no seizure yet" : tt <= T.end ? "watching…" : "MISSED") + ` · ${r.fa} false`;
+  $("fuseScore").innerHTML = `<span style="color:${C.warn}">EEG: ${txt(je)}</span> | <span style="color:#fff">MM: ${txt(jm)}</span>`;
+}
+
 // ---------------------------------------------------------------- readouts + loop
 function updateReadouts() {
   const m = M(), i = frame();
   for (const r of RO) {
     const v = m[r.key][i];
     $("v_" + r.key).innerHTML = `${r.key === "ado" ? v.toFixed(2) : Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1)}<small>${r.unit}</small>`;
-    $("b_" + r.key).style.width = Math.max(0, Math.min(100, (v - r.lo) / (r.hi - r.lo) * 100)) + "%";
+    $("b_" + r.key).style.setProperty("--p", Math.max(0, Math.min(100, (v - r.lo) / (r.hi - r.lo) * 100)).toFixed(1));
   }
   const [name, col, text] = phaseOf(m, i);
   const b = $("phase"); b.textContent = name; b.style.color = col; b.style.borderColor = col; b.style.background = hexA(col, 0.12);
+  b.classList.toggle("alert", col === C.bad);
   if ($("explain").dataset.p !== name) { $("explain").innerHTML = text; $("explain").dataset.p = name; }
   $("clock").textContent = `${S.t.toFixed(1)} / ${m.dur.toFixed(0)} s`;
   $("seek").value = Math.round(S.t / m.dur * 1000);
@@ -607,7 +1245,7 @@ function loop(now) {
     S.eegT += dt * S.speed; if (S.eegT >= EDUR) S.eegT = EWIN;
   }
   drawField(S.playing ? dt * S.speed : 0);
-  drawCharts(); drawEEG(); drawProb(); drawBands(); updateReadouts();
+  drawCharts(); drawEEG(); drawProb(); drawBands(); drawBody(); updateReadouts();
   requestAnimationFrame(loop);
 }
 S.eegT = EWIN;
@@ -618,8 +1256,22 @@ S.eegT = EWIN;
   if (q.has("eeg")) S.eegT = Math.max(EWIN, Math.min(EDUR - 0.1, +q.get("eeg")));
   if (q.has("speed")) { S.speed = +q.get("speed"); syncSpeed(); }
   if (q.get("paused") === "1") togglePlay();
+  if (q.get("type") in SZT) { S.szType = q.get("type"); $("szType").value = S.szType; }
+  if (q.get("walk") === "0") { S.walk = false; $("walkBtn").classList.remove("on"); }
+  if (q.get("view") === "ring") { S.view = "ring"; syncView(); }
+  if (["both", "k", "spk"].includes(q.get("h"))) { S.hsrc = q.get("h"); $("hsrc").value = S.hsrc; }
+  if (q.has("yaw")) { PL.yaw = +q.get("yaw"); PL.auto = false; }
+  rebuildBody();
 }
 requestAnimationFrame(loop);
+document.querySelectorAll(".card").forEach((c, k) => c.style.animationDelay = (0.9 + k * 0.05) + "s");
+{ // J.A.R.V.I.S.-style boot log (skip with ?boot=0)
+  const q = new URLSearchParams(location.search), box = $("boot"), log = $("bootLog");
+  const msgs = ["> INITIALISING NEURO-HUD ...", "> LOADING IONIC MODEL · 100 NEURONS · K⁺ Na⁺ Cl⁻", "> LINKING EAR-EEG · ECG · EMG · MOTION",
+    "> CALIBRATING SEIZURE DETECTOR ...", "> ALL SYSTEMS ONLINE"];
+  if (q.get("boot") === "0") { box.classList.add("done"); document.querySelectorAll(".card").forEach(c => c.style.animation = "none"); }
+  else { msgs.forEach((t, k) => setTimeout(() => { log.textContent += t + "\n"; }, 120 + k * 150)); setTimeout(() => box.classList.add("done"), 1100); }
+}
 </script>
 </body>
 </html>
