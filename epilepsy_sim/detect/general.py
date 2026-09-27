@@ -27,9 +27,11 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zlib
 from pathlib import Path
 
 import numpy as np
+from tqdm import tqdm
 from scipy.signal import butter, lfilter, sosfiltfilt
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -145,24 +147,28 @@ def recordings():
 
 
 # ------------------------------------------------------------------ experiments
-def run():
+def run(only=None):
     RES.mkdir(exist_ok=True)
     recs = recordings()
     subjects = sorted({r[0] for r in recs})
     print(f"{len(recs)} recordings, {len(subjects)} subjects, "
           f"{sum(len(r[3]) for r in recs)} seizures", flush=True)
-    rng = np.random.default_rng(0)
     thresholds = np.round(np.arange(0.1, 0.96, 0.05), 2)
     out = {"general": {}, "finetune": {}, "per_subject": {}}
+    if only and (RES / "metrics.json").exists():  # resume: keep results of configs not re-run
+        out = json.loads((RES / "metrics.json").read_text())
     t0 = time.time()
 
     for cname, chans in CONFIGS.items():
+        if only and not any(o.lower() in cname.lower() for o in only):
+            continue
         cidx = [FULL18.index(c) for c in chans]
+        rng = np.random.default_rng(zlib.crc32(cname.encode()))  # per-config seed: reruns are reproducible
         for norm in NORMS.get(cname, (True,)):
             key = f"{cname} | {'normalised' if norm else 'raw'}"
             # training pool: all seizure windows + NEG_FRAC of the rest, tagged by subject
             Xs, ys, gs = [], [], []
-            for subj, p, f, sz in recs:
+            for subj, p, f, sz in tqdm(recs, desc=f"{key}: loading", unit="rec", leave=False):
                 X, y, _ = load(p, f, cidx, norm)
                 keep = (y == 1) | (rng.random(len(y)) < NEG_FRAC)
                 Xs.append(X[keep])
@@ -171,9 +177,13 @@ def run():
             Xp, yp, gp = np.vstack(Xs), np.concatenate(ys), np.concatenate(gs)
             del Xs, ys
             # leave-one-subject-out
-            scored, per_subj = [], {}
-            for si, subj in enumerate(subjects):
+            scored, per_subj, gens = [], {}, {}
+            done = only and key in out["general"]
+            if done:
+                tqdm.write(f"[general] {key}: already saved in metrics.json, skipping to fine-tuning")
+            for si, subj in enumerate(tqdm([] if done else subjects, desc=f"{key}: new-user test", unit="subject")):
                 m = clf().fit(Xp[gp != si], yp[gp != si])
+                gens[si] = m  # reused by the fine-tuning test below (no second fit)
                 srec = []
                 for s_, p, f, sz in recs:
                     if s_ != subj:
@@ -182,25 +192,30 @@ def run():
                     srec.append((m.predict_proba(X)[:, 1], t, sz, len(t) / 3600))
                 scored += srec
                 per_subj[subj] = score(srec, 0.5)
-            out["general"][key] = {f"{th:.2f}": score(scored, th) for th in thresholds}
-            out["per_subject"][key] = {s: {k: v for k, v in d.items() if k != "latencies"}
-                                       for s, d in per_subj.items()}
+            if not done:
+                out["general"][key] = {f"{th:.2f}": score(scored, th) for th in thresholds}
+                out["per_subject"][key] = {s: {k: v for k, v in d.items() if k != "latencies"}
+                                           for s, d in per_subj.items()}
+                (RES / "metrics.json").write_text(json.dumps(out, indent=1))  # save now: survives a later stop
             r = out["general"][key]["0.50"]
-            print(f"[general] {key}: sens {r['sensitivity']:.0%} ({r['detected']}/{r['seizures']}), "
-                  f"FA/24h {r['fa_per_24h']:.1f}, latency {r['latency_median_s']} s  ({time.time() - t0:.0f} s)",
-                  flush=True)
+            tqdm.write(f"[general] {key}: sens {r['sensitivity']:.0%} ({r['detected']}/{r['seizures']}), "
+                  f"FA/24h {r['fa_per_24h']:.1f}, latency {r['latency_median_s']} s  ({time.time() - t0:.0f} s)")
             if not norm:
                 continue
 
             # ---------------- fine-tuning (normalised features only)
             ft = {k: {"general": [], "patient_only": [], "finetuned": []} for k in (1, 2)}
-            for si, subj in enumerate(subjects):
+            eligible = [si for si, subj in enumerate(subjects)
+                        if len([r for r in recs if r[0] == subj and r[3]]) >= 3
+                        and any(r[0] == subj and not r[3] for r in recs)]
+            for si in tqdm(eligible, desc=f"{key}: fine-tuning", unit="subject"):
+                subj = subjects[si]
                 srecs = [r for r in recs if r[0] == subj]
                 szr = [r for r in srecs if r[3]]
                 fre = [r for r in srecs if not r[3]]
                 if len(szr) < 3 or not fre:
                     continue
-                general = clf().fit(Xp[gp != si], yp[gp != si])
+                general = gens.pop(si, None) or clf().fit(Xp[gp != si], yp[gp != si])
                 for k in (1, 2):
                     tune = szr[:k] + fre[:1]
                     test = szr[k:] + fre[1:]
@@ -226,8 +241,8 @@ def run():
                 for name in ("general", "patient_only", "finetuned"):
                     r = out["finetune"][key][str(k)][name]["0.50"]
                     line += f" {name} sens {r['sensitivity']:.0%} FA/24h {r['fa_per_24h']:.1f} |"
-                print(line, f"({time.time() - t0:.0f} s)", flush=True)
-            del Xp, yp, gp
+                tqdm.write(f"{line} ({time.time() - t0:.0f} s)")
+            del Xp, yp, gp, gens
         (RES / "metrics.json").write_text(json.dumps(out, indent=1))
     figure(out)
     print(f"saved {RES / 'metrics.json'} and {RES / 'general.png'}")
@@ -282,5 +297,7 @@ def figure(out):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("cmd", choices=["fetch", "run"])
+    ap.add_argument("--configs", nargs="*", default=None,
+                    help="run only configs whose name contains these words (e.g. \"Full cap\"); others kept from metrics.json")
     a = ap.parse_args()
-    fetch() if a.cmd == "fetch" else run()
+    fetch() if a.cmd == "fetch" else run(a.configs)

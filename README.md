@@ -48,8 +48,8 @@
 | 4 | **The derived inference methods recover hidden values in twin experiments.** KCC2 strength was inferred as 0.36 ± 0.09 (true 0.30). Naive formulas fail exactly where theory predicts (e.g. 2.4× K⁺ error from scalp DC). | `epilepsy_sim/COMPARISON.md` |
 | 5 | **Our Epileptor matches The Virtual Brain's official implementation.** First seizure onset is identical (886.2), and differences vanish as the time step shrinks. | `epilepsy_sim/COMPARISON.md` |
 | 6 | **On real EEG, temple and ear electrodes catch seizures as well as a full cap, but with more false alarms.** Patient-specific (3 patients, 19 seizures): both temples caught 100% with 9.8 false alarms/day; the full cap caught 95% with 5.2/day. | `epilepsy_sim/detect/` |
-| 7 | **The ear-hook (2 channels) matches the temple setup (4 channels) with half the electrodes.** On 23 subjects and 185 seizures, new-user detection was 88% vs 85%, and after fine-tuning on 2 own seizures, 86% vs 86%. | `epilepsy_sim/detect/general.py` |
-| 8 | **False alarms are the real problem.** EEG-only general models give 140–400 false alarms/day. Personal fine-tuning cuts this by ~60%; multimodal fusion (heart rate, motion, jaw EMG) is the next step. | §7 |
+| 7 | **The ear-hook (2 channels) catches as many seizures as a full 18-channel cap, but with ~2× the false alarms.** On 23 subjects and 185 seizures: new user 88% vs 85%; after fine-tuning on 2 own seizures 86% (162 FA/day) vs 89% (88 FA/day). Both ears beat one ear on every measure. | `epilepsy_sim/detect/general.py` |
+| 8 | **False alarms are the real problem.** EEG-only models give 90–550 false alarms/day. Per-person normalisation and fine-tuning cut them by 40–60%, but reaching ≤1/day needs multimodal fusion (heart rate, motion, jaw EMG). | §7 |
 
 ---
 
@@ -104,6 +104,7 @@ epilepsy_temple/
     │   ├── detect.py                patient-specific detection: full cap vs temple/ear channels
     │   ├── general.py               general model on all CHB-MIT subjects + per-person fine-tuning
     │   ├── notify_watch.sh          optional: ring your phone (ntfy) when a long run finishes
+    │   ├── notify_final.sh          optional: ring your phone when general.py finishes / crashes / stops
     │   ├── results/                 3-patient detection metrics + figure
     │   └── results_general/         23-subject general-model metrics
     └── viz/
@@ -133,7 +134,7 @@ uv sync                                    # numpy, scipy, matplotlib, numba, mn
 | The Virtual Brain comparison | `uv run --extra tvb tvb_compare.py` | ~12 min |
 | Download CHB-MIT subset (3 patients) | `uv run detect/fetch_chbmit.py` | ~4 min, 1.4 GB |
 | Temple vs full-cap detection | `uv run detect/detect.py --configs 4` (then 2, 3, 1, 0) | ~2–40 min each |
-| General model, all subjects (streaming, ~1 GB disk) | `uv run detect/general.py fetch` then `run` | ~1 h + 2–3 h |
+| General model, all subjects (streaming, ~1 GB disk) | `uv run detect/general.py fetch` then `run` (add `--configs "Full cap"` to re-run one setup; progress bars show time left) | ~1 h + 2–3 h |
 | Rebuild live-lab data | `uv run viz/export_data.py` | ~2 min |
 
 > **Memory:** network simulations use ~1–2 GB. On machines with little free RAM, run one long job at a time.
@@ -224,8 +225,8 @@ On a 76-region connectome, a right-amygdala seizure spread to 36/38 right-hemisp
 | Temple (4 ch), raw features | 62% | 524 | 6.5 s |
 | Temple (4 ch), **per-person normalised** | 85% | 342 | 6.0 s |
 | **Ear-hook both ears (2 ch)**, normalised | **88%** | 382 | **5.0 s** |
-| Ear-hook one ear (1 ch) | *in progress* | | |
-| Full cap (18 ch) | *in progress* | | |
+| Ear-hook one ear (1 ch), normalised | 83% | 556 | 6.0 s |
+| Full cap (18 ch), normalised | 85% | **228** | 5.0 s |
 
 **After learning the user's own seizures** (fine-tuning on their first 2 seizure recordings, tested on later ones):
 
@@ -233,12 +234,20 @@ On a 76-region connectome, a right-amygdala seizure spread to 36/38 right-hemisp
 |---|---|---|---|
 | Temple (4 ch) | 84% · 361 FA/day | 68% · 16 FA/day | **86% · 138 FA/day** |
 | **Ear-hook both ears (2 ch)** | 87% · 397 FA/day | 65% · 19 FA/day | **86% · 162 FA/day** |
+| Ear-hook one ear (1 ch) | 81% · 550 FA/day | 66% · 79 FA/day | 80% · 216 FA/day |
+| Full cap (18 ch) | 84% · 247 FA/day | 68% · 6 FA/day | **89% · 88 FA/day** |
+
+At a stricter alarm threshold (chosen after seeing results, so optimistic), fine-tuned detectors reach ~18–23 false alarms/day while catching 64% (ear-hook both ears) to 75% (full cap) of seizures.
+
+![General model](epilepsy_sim/detect/results_general/general.png)
 
 Takeaways:
 
-1. **Per-person normalisation** (comparing each person with their own recent baseline) adds 43 detected seizures.
-2. **Fine-tuning** cuts false alarms by ~60% without losing seizures.
-3. **The ear-hook performs like the temple setup** with half the electrodes.
+1. **Per-person normalisation** (comparing each person with their own recent baseline) adds 43 detected seizures to the temple setup.
+2. **Fine-tuning** cuts false alarms by 40–65% without losing seizures.
+3. **The ear-hook is worth it:** with 2 electrodes it matches the temple setup (4) and catches as many seizures as the full cap (18). What the extra channels mainly buy is **false-alarm rejection**, which the ear-hook can recover with its own heart-rate and motion sensors (§7).
+4. **Both ears > one ear:** about 6% more seizures caught and 25–30% fewer false alarms.
+5. **Patient-only models** have few false alarms but miss a third of seizures. Two examples are too few to learn from alone.
 
 ### 6.6 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
@@ -285,7 +294,7 @@ A published EEG + ECG detector reached 84.8% sensitivity at **0.25 false alarms/
 | Priority | Next step |
 |---|---|
 | ★★★ | Multimodal detection on SeizeIT2 (behind-the-ear EEG + ECG + EMG + motion): measure the false-alarm reduction |
-| ★★★ | Finish the general-model comparison: one ear vs both ears vs full cap |
+| ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |
 | ★★ | Deep-learning detector and a larger training set (e.g. TUH EEG, requires registration) |
 | ★★ | Hardware prototype: dry ear electrodes + in-ear PPG + IMU, recording on a phone |
