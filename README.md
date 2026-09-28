@@ -289,7 +289,7 @@ Takeaways:
 | Ear EEG + ECG, general | 89 (−44%) |
 | **Ear EEG + ECG, fine-tuned** | **61 (−62%)** |
 
-   One seizure is not enough for EEG-only tuning. Requiring a sustained 10–20 s alarm does not help. At ≤1 false alarm/day the best setup still catches only 14% of seizures, so absolute rates remain far from usable.
+   One seizure is not enough for EEG-only tuning. Requiring a sustained 10–20 s alarm does not help. A **personal alarm threshold** also gives no meaningful gain, because the per-person baseline normalisation already calibrates everyone. A useful side result: the shared threshold's false-alarm rate is **predictable** (budget 1 / 5 / 20 per day on tuning data gave 1.4 / 5.2 / 20.2 later). At ≤1 false alarm/day the best setup still catches only 11–14% of seizures, so absolute rates remain far from usable.
 
 ### 6.7 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
@@ -353,7 +353,8 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 |---|---|
 | ✅ | ~~Multimodal detection on SeizeIT2: measure the false-alarm reduction~~ (done, §6.6: ECG −18–31%) |
 | ✅ | ~~Personal fine-tuning + sustained-alarm rules on SeizeIT2~~ (done: −62% with ECG; sustained rules don't help) |
-| ★★★ | Personal alarm thresholds and 5–10 min context features (HR/HRV trends), aiming for ≤1 false alarm/day |
+| ✅ | ~~Personal alarm thresholds~~ (no meaningful gain) |
+| ★★★ | 5–10 min context features (HR/HRV and EEG trends), aiming for ≤1 false alarm/day |
 | ★★ | SeizeIT2 split by seizure type; degrade ECG to PPG-like beat timing (what the ear-hook would see) |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |

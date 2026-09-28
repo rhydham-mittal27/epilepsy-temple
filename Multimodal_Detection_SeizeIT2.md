@@ -23,6 +23,7 @@ Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Re
 5. [Models and evaluation](#5-models-and-evaluation)
 6. [Results](#6-results)
    - [6.5 Personal fine-tuning and sustained-alarm rules](#65-personal-fine-tuning-and-sustained-alarm-rules)
+   - [6.6 Personal alarm threshold](#66-personal-alarm-threshold)
 7. [Interim snapshots](#7-interim-snapshots)
 8. [What it means for the ear-hook](#8-what-it-means-for-the-ear-hook)
 9. [Limitations](#9-limitations)
@@ -206,6 +207,35 @@ A vectorised event scorer was checked to give identical results to the reference
 3. **Sustained-alarm rules don't pay off.** Requiring 10 s or 20 s above threshold only helps at low sensitivity (e.g. EEG fine-tuned at 40%: 62 → 44). It is worse at 60–70% caught and adds 3–7 s of delay. It rejects brief false alarms but also misses short or flickering seizures. **Keep the 6 s smoothing rule.**
 4. **Still far from the ≤1 false alarm/day target.** The best setup catches **14%** of seizures at ≤1 FA/day and **21–23%** at ≤5. Tuning plus ECG closes about 60% of the gap in false alarms; the rest needs a better signal or model (§10).
 
+### 6.6 Personal alarm threshold
+
+**Question.** People's detector outputs may sit at different baseline levels, so one shared alarm threshold may be too strict for some and too loose for others. Does giving each person their own threshold help?
+
+**Protocol** (`seizeit2.py personal`; same 71 patients, same split and models as §6.5, k = 2):
+- **Personal threshold:** for each target budget (0.5–200 false alarms/day), the lowest threshold whose false alarms on **that person's tuning data** stay within the budget. Patients with less than 6 h of tuning data use the shared threshold (12 of 71; median tuning data 23 h).
+- **Shared threshold:** the same rule on **everyone's tuning data pooled**.
+- **Scoring:** both are calibrated on tuning data only and scored only on later data. No seizure examples are needed to set a threshold.
+
+**Seizures caught on later data within a false-alarm budget** (best setting whose *measured* later false-alarm rate fits the budget):
+
+| Model | Threshold | ≤1/day | ≤5/day | ≤20/day |
+|---|---|---|---|---|
+| EEG, general | shared | 4% | 11% | 23% |
+| EEG, general | personal | – | 10% | 25% |
+| **EEG + ECG, general** | **shared** | **11%** | 18% | 27% |
+| EEG + ECG, general | personal | – | 22% | 29% |
+
+*"–": no setting got the later false-alarm rate that low.*
+
+![Personal threshold](epilepsy_sim/detect/results_seizeit2/personal_threshold.png)
+
+**Findings:**
+
+1. **Personal thresholds give no meaningful gain.** They catch at most 2–4% more seizures at loose budgets, tend to overshoot their false-alarm budget (1/day became 1.7–2.4/day), and never reach the strictest budget.
+2. **Why: the baseline normalisation already calibrates everyone.** Every feature is compared with the person's own last ~10 minutes (§4), so outputs are already on a common scale. At a budget of 5/day the personal thresholds sit within ~0.01 of the shared one (interquartile range 0.956–0.971 vs shared 0.971 for EEG). That normalisation step was the right design choice.
+3. **The general model's alarm rate is predictable.** With EEG + ECG and a shared threshold, budgets of 1 / 5 / 20 per day on tuning data gave **1.4 / 5.2 / 20.2** per day on later data. An app could honestly tell a user what false-alarm rate to expect after a few days of wear.
+4. **Never calibrate the fine-tuned model on its own training data.** Its tuning-data false alarms look far too clean, so budgets of 0.5–1/day became **10–18/day** later. Calibration for a personalised model needs held-out data, e.g. the last hours of the tuning period.
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -242,7 +272,7 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 |---|---|---|
 | ✅ | ~~Personal fine-tuning~~ (§6.5: −42% alone, −62% with ECG, needs ≥2 seizures) | – |
 | ✅ | ~~Sustained-alarm post-processing~~ (§6.5: does not help) | – |
-| ★★★ | **Personal alarm threshold** set from each user's tuning data | One shared threshold is a poor fit for patients whose baseline probabilities differ |
+| ✅ | ~~Personal alarm threshold~~ (§6.6: no meaningful gain; normalisation already calibrates) | – |
 | ★★★ | **Longer context:** features over 5–10 min of HR/HRV and EEG trends | Autonomic change builds over minutes; 4 s windows can't see it |
 | ★★ | **Split by seizure type** (non-motor vs motor vs tonic-clonic) | Tells whether EMG/motion earn their place for convulsive seizures |
 | ★★ | **Degrade ECG to PPG-like beat timing** (jitter, dropouts) | Estimates what the ear-hook's optical heart rate would achieve |
@@ -259,6 +289,7 @@ uv run detect/seizeit2.py run                # 5 setups x 5-fold CV (~1 h); resu
 uv run detect/seizeit2.py run --snapshot     # interim results on fully streamed patients while fetch is running
 uv run detect/seizeit2.py report             # recompute tables + figure from saved metrics (no retraining)
 uv run detect/seizeit2.py finetune --k 2     # personal fine-tuning on 2 own seizures (~35 min); then --k 1 (~45 min)
+uv run detect/seizeit2.py personal          # shared vs personal alarm threshold (~35 min; model outputs cached)
 ```
 
 If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or run finishes, or crashes.

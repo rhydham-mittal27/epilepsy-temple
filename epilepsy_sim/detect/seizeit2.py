@@ -19,6 +19,7 @@ Usage (run in your own terminal, from epilepsy_sim/):
     uv run detect/seizeit2.py fetch     # ~1.5-2.5 h at ~20 MB/s (126 GB streamed), resumable
     uv run detect/seizeit2.py run       # ~30-60 min
     uv run detect/seizeit2.py finetune  # personal fine-tuning + sustained-alarm rules (~2-3 h)
+    uv run detect/seizeit2.py personal  # shared vs personal alarm threshold (~35 min; outputs cached)
 
 Data: SeizeIT2 (CC0), Bhagubai et al. 2025, doi:10.18112/openneuro.ds005873.v1.1.0.
 """
@@ -589,11 +590,12 @@ def split_patient(rs, k):
     return tune, test
 
 
-def score_fast(recs, thresholds, smooth=3, persist=1):
+def score_fast(recs, thresholds, smooth=3, persist=1, as_list=False, keep_lat=False):
     """Event-level scoring for many thresholds at once, with the same rules as detect.score()
     (caught = alarm from PRE s before onset to seizure end; alarms up to POST s after a seizure are
     not false; REFRACT s between alarms) plus a persistence rule: the smoothed probability must stay
-    above threshold for `persist` consecutive windows before an alarm fires."""
+    above threshold for `persist` consecutive windows before an alarm fires.
+    Returns {"0.500": row, ...}, or a list of rows in threshold order if as_list."""
     from detect import POST as POST_S, PRE, REFRACT
 
     P, T, S, hours, off = [], [], [], 0.0, 0.0
@@ -606,7 +608,10 @@ def score_fast(recs, thresholds, smooth=3, persist=1):
         S += [(a + off, b + off) for a, b in sz]
         hours += h
         off += float(t[-1]) + 10_000  # records never interact
-    P, T = np.concatenate(P), np.concatenate(T)
+    if not P:  # nothing to score
+        P, T = np.zeros(0), np.zeros(0)
+    else:
+        P, T = np.concatenate(P), np.concatenate(T)
     S = np.array(sorted(S), float).reshape(-1, 2)
     lo, hi = S[:, 0] - PRE, S[:, 1] + POST_S  # merged "not a false alarm" intervals
     mlo, mhi = [], []
@@ -617,7 +622,7 @@ def score_fast(recs, thresholds, smooth=3, persist=1):
             mlo.append(a)
             mhi.append(b)
     mlo, mhi = np.array(mlo), np.array(mhi)
-    out = {}
+    rows = []
     for thr in thresholds:
         above = P > thr
         if persist > 1:
@@ -632,12 +637,15 @@ def score_fast(recs, thresholds, smooth=3, persist=1):
         hit = (j < len(al)) & (al[np.minimum(j, max(len(al) - 1, 0))] <= S[:, 1]) if len(al) else np.zeros(len(S), bool)
         lat = (al[j[hit]] - S[hit, 0]) if len(al) else np.array([])
         m = np.searchsorted(mlo, al, side="right") - 1
-        covered = (m >= 0) & (al <= mhi[np.maximum(m, 0)]) if len(al) else np.array([], bool)
+        covered = (m >= 0) & (al <= mhi[np.maximum(m, 0)]) if len(al) and len(mhi) else np.zeros(len(al), bool)
         fa = int((~covered).sum())
-        out[f"{thr:.3f}"] = {"sensitivity": float(hit.mean()) if len(S) else 0.0, "detected": int(hit.sum()),
-                             "seizures": int(len(S)), "fa_per_24h": fa / max(hours, 1e-9) * 24, "false_alarms": fa,
-                             "hours": hours, "latency_median_s": float(np.median(lat)) if len(lat) else None}
-    return out
+        row = {"sensitivity": float(hit.mean()) if len(S) else 0.0, "detected": int(hit.sum()),
+               "seizures": int(len(S)), "fa_per_24h": fa / max(hours, 1e-9) * 24, "false_alarms": fa,
+               "hours": hours, "latency_median_s": float(np.median(lat)) if len(lat) else None}
+        if keep_lat:
+            row["latencies"] = [float(v) for v in lat]
+        rows.append(row)
+    return rows if as_list else {f"{thr:.3f}": r for thr, r in zip(thresholds, rows)}
 
 
 def finetune(configs=None, ks=(1, 2), folds=5):
@@ -749,6 +757,180 @@ def ft_figure(out):
     plt.close(fig)
 
 
+# ------------------------------------------------------------------ personal alarm thresholds
+PROBS = FEAT.parent / "probs"  # cached model outputs (gitignored with the rest of data/)
+PT_BUDGETS = [0.5, 1, 2, 3, 5, 10, 20, 50, 100, 200]  # target false alarms/day on the TUNING data
+PT_GRID = np.unique(np.round(np.r_[np.linspace(0.02, 0.9, 45), 1 - np.logspace(-1, -3.3, 40)], 5))
+MIN_TUNE_H = 6.0  # less tuning data than this -> fall back to the shared threshold
+
+
+def slug(s):
+    return re.sub(r"[^a-z0-9]+", "_", s.lower()).strip("_")
+
+
+def collect_probs(cname, k, folds=5):
+    """General and fine-tuned model outputs on every eligible patient's tuning AND test data.
+    Same models and split as finetune(); cached so threshold experiments need no retraining."""
+    import pickle
+
+    PROBS.mkdir(parents=True, exist_ok=True)
+    cache = PROBS / f"{slug(cname)}_k{k}.pkl"
+    if cache.exists():
+        return pickle.loads(cache.read_bytes())
+    groups = CONFIGS[cname]
+    runs = [r for r in json.loads((FEAT / "index.json").read_text()) if (FEAT / f"{r['run']}.npz").exists()]
+    subs, fold = subject_folds(runs, folds)
+    by = {s: [r for r in runs if r["sub"] == s] for s in subs}
+    rng = np.random.default_rng(zlib.crc32(cname.encode()))
+    Xs, ys, fs_ = [], [], []
+    for r in tqdm(runs, desc=f"{cname}: loading pool", unit="run", leave=False):
+        X, y, _ = load(r["run"])
+        keep = (y == 1) | (rng.random(len(y)) < NEG_FRAC)
+        Xs.append(design(X, groups)[keep])
+        ys.append(y[keep])
+        fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
+    Xp, yp, fp = np.vstack(Xs), np.concatenate(ys), np.concatenate(fs_)
+    del Xs, ys, fs_
+    gen = {f: clf().fit(Xp[fp != f], yp[fp != f]) for f in tqdm(range(folds), desc=f"{cname}: general models", unit="fold")}
+    data = {}
+    for s in tqdm([s for s in subs if split_patient(by[s], k)], desc=f"{cname} | k={k}: models + outputs", unit="patient"):
+        tune, test = split_patient(by[s], k)
+        parts = {"tune": [], "test": []}
+        for which, lst in (("tune", tune), ("test", test)):
+            for r, cut in lst:
+                X, y, t = load(r["run"])
+                if cut is None:
+                    sel, szs = np.ones(len(t), bool), [tuple(v) for v in r["seizures"]]
+                elif which == "tune":
+                    sel, szs = t <= cut, [tuple(v) for v in r["seizures"] if v[0] <= cut]
+                else:
+                    sel, szs = t - WIN > cut, [tuple(v) for v in r["seizures"] if v[0] > cut]
+                if sel.any():
+                    parts[which].append((design(X, groups)[sel], y[sel], t[sel].astype(np.int32), szs, sel.sum() * STEP / 3600))
+        Xt = np.vstack([z for z, *_ in parts["tune"]])
+        yt = np.concatenate([y for _, y, *_ in parts["tune"]])
+        tr = fp != fold[s]
+        w = np.r_[np.ones(tr.sum()), np.full(len(yt), PATIENT_W)]
+        fin = clf().fit(np.vstack([Xp[tr], Xt]), np.r_[yp[tr], yt], sample_weight=w)
+        data[s] = {which: {name: [(m.predict_proba(z)[:, 1].astype(np.float32), t, szs, h) for z, _, t, szs, h in parts[which]]
+                           for name, m in (("general", gen[fold[s]]), ("finetuned", fin))}
+                   for which in ("tune", "test")}
+    cache.write_bytes(pickle.dumps(data))
+    return data
+
+
+def personal(configs=None, k=2):
+    """Shared vs personal alarm threshold, both calibrated ONLY on tuning data, scored on later data.
+    Personal: per patient, the lowest threshold whose false alarms on that patient's own tuning data
+    stay within the budget. Shared: the same rule on everyone's tuning data pooled."""
+    path = RES / "personal_threshold.json"
+    out = json.loads(path.read_text()) if path.exists() else {}
+    names = FT_CONFIGS if not configs else [c for c in CONFIGS if any(o.lower() in c.lower() for o in configs)]
+    for cname in names:
+        key = f"{cname} | k={k}"
+        data = collect_probs(cname, k)
+        res = {"patients": len(data)}
+        for model in ("general", "finetuned"):
+            tune = {}
+            for s, d in tqdm(data.items(), desc=f"{key} | {model}: calibrating", unit="patient", leave=False):
+                rows = score_fast(d["tune"][model], PT_GRID, as_list=True)
+                tune[s] = (sum(r[3] for r in d["tune"][model]), np.array([r["false_alarms"] for r in rows]))
+            H = sum(h for h, _ in tune.values())
+            pooled = sum(fa for _, fa in tune.values()) * 24 / max(H, 1e-9)
+
+            def pick(fa_day, budget):  # lowest threshold within budget (most sensitive), else the highest
+                ok = np.flatnonzero(fa_day <= budget)
+                return float(PT_GRID[ok[0]]) if len(ok) else float(PT_GRID[-1])
+
+            res[model] = {}
+            for mode in ("shared", "personal"):
+                res[model][mode] = {}
+                for B in PT_BUDGETS:
+                    shared_thr = pick(pooled, B)
+                    det = nsz = fa = 0
+                    hours, lats, thrs, fallback = 0.0, [], [], 0
+                    for s, d in data.items():
+                        h_t, fa_t = tune[s]
+                        if mode == "shared":
+                            thr = shared_thr
+                        elif h_t < MIN_TUNE_H:
+                            thr, fallback = shared_thr, fallback + 1
+                        else:
+                            thr = pick(fa_t * 24 / h_t, B)
+                        r = score_fast(d["test"][model], [thr], as_list=True, keep_lat=True)[0]
+                        det, nsz, fa, hours = det + r["detected"], nsz + r["seizures"], fa + r["false_alarms"], hours + r["hours"]
+                        lats += r["latencies"]
+                        thrs.append(thr)
+                    res[model][mode][str(B)] = {
+                        "sensitivity": det / max(nsz, 1), "detected": det, "seizures": nsz, "fa_per_24h": fa * 24 / max(hours, 1e-9),
+                        "latency_median_s": float(np.median(lats)) if lats else None,
+                        "threshold_median": float(np.median(thrs)), "threshold_iqr": [float(np.percentile(thrs, 25)), float(np.percentile(thrs, 75))],
+                        "fallback_patients": fallback}
+        out[key] = res
+        path.write_text(json.dumps(out, indent=1))
+        pt_summary({key: res})
+    pt_figure(out)
+    lines = []
+    for key, res in out.items():
+        for model in ("general", "finetuned"):
+            sh = pt_frontier(res[model]["shared"], 5)
+            pe = pt_frontier(res[model]["personal"], 5)
+            lines.append(f"{key.split(' (')[0].split(' |')[0]} {model}: {sh:.0%}->{pe:.0%}" if sh is not None and pe is not None else key)
+    notify("SeizeIT2 personal thresholds DONE", "Caught at <=5 FA/day, shared->personal: " + "; ".join(lines), "tada")
+    print(f"saved {path} and {RES / 'personal_threshold.png'}")
+
+
+def pt_frontier(curve, fa_max):
+    """Best test sensitivity among budget settings whose TEST false alarms stay <= fa_max/day."""
+    ok = [v["sensitivity"] for v in curve.values() if v["fa_per_24h"] <= fa_max]
+    return max(ok) if ok else None
+
+
+def pt_summary(out):
+    for key, res in out.items():
+        print(f"\n=== {key}  ({res['patients']} patients; thresholds set on tuning data, scored on later data)")
+        print(f"{'model':10s}{'budget/day':>11s} |{'SHARED: caught':>16s}{'FA/day':>8s}{'thr':>7s} |{'PERSONAL: caught':>18s}{'FA/day':>8s}{'thr (median)':>14s}{'delay':>7s}")
+        for model in ("general", "finetuned"):
+            for B in PT_BUDGETS:
+                a, b = res[model]["shared"][str(B)], res[model]["personal"][str(B)]
+                print(f"{model:10s}{B:>11g} |{a['sensitivity']:>16.0%}{a['fa_per_24h']:>8.1f}{a['threshold_median']:>7.3f} |"
+                      f"{b['sensitivity']:>18.0%}{b['fa_per_24h']:>8.1f}{b['threshold_median']:>14.3f}"
+                      + (f"{b['latency_median_s']:>6.0f}s" if b["latency_median_s"] is not None else f"{'-':>7s}"))
+        print("Seizures caught with at most X false alarms/day on the LATER data (best budget setting):")
+        for model in ("general", "finetuned"):
+            cells = []
+            for X in (1, 5, 20):
+                sh, pe = pt_frontier(res[model]["shared"], X), pt_frontier(res[model]["personal"], X)
+                f = lambda v: f"{v:.0%}" if v is not None else "-"
+                cells.append(f"<={X}/day: shared {f(sh)} vs personal {f(pe)}")
+            print(f"  {model:10s} " + " | ".join(cells))
+
+
+def pt_figure(out):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    keys = list(out)
+    fig, ax = plt.subplots(1, len(keys), figsize=(7 * len(keys), 5.5), squeeze=False)
+    for a, key in zip(ax[0], keys):
+        for model, c in (("general", "tab:grey"), ("finetuned", "tab:green")):
+            for mode, ls in (("shared", ":"), ("personal", "-")):
+                cur = out[key][model][mode]
+                a.plot([v["fa_per_24h"] for v in cur.values()], [100 * v["sensitivity"] for v in cur.values()],
+                       ls, color=c, marker="o", ms=3, label=f"{model}, {mode} threshold")
+        a.set_xscale("symlog", linthresh=1)
+        a.axvline(1, color="grey", lw=0.8, ls="--")
+        a.set(xlabel="false alarms per 24 h (later data)", ylabel="seizures detected (%)",
+              title=f"{key}\n({out[key]['patients']} patients)")
+        a.legend(fontsize=8)
+    fig.suptitle("SeizeIT2: shared vs personal alarm threshold (set on tuning data only)", fontsize=13)
+    fig.tight_layout()
+    fig.savefig(RES / "personal_threshold.png", dpi=110)
+    plt.close(fig)
+
+
 def main(a):
     if a.cmd == "fetch":
         fetch(a.workers)
@@ -771,13 +953,16 @@ def main(a):
         figure(out)
     elif a.cmd == "finetune":
         finetune(a.configs, tuple(a.k))
+    elif a.cmd == "personal":
+        for k in (a.k if a.k != [1, 2] else [2]):  # default: tune on 2 own seizures
+            personal(a.configs, k)
     else:
         run(a.configs, snapshot=a.snapshot)
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["fetch", "run", "report", "finetune", "test"])
+    ap.add_argument("cmd", choices=["fetch", "run", "report", "finetune", "personal", "test"])
     ap.add_argument("--workers", type=int, default=3, help="runs streamed in parallel (each uses 4 connections)")
     ap.add_argument("--configs", nargs="*", default=None, help="re-run only configs containing these words")
     ap.add_argument("--snapshot", action="store_true",
