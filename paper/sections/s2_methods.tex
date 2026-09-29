@@ -413,6 +413,36 @@ Each recording and channel was divided by its median absolute amplitude, with th
 For a like-for-like comparison, the ear-EEG feature model and the best general feature model were retrained on exactly the same runs, patients and folds. Each was also combined with the CNN by \emph{late fusion}: the unweighted mean of the two probabilities. The fusion has no fitted parameters, so no test labels leak into it. The window-level AUROC is reported in addition to the event metrics.
 
 % ----------------------------------------------------------------------------
+\subsection{Electrode quality and adult validation}
+\label{sec:m-electrodes}
+
+\paragraph{Electrode stability (SeizeIT2).} This analysis tests whether poor electrode contact limits detection. For each of the 71 personalisation patients, contact stability was the interquartile range over time of the ear-EEG log-variance, averaged over both channels. It used only non-seizure windows of the tuning period, so it is a quantity a device would know after its first days of wear. Patients were split at the median. For each group we compared:
+\begin{itemize}
+\item false alarms at matched sensitivity;
+\item seizures caught within budgets;
+\item the share of later seizures whose smoothed output ever exceeded 0.5 and 0.95.
+\end{itemize}
+Spearman correlations related instability to per-patient seizure visibility (the median seizure peak) and to false alarms.
+
+\paragraph{Siena Scalp EEG (adult validation).} The Siena database \cite{detti2020,goldberger2000} contains 14 adults (20--71\,y) with focal epilepsy: 13 temporal and 1 frontal with focal-to-bilateral tonic-clonic seizures. It comprises 47 seizures in 141\,h of video-EEG across 41 EDF files, recorded with a full 10-20 cap at 512\,Hz plus EKG. All 21.8\,GB were streamed from PhysioNet's open-data mirror into memory, and only features were stored.
+
+Seizure onsets were aligned to each EDF header's start time. Three errors in the dataset's seizure lists were corrected, each with a logged rule:
+\begin{itemize}
+\item a file name given once for two seizures and not matching the file;
+\item a letter-O typo in a file name;
+\item a seizure end time off by one hour.
+\end{itemize}
+The montages were identical to the CHB-MIT study:
+\begin{itemize}
+\item ear-hook, both ears (T3--T5, T4--T6, i.e.\ T7--P7, T8--P8);
+\item ear-hook, one ear;
+\item the 18-channel double banana;
+\end{itemize}
+each with or without the eight ECG features. The SeizeIT2 feature pipeline, classifier and scoring were reused, with 20\% of non-seizure windows in the training pool. Evaluation was leave-one-patient-out. One patient (PN00) was also analysed patient-specifically, leave-one-recording-out.
+
+\paragraph{A training-speed correction.} With sample weights (from class balancing) and fewer than 200,000 training rows, scikit-learn~1.9 computes the histogram bin edges by calling a weighted-percentile routine once per edge and feature. This made small-dataset fits 10--50$\times$ slower. We replaced it with a vectorised implementation of the same computation. Thresholds were identical for 200 of 200 random test features, and predictions were bit-identical. SeizeIT2 fits were never affected, because they exceed 200,000 rows and scikit-learn then subsamples without weights.
+
+% ----------------------------------------------------------------------------
 \subsection{Interactive system model (Study 5)}
 \label{sec:m-live}
 

@@ -32,6 +32,63 @@ import numpy as np
 from scipy.signal import butter, sosfiltfilt
 from sklearn.ensemble import HistGradientBoostingClassifier
 
+
+def _weighted_edges(x, w, pct):
+    """Vectorised twin of sklearn.utils.stats._weighted_percentile(x, w, pct, average=True) for a 1D
+    float64 array with no zero weights (what the binner passes): same sort call, same cumulative
+    weights, same "averaged_inverted_cdf" rule, but one searchsorted for all percentiles instead of
+    a Python loop over them."""
+    idx = np.argsort(x.reshape(-1, 1), axis=0)[:, 0]  # same (unstable) sort sklearn uses internally
+    xs, cdf = x[idx], np.cumsum(w[idx])
+    adj = pct / 100 * cdf[-1]
+    zero = adj == 0
+    adj[zero] = np.nextafter(adj[zero], adj[zero] + 1)
+    last = len(x) - 1
+    pi = np.clip(np.searchsorted(cdf, adj), 0, last)
+    above = (cdf[pi] - adj) > np.finfo(np.float64).eps
+    return np.where(above, xs[pi], (xs[pi] + xs[np.clip(pi + 1, 0, last)]) / 2)
+
+
+def _speed_up_weighted_binning():
+    """scikit-learn 1.9 bins each feature with sample weights (class_weight="balanced") by calling
+    _weighted_percentile once PER BIN EDGE (254 calls x n_features, each re-sorting the column,
+    through array-API wrappers). With fewer than 200k training rows (no subsampling, so the weighted
+    path is taken) this dominated fit time: 4,500 rows x 252 features took ~55 s. Replace it with a
+    vectorised equivalent (_weighted_edges); thresholds and model outputs are identical (checked
+    bit-for-bit on random, tied, discrete and missing-value features)."""
+    import sklearn.ensemble._hist_gradient_boosting.binning as B
+
+    orig = B._find_binning_thresholds
+    if getattr(orig, "_vectorised", False):
+        return
+
+    def fast(col_data, max_bins, sample_weight=None):
+        if sample_weight is None:
+            return orig(col_data, max_bins, None)
+        missing = np.isnan(col_data)
+        if missing.any():
+            col_data, sample_weight = col_data[~missing], sample_weight[~missing]
+        nz = sample_weight != 0
+        col_data, sample_weight = col_data[nz], sample_weight[nz]
+        order = np.argsort(col_data)
+        col_data, sample_weight = col_data[order], sample_weight[order]
+        distinct = np.unique(col_data).astype(B.X_DTYPE)
+        if len(distinct) <= max_bins:  # few distinct values: the original (unweighted) midpoint rule applies
+            return orig(col_data, max_bins, sample_weight)
+        pct = np.linspace(0, 100, num=max_bins + 1)[1:-1]
+        if col_data.dtype != np.float64 or sample_weight.dtype != np.float64:
+            return orig(col_data, max_bins, sample_weight)  # only the float64 case is mirrored exactly
+        thr = _weighted_edges(col_data, sample_weight, pct)
+        thr = np.unique(thr) if np.unique(thr).shape[0] != thr.shape[0] else thr
+        np.clip(thr, a_min=None, a_max=B.ALMOST_INF, out=thr)
+        return thr
+
+    fast._vectorised = True
+    B._find_binning_thresholds = fast
+
+
+_speed_up_weighted_binning()
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "chbmit"
 FEAT = DATA / "features"

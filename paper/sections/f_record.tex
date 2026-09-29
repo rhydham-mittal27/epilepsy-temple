@@ -77,6 +77,8 @@ This led to the body-signal review and the SeizeIT2 study.
 27 & Ceiling; seizure types; PPG & Signal-limited; tonic-clonic 100\%; PPG $\approx$ ECG; PPG crash fixed; duplicate queue stopped \\
 28 & Raw-EEG CNN & Stream stopped at 293/2,850 runs (slow Wi-Fi; captive-portal TLS failures; disk). 33 patients: CNN AUROC 0.715 vs features 0.830; fusion with ear-EEG features 19\%$\to$37\% at $\le$1 \FAd; NaN-loss bug (flat EEG, float16 overflow) fixed \\
 29 & This paper & Full LaTeX record, restructured into research-article format \\
+30 & Electrode stability (SeizeIT2) & Stable contact: up to 2$\times$ fewer false alarms; seizure visibility unchanged \\
+31 & Siena adult validation (streamed) & Ear-hook 96\% vs cap 91\% caught; cap 2--3$\times$ fewer false alarms; ECG helps ear-hook only; list typos and scikit-learn slowdown fixed \\
 \bottomrule
 \end{longtable}
 
@@ -109,6 +111,8 @@ SeizeIT2 & Stage-2 alarms grouped per patient although each recording's clock re
 SeizeIT2 & All-NaN ECG-waveform column crashed histogram binning for PPG & Column dropped for PPG \\
 SeizeIT2 & Failed queue step did not stop its batch; two copies ran & Stale copy killed; queues stop on failure \\
 SeizeIT2 CNN & Flat-EEG runs (median 0) divided by $\approx$0 overflowed float16 $\to$ NaN loss in every fold & 1 \uV{} scale floor, $\pm$50 clipping, finite-pool assert, fail-fast on non-finite loss; outputs deleted and re-run \\
+Siena & Seizure-list errors: file name given once and not matching (PN01), letter-O typo (PN06), end time off by one hour (PN00-3) & Parser carries names forward, maps to the only file, normalises O/0; hour typo corrected with a logged rule; all 47 seizures checked against recording length \\
+Tooling & scikit-learn 1.9 weighted binning called a percentile routine per bin edge: small-dataset fits 10--50$\times$ slower & Vectorised equivalent in \code{detect.py}; thresholds identical (200/200), predictions bit-identical; fit 33 s $\to$ 4 s \\
 Tooling & PyTorch index made the resolver look for all packages there & Explicit index \\
 Tooling & \code{uv sync --extra dl} removed TVB packages & Reinstall with \code{--extra tvb} \\
 \bottomrule
@@ -157,6 +161,8 @@ Command & Time \\
 \code{uv run detect/stage2.py [--personal --w 20] [--quality]} & $\approx$15--25 min \\
 \code{uv run --extra dl detect/cnn.py fetch} (raw EEG, resumable) & hours (network-bound) \\
 \code{uv run --extra dl detect/cnn.py train / eval / compare} (293 runs) & $\approx$17 + 1 + 10 min \\
+\code{uv run detect/analysis_electrodes.py} & $\approx$3 min \\
+\code{uv run detect/siena.py fetch --workers 2}; \code{run} & $\approx$46 min + 3 min \\
 \bottomrule
 \end{tabularx}
 \end{table}

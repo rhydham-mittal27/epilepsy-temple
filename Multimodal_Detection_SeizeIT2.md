@@ -695,6 +695,22 @@ A **late fusion** averages the feature and CNN probabilities with equal fixed we
 
 **For the device.** Raw-waveform deep learning is **not** a shortcut past the signal ceiling (§6.16) at this data size. It may earn a place later as an extra input to the personal verifier, or when trained on all 125 patients. That needs the full 47.6 GB raw stream, about 12 GB of disk.
 
+### 6.20 Is electrode quality the limit? (stable vs unstable contact)
+
+Contact stability was measured per patient as the IQR of ear-EEG log-variance over non-seizure windows of the **tuning period only**. The 71 patients were split at the median, and detection was scored on later data (`analysis_electrodes.py`).
+
+| Ear EEG, general | Stable (36 pts, 263 sz) | Unstable (35 pts, 386 sz) |
+|---|---|---|
+| FA/day at 50 / 60 / 70% caught | **95 / 136 / 183** | 150 / 201 / 374 |
+| Caught at ≤1 / 5 / 20 FA/day | 4% / 14% / 27% | 4% / 11% / 20% |
+| Seizures ever > 0.95 | 21% | 20% |
+
+- **False alarms:** stable contact gives up to 2× fewer. Per patient, instability tracks false alarms (ρ = +0.34, p = 0.004).
+- **Seizure visibility:** the same in both groups; instability vs how high seizures score gives ρ = −0.10 (n.s.).
+- **Conclusion:** electrode contact is a false-alarm problem, not the reason seizures are missed.
+
+The same holds for the fine-tuned and best models. Full tables, and an independent adult validation on the Siena dataset (ear-hook 96% caught vs cap 91%; ECG −27% to −48% false alarms for the ear-hook), are in [`Electrodes_and_Siena_Validation.md`](Electrodes_and_Siena_Validation.md).
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -765,6 +781,8 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 | ✅ | Split by seizure type, duration, lobe and side (§6.17) | Tonic-clonic 100%; seizures <30 s nearly invisible; temporal 2× better |
 | ✅ | CNN on the raw ear EEG, 33-patient subset (§6.19) | Weaker than features alone (AUROC 0.72 vs 0.83); fused with ear-EEG features it helps at strict budgets (19% → 37% at ≤1/day); mixed on top of the best model |
 | ★ | CNN on all 125 patients | Needs the full raw stream (~12 GB of disk); tests whether more patients fix the overfitting |
+| ✅ | Electrode stability (§6.20) | Contact drives false alarms (up to 2×), not seizure visibility |
+| ✅ | Adult validation on Siena (`Electrodes_and_Siena_Validation.md`) | Ear-hook 96% vs cap 91% caught; cap 2–3× fewer false alarms; ECG helps the ear-hook |
 | ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Slow pre-ictal autonomic change |
 
 ## 11. Reproduce
@@ -799,7 +817,7 @@ If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or 
 
 ## Appendix A. Experiment log (chronological)
 
-*Status (29 Sep 2026): experiments 1–22 are complete. The raw-EEG CNN (22) ran on a 33-patient subset.*
+*Status (29 Sep 2026): experiments 1–23 are complete. The raw-EEG CNN (22) ran on a 33-patient subset. Experiment 23 and the Siena validation are written up in `Electrodes_and_Siena_Validation.md`.*
 
 Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
 
@@ -828,6 +846,7 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 21 | PPG-quality heart signals | `run` + `personal --configs "EEG + PPG(sim) + context + HR-excess"` | ≈ ECG overall; responders 28% / 54% / 69% vs 33% / 60% / 75% at ≤1 / 5 / 20 per day (§6.18). **Crash caught:** the all-NaN ECG-waveform column broke histogram binning; fixed by dropping the column. **Queue mistake caught:** a failed step didn't stop its queue, so two copies ran; the stale one was stopped |
 
 | 22 | CNN on raw behind-the-ear EEG (32 Hz, 16 s context), alone and late-fused with the feature models, same subset and folds | `cnn.py fetch / train / eval / compare` | Stream stopped at 293/2,850 runs (33 patients, 101 seizures). Download was the bottleneck (0.3–0.7 MB/s per stream; captive-portal TLS failures; disk guard). CNN alone AUROC 0.715 vs features 0.830; ear-EEG features + CNN: 19% → 37% caught at ≤1/day; mixed on the best model (§6.19). **Bug caught:** flat-EEG runs overflowed float16 → NaN loss; fixed with a 1 µV scale floor, clipping and a fail-fast check |
+| 23 | Electrode stability: stable vs unstable ear-EEG contact (from tuning data), scored on later data | `analysis_electrodes.py` | Stable contact: up to 2× fewer false alarms; seizure visibility unchanged (20–21% reach 0.95 in both). Contact is a false-alarm problem, not the ceiling (§6.20) |
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.
