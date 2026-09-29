@@ -387,7 +387,9 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | ✅ | ~~Personal fine-tuning + sustained-alarm rules on SeizeIT2~~ (done: −62% with ECG; sustained rules don't help) |
 | ✅ | ~~Personal alarm thresholds~~ (no meaningful gain) |
 | ✅ | ~~Context features, HR-excess, bigger model, two-stage + personal alarm verifier~~ (done: best 19% of seizures at ≤1 false alarm/day, 39% for heart responders) |
-| ★★★ | Ear-EEG signal-quality gate; personal verifier on the fine-tuned detector with held-out calibration; PPG-quality heart rate |
+| ✅ | ~~PPG-quality heart rate, seizure-type split~~ (simulated in-ear PPG ≈ chest ECG; tonic-clonic 100% at ≤5 false alarms/day) |
+| ⏳ | CNN on the raw ear EEG (streaming + CPU training in progress) |
+| ★★★ | Hardware: dry ear-electrode contact quality and more / better-placed EEG channels (the remaining gap is a signal problem) |
 | ★★ | SeizeIT2 split by seizure type; degrade ECG to PPG-like beat timing (what the ear-hook would see) |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |

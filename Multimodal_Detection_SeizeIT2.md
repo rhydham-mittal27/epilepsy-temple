@@ -688,6 +688,8 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 | ★★★ | **Personal verifier on top of the fine-tuned detector**, with calibration on a held-out slice | Combines the two strongest levers; gives calibrated numbers |
 | ✅ | PPG-quality heart signals (§6.18) | Lose almost nothing vs chest ECG |
 | ✅ | Split by seizure type, duration, lobe and side (§6.17) | Tonic-clonic 100%; seizures <30 s nearly invisible; temporal 2× better |
+| ⏳ | **CNN on the raw ear EEG** (`detect/cnn.py`), alone and stacked into the best feature model | In progress: raw EEG streaming (47.6 GB at ~1.7 MB/s on Wi-Fi, ~7 h), then ~1–2 h of CPU training |
+| ⏳ | PPG results for heart responders | Fine-tuning + responder split running |
 | ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Slow pre-ictal autonomic change |
 
 ## 11. Reproduce
@@ -718,6 +720,8 @@ If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or 
 
 ## Appendix A. Experiment log (chronological)
 
+*Status (29 Sep 2026): experiments 1–21 are complete. Experiment 22 (raw-EEG CNN) and the PPG responder split are running.*
+
 Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
 
 | # | Experiment | Command / script | Outcome |
@@ -743,6 +747,8 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 19 | Sensitivity ceiling | analysis of cached outputs | 25% of seizures never exceed 0.5; only 30% reach 0.95, so the detector has plateaued (§6.16) |
 | 20 | Seizure type / duration / lobe / side split | `analysis_seizure_types.py` | Tonic-clonic 100% at ≤5/day; <30 s seizures 4%; temporal 43% vs 19% (§6.17) |
 | 21 | PPG-quality heart signals | `run --configs "EEG + PPG(sim) + context + HR-excess"` | ≈ ECG (§6.18). **Crash caught:** the all-NaN ECG-waveform column broke histogram binning; fixed by dropping the column. **Queue mistake caught:** a failed step didn't stop its queue, so two copies ran; the stale one was stopped |
+
+| 22 | CNN on raw behind-the-ear EEG (32 Hz, 16 s context, same patient folds), alone and stacked | `cnn.py fetch / train / eval` | **In progress.** Raw EEG streaming, ~7 h at current Wi-Fi speed. The first attempt ran at 2 workers and competed with a CPU job; restarted with 6 workers (resumable). Profiling showed the download (0.3–0.7 MB/s per stream today), not filtering (0.4 s/run), is the bottleneck |
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.
