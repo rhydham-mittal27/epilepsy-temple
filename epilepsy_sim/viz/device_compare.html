@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ear-hook vs Ear + Back + Parietal</title>
+<style>
+/* Stark-lab holographic HUD, one screen: top strip (title, JARVIS, controls, tonic-clonic gauge);
+   three columns (hologram MK-I | comparison: tonic-clonic then all seizures | hologram MK-II);
+   one-line footnote. Falls back to a scrolling stack on narrow screens. System fonts only (offline). */
+:root{
+  --bg:#02060d; --glass:rgba(8,26,44,.55); --edge:rgba(64,200,255,.35); --edge2:rgba(64,200,255,.12);
+  --fg:#cfefff; --dim:#6f98b5;
+  --a:#3fd8ff; --b:#ffb23f; --red:#ff3d5a; --cap:#b8c7d6; --good:#5dffb0; --bad:#ff6b7d;
+  --disp:"Bahnschrift","DIN Alternate","Segoe UI",sans-serif;
+  --mono:"Consolas","SFMono-Regular","Menlo",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--disp)}
+body{padding:10px 16px;overflow:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(30,120,190,.22), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(255,160,40,.10), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(64,200,255,.05) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, rgba(64,200,255,.05) 0 1px, transparent 1px 44px), var(--bg)}
+body::after{content:"";position:fixed;inset:0;z-index:50;pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px);mix-blend-mode:overlay}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px}
+
+/* panels with corner brackets */
+.hud{position:relative;background:var(--glass);border:1px solid var(--edge2);
+  box-shadow:0 0 26px rgba(40,170,255,.08), inset 0 0 40px rgba(40,170,255,.05)}
+.hud::before,.hud::after{content:"";position:absolute;width:16px;height:16px;pointer-events:none;z-index:4}
+.hud::before{left:-1px;top:-1px;border-left:2px solid var(--a);border-top:2px solid var(--a);box-shadow:-2px -2px 10px rgba(63,216,255,.35)}
+.hud::after{right:-1px;bottom:-1px;border-right:2px solid var(--a);border-bottom:2px solid var(--a);box-shadow:2px 2px 10px rgba(63,216,255,.35)}
+.hud.gold::before,.hud.gold::after{border-color:var(--b);box-shadow:0 0 10px rgba(255,178,63,.35)}
+.hud.redx::before,.hud.redx::after{border-color:var(--red);box-shadow:0 0 10px rgba(255,61,90,.45)}
+
+/* ---------- top strip */
+.top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:stretch}
+.head{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.sys{font:10px var(--mono);letter-spacing:.26em;color:var(--a);text-shadow:0 0 8px rgba(63,216,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sys b{color:var(--good);font-weight:400}
+h1{margin:2px 0 0;font:600 clamp(18px,2vw,28px) var(--disp);letter-spacing:.08em;text-transform:uppercase;text-shadow:0 0 18px rgba(63,216,255,.45);white-space:nowrap}
+h1 .x{color:var(--dim);font-weight:300;font-size:.7em;letter-spacing:.2em}
+h1 .ga{color:var(--a)} h1 .gb{color:var(--b);text-shadow:0 0 18px rgba(255,178,63,.45)}
+.jarvis{margin:3px 0 0;font:11px var(--mono);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jarvis::before{content:"JARVIS › ";color:var(--a)}
+.caret{display:inline-block;width:6px;height:11px;background:var(--a);margin-left:3px;vertical-align:-1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.ctrls{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+button{font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg);cursor:pointer;
+  background:rgba(8,30,50,.7);border:1px solid var(--edge);padding:5px 9px;clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
+button:hover{background:rgba(20,70,110,.8);text-shadow:0 0 6px var(--a)}
+button:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+button[aria-pressed="true"]{background:rgba(63,216,255,.2);border-color:var(--a);color:#fff;text-shadow:0 0 8px var(--a)}
+.banner{display:grid;grid-template-columns:auto auto;gap:4px 14px;align-items:center;padding:8px 16px 8px 10px;max-width:640px;
+  background:linear-gradient(90deg,rgba(255,61,90,.16),rgba(8,26,44,.5) 70%)}
+.reactor{position:relative;width:84px;height:84px}
+.reactor svg{width:100%;height:100%;overflow:visible}
+.reactor .num{position:absolute;inset:0;display:grid;place-items:center;font:700 19px var(--mono);color:#fff;text-shadow:0 0 12px var(--red),0 0 24px var(--red)}
+.spinA{transform-origin:60px 60px;animation:spin 14s linear infinite}
+.spinB{transform-origin:60px 60px;animation:spin 9s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btxt .t{font:600 11px var(--disp);letter-spacing:.18em;text-transform:uppercase;color:#ff8ea0;text-shadow:0 0 10px rgba(255,61,90,.6)}
+.btxt .h{font:600 15px var(--disp);margin-top:3px}
+.btxt .h em{font-style:normal;color:#fff;text-shadow:0 0 10px rgba(255,61,90,.7)}
+.btxt .s{font:10px var(--mono);color:var(--dim);margin-top:4px;line-height:1.45;max-width:62ch}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.pill{font:10px var(--mono);border:1px solid rgba(255,61,90,.45);padding:1px 7px;color:#ffc2cb;background:rgba(255,61,90,.08)}
+
+/* ---------- main three columns */
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,1fr);gap:10px;min-height:0}
+.card{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.card h2{margin:0;padding:8px 12px 0;font:600 13px var(--disp);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.card h2 .id{font:10px var(--mono);padding:1px 6px;border:1px solid currentColor;letter-spacing:.1em}
+.tag{font:10px var(--mono);color:var(--dim);letter-spacing:.08em;padding:2px 12px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.view{position:relative;flex:1;min-height:150px}
+.view canvas{position:absolute;inset:0;display:block;width:100%;height:100%;cursor:grab;z-index:1}
+.view canvas:active{cursor:grabbing}
+.reticle{position:absolute;inset:0;z-index:2;pointer-events:none}
+.reticle svg{width:100%;height:100%}
+.r1{transform-origin:50% 50%;transform-box:fill-box;animation:spin 30s linear infinite}
+.r2{transform-origin:50% 50%;transform-box:fill-box;animation:spin 18s linear infinite reverse}
+.beam{position:absolute;left:0;right:0;height:50px;z-index:2;pointer-events:none;top:0;
+  background:linear-gradient(180deg,transparent,rgba(63,216,255,.10) 45%,rgba(63,216,255,.35) 50%,transparent 52%);animation:sweep 5.5s ease-in-out infinite}
+.card.gold .beam{background:linear-gradient(180deg,transparent,rgba(255,178,63,.08) 45%,rgba(255,178,63,.3) 50%,transparent 52%)}
+@keyframes sweep{0%{top:-10%}50%{top:92%}100%{top:-10%}}
+.lbl{position:absolute;z-index:3;transform:translate(-50%,-150%);font:9px var(--mono);letter-spacing:.08em;padding:0 4px;
+  background:rgba(2,10,20,.8);border:1px solid currentColor;pointer-events:none;white-space:nowrap;text-shadow:0 0 6px currentColor}
+.corner{position:absolute;z-index:3;font:9px var(--mono);color:var(--dim);letter-spacing:.14em;pointer-events:none}
+.corner.tl{left:10px;top:6px}.corner.tr{right:10px;top:6px}
+.corner.bl{left:10px;bottom:6px;display:grid;gap:2px}
+.corner i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px;box-shadow:0 0 6px currentColor}
+.sec{font:10px var(--mono);letter-spacing:.18em;text-transform:uppercase;padding:4px 12px;border-top:1px solid var(--edge2);
+  display:flex;justify-content:space-between;gap:8px}
+.sec.tc{color:#ff8ea0;background:linear-gradient(90deg,rgba(255,61,90,.16),transparent);text-shadow:0 0 8px rgba(255,61,90,.5)}
+.sec.all{color:var(--a);background:linear-gradient(90deg,rgba(63,216,255,.10),transparent)}
+.sec small{letter-spacing:.04em;text-transform:none;color:var(--dim);text-shadow:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:grid;grid-template-columns:repeat(3,1fr)}
+.stat{padding:5px 12px 6px;border-top:1px solid var(--edge2);border-right:1px solid var(--edge2);min-width:0}
+.stat:last-child{border-right:0}
+.stat .k{font:9px var(--mono);color:var(--dim);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .v{font:700 clamp(17px,1.7vw,23px) var(--mono);font-variant-numeric:tabular-nums;text-shadow:0 0 12px currentColor;line-height:1.15}
+.card.cyan .stat .v{color:#dff7ff} .card.gold .stat .v{color:#fff1d8}
+.stat .n{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- centre comparison */
+.cmp{display:flex;flex-direction:column;min-height:0;padding:8px 12px;overflow:hidden}
+.blk{display:flex;flex-direction:column;min-height:0;flex:1}
+.blk + .blk{margin-top:8px;padding-top:8px;border-top:1px dashed var(--edge)}
+.blk h3{margin:0;font:600 12px var(--disp);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk h3.tc{color:#ff8ea0;text-shadow:0 0 10px rgba(255,61,90,.5)}
+.blk h3.al{color:var(--a);text-shadow:0 0 10px rgba(63,216,255,.4)}
+.note{color:var(--dim);font:10px var(--mono);margin:2px 0 6px;line-height:1.4}
+.rows{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:4px;min-height:0}
+.row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.6fr);gap:10px;align-items:center}
+.row .name{font-size:12px;line-height:1.2;min-width:0}
+.row .name small{display:block;font:10px var(--mono);margin-top:1px;text-shadow:0 0 8px currentColor}
+.bars{display:grid;gap:3px;min-width:0}
+.bar{position:relative;height:11px;background:rgba(20,60,90,.25);border:1px solid rgba(64,200,255,.1)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1);
+  -webkit-mask:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 8px);mask:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 8px)}
+.bar .fill.a{background:linear-gradient(90deg,rgba(63,216,255,.35),var(--a));filter:drop-shadow(0 0 5px var(--a))}
+.bar .fill.b{background:linear-gradient(90deg,rgba(255,178,63,.35),var(--b));filter:drop-shadow(0 0 5px var(--b))}
+.bar .val{position:absolute;top:0;bottom:0;display:flex;align-items:center;font:10px var(--mono);font-variant-numeric:tabular-nums;padding-left:5px;white-space:nowrap}
+.bar .capm{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--cap);box-shadow:0 0 6px var(--cap);transition:left 1.1s}
+.foot{color:var(--dim);font:10px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot b{color:var(--cap);font-weight:400}
+
+/* boot */
+#boot{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 45%,#06223a,#010408 70%);display:grid;place-items:center;transition:opacity .6s}
+#boot.gone{opacity:0;pointer-events:none}
+#boot .core{width:170px;height:170px}
+#boot svg{width:100%;height:100%}
+#boot pre{font:12px var(--mono);color:var(--a);text-shadow:0 0 8px var(--a);margin:20px 0 0;min-height:7.5em;width:min(560px,90vw);white-space:pre-wrap}
+#boot .skip{position:absolute;bottom:20px;right:24px;font:11px var(--mono);color:var(--dim);letter-spacing:.2em}
+
+/* narrow screens: stack and scroll */
+@media (max-width:1000px), (max-height:560px){
+  body{overflow:auto;height:auto}
+  .app{height:auto}
+  .top{grid-template-columns:1fr}
+  .banner{max-width:none}
+  .main{grid-template-columns:1fr}
+  .view{flex:none;height:340px}
+  .cmp{order:3}
+  .foot{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){
+  .spinA,.spinB,.r1,.r2,.beam,.caret{animation:none}
+  .bar .fill,.bar .capm{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div id="boot" role="presentation">
+  <div style="display:grid;justify-items:center">
+    <div class="core">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <defs><radialGradient id="cg"><stop offset="0" stop-color="#e8fbff"/><stop offset=".35" stop-color="#3fd8ff"/><stop offset="1" stop-color="#3fd8ff" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="60" cy="60" r="30" fill="url(#cg)"/>
+        <g class="spinA"><circle cx="60" cy="60" r="44" fill="none" stroke="#3fd8ff" stroke-width="2" stroke-dasharray="6 5" opacity=".9"/></g>
+        <g class="spinB"><circle cx="60" cy="60" r="52" fill="none" stroke="#3fd8ff" stroke-width="1" stroke-dasharray="30 12 4 12" opacity=".6"/></g>
+        <circle cx="60" cy="60" r="36" fill="none" stroke="#bff3ff" stroke-width="1.5" opacity=".8"/>
+      </svg>
+    </div>
+    <pre id="bootlog"></pre>
+  </div>
+  <div class="skip">CLICK TO SKIP</div>
+</div>
+
+<div class="app">
+  <div class="top">
+    <div class="head">
+      <div class="sys">STARK NEURO-WEARABLE LAB // SYS <b>ONLINE</b> // PROTOTYPE 1 ELECTRODE STUDY</div>
+      <h1><span class="ga">Ear-hook</span> <span class="x">vs</span> <span class="gb">Ear + Back + Parietal</span></h1>
+      <p class="jarvis"><span id="jtxt"></span><span class="caret"></span></p>
+      <div class="ctrls" role="group" aria-label="Controls">
+        <button id="ds-chb" aria-pressed="true">CHB-MIT · 23 children</button>
+        <button id="ds-siena" aria-pressed="false">Siena · 14 adults</button>
+        <button id="v-front">Front</button><button id="v-side">Side</button><button id="v-back">Back</button><button id="v-top">Top</button>
+        <button id="spin" aria-pressed="true">Auto-rotate</button>
+      </div>
+    </div>
+    <section class="hud redx banner" aria-label="Tonic-clonic alarm mode">
+      <div class="reactor">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,61,90,.18)" stroke-width="10"/>
+          <circle id="gauge" cx="60" cy="60" r="50" fill="none" stroke="#ff3d5a" stroke-width="10" stroke-dasharray="0 400" transform="rotate(-90 60 60)"
+            style="filter:drop-shadow(0 0 6px #ff3d5a);transition:stroke-dasharray 1.6s cubic-bezier(.2,.8,.2,1)"/>
+          <g class="spinA"><circle cx="60" cy="60" r="39" fill="none" stroke="#ff8ea0" stroke-width="1" stroke-dasharray="3 6" opacity=".8"/></g>
+          <g class="spinB"><circle cx="60" cy="60" r="59" fill="none" stroke="#ff3d5a" stroke-width="1" stroke-dasharray="20 10 2 10" opacity=".5"/></g>
+        </svg>
+        <div class="num" id="gnum">0%</div>
+      </div>
+      <div class="btxt">
+        <div class="t">▲ Tonic-clonic alarm mode · Prototype 1 target</div>
+        <div class="h"><em>87%</em> caught at <em>≤1 false alarm / day</em></div>
+        <div class="pills"><span class="pill">96% at ≤5/day</span><span class="pill">100% at ≤10/day</span><span class="pill">90% at 1.1/day</span></div>
+        <div class="s">Dedicated convulsive model · SeizeIT2 · 125 patients · 55 tonic-clonic seizures · never-seen patients. Shared by both devices.</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="main">
+    <section class="hud card cyan" aria-label="Device A">
+      <h2 style="color:var(--a)"><span class="id">MK-I</span>"?" Ear-hook · both ears</h2>
+      <div class="tag">2 EEG CH · T7–P7, T8–P8 · IN-EAR PPG · DISCREET</div>
+      <div class="view" id="viewA">
+        <canvas id="cA" aria-label="3D hologram of a head wearing the ear-hook"></canvas>
+        <div class="reticle" aria-hidden="true"><svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+          <g class="r1"><circle cx="200" cy="200" r="178" fill="none" stroke="rgba(63,216,255,.35)" stroke-width="1" stroke-dasharray="2 8"/></g>
+          <g class="r2"><circle cx="200" cy="200" r="165" fill="none" stroke="rgba(63,216,255,.25)" stroke-width="2" stroke-dasharray="60 30 10 30"/></g>
+          <path d="M200 8v22M200 370v22M8 200h22M370 200h22" stroke="rgba(63,216,255,.6)" stroke-width="1.5"/></svg></div>
+        <div class="beam"></div>
+        <div class="corner tl">TGT · SUBJECT A</div><div class="corner tr">CH 2</div>
+        <div class="corner bl"><div><i style="background:var(--a);color:var(--a)"></i>EAR-HOOK</div><div><i style="background:#fff;color:#fff"></i>EEG CHANNEL</div><div><i style="background:var(--red);color:var(--red)"></i>IN-EAR PPG</div></div>
+      </div>
+      <div id="statsA"></div>
+    </section>
+
+    <section class="hud cmp" aria-label="Side-by-side comparison">
+      <div class="blk">
+        <h3 class="tc">▲ Tonic-clonic only · Siena PN10</h3>
+        <p class="note">10 tonic-clonic seizures, 1 patient (frontal onset), EEG-only · exploratory</p>
+        <div class="rows" id="rowsTC"></div>
+      </div>
+      <div class="blk">
+        <h3 class="al" id="cmpTitle">◆ All seizures</h3>
+        <p class="note" id="cmpNote"></p>
+        <div class="rows" id="rows"></div>
+      </div>
+    </section>
+
+    <section class="hud gold card gold" aria-label="Device B">
+      <h2 style="color:var(--b)"><span class="id">MK-II</span>Ear + back + parietal</h2>
+      <div class="tag">6 EEG CH · + P7–O1, P8–O2, P3–O1, P4–O2 · UNDER HAIR</div>
+      <div class="view" id="viewB">
+        <canvas id="cB" aria-label="3D hologram of a head wearing ear-hooks, a back band and a parietal strap"></canvas>
+        <div class="reticle" aria-hidden="true"><svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+          <g class="r1"><circle cx="200" cy="200" r="178" fill="none" stroke="rgba(255,178,63,.35)" stroke-width="1" stroke-dasharray="2 8"/></g>
+          <g class="r2"><circle cx="200" cy="200" r="165" fill="none" stroke="rgba(255,178,63,.25)" stroke-width="2" stroke-dasharray="60 30 10 30"/></g>
+          <path d="M200 8v22M200 370v22M8 200h22M370 200h22" stroke="rgba(255,178,63,.6)" stroke-width="1.5"/></svg></div>
+        <div class="beam"></div>
+        <div class="corner tl">TGT · SUBJECT B</div><div class="corner tr">CH 6</div>
+        <div class="corner bl"><div><i style="background:var(--a);color:var(--a)"></i>EAR-HOOKS</div><div><i style="background:var(--b);color:var(--b)"></i>BACK BAND + PARIETAL</div><div><i style="background:#fff;color:#fff"></i>EEG CHANNEL</div></div>
+      </div>
+      <div id="statsB"></div>
+    </section>
+  </div>
+
+  <div class="foot"><b>▮</b> grey marker = full 18-channel cap · "FA/day at X%" = fewest false alarms still catching X% (lower is better) · "caught ≤N/day" higher is better · never-seen patients (leave-one-patient-out) · hospital gel electrodes at these positions, not the devices · slightly optimistic · details: False_Alarm_Reduction.md</div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script>
+"use strict";
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ---------------------------------------------------------------- measured results */
+const DATA = {
+  chb: {
+    name: "CHB-MIT", who: "23 children · 185 seizures",
+    A: {caught05: 88.6, fa05: 570, lat: 5, fa50: 26.1, fa70: 113.1, b1: 10, b5: 26, b20: 50, b50: 55},
+    B: {caught05: 87.0, fa05: 467, lat: 4, fa50: 9.9,  fa70: 69.4,  b1: 18, b5: 39, b20: 59, b50: 68},
+    CAP:{fa50: 14.1, fa70: 104.4, b1: 26, b5: 42, b20: 54, b50: 61}
+  },
+  siena: {
+    name: "Siena", who: "14 adults · 47 seizures",
+    A: {caught05: 95.7, fa05: 310, lat: 9, fa50: 27.1, fa70: 59.6, b1: 11, b5: 32, b20: 47, b50: 66},
+    B: {caught05: 91.5, fa05: 203, lat: 13, fa50: 10.2, fa70: 31.7, b1: 19, b5: 38, b20: 66, b50: 81},
+    CAP:{fa50: 9.5, fa70: 23.3, b1: 4, b5: 34, b20: 68, b50: 83}
+  }
+};
+// tonic-clonic seizures only: Siena patient PN10 (10 focal-to-bilateral tonic-clonic seizures), leave-one-patient-out
+const TC = {
+  A:  {fa50: 48.5, fa70: 59.6, fa90: 103.5, b5: 10, b20: 20, b50: 60},
+  B:  {fa50: 10.2, fa70: 12.3, fa90: 31.7,  b5: 20, b20: 80, b50: 90},
+  CAP:{fa50: 14.6, fa70: 19.4, fa90: 44.1,  b5: 20, b20: 80, b50: 90}
+};
+let ds = "chb";
+
+function barRows(A, B, CAP, rows, grow){
+  return rows.map(([t,key,lower,u])=>{
+    const a=A[key], b=B[key], c=CAP[key];
+    const max = Math.max(a,b,c)*1.15 || 1;
+    const better = lower ? b<a : b>a;
+    const pct = lower ? Math.round((b-a)/a*100) : (b-a);
+    const txt = lower ? `${pct>0?"+":""}${pct}% FA` : `${pct>=0?"+":""}${pct} pts`;
+    const w = v => grow ? 0 : v/max*100;
+    return `<div class="row"><div class="name">${t}<small style="color:var(${better?"--good":(a===b?"--dim":"--bad")})">MK-II ${txt}</small></div>
+      <div class="bars">
+        <div class="bar"><div class="fill a" data-w="${a/max*100}" style="width:${w(a)}%"></div><div class="val" style="left:${a/max*100}%">${a}${u}</div><div class="capm" style="left:${c/max*100}%" title="full cap ${c}${u}"></div></div>
+        <div class="bar"><div class="fill b" data-w="${b/max*100}" style="width:${w(b)}%"></div><div class="val" style="left:${b/max*100}%">${b}${u}</div><div class="capm" style="left:${c/max*100}%" title="full cap ${c}${u}"></div></div>
+      </div></div>`;
+  }).join("");
+}
+
+function renderStats(animate){
+  const d = DATA[ds];
+  for (const k of ["A","B"]) {
+    const s = d[k], t = TC[k], el = document.getElementById("stats"+k);
+    el.innerHTML = `
+      <div class="sec tc">▲ Tonic-clonic <small>Siena PN10 · exploratory</small></div>
+      <div class="stats">
+        <div class="stat"><div class="k">FA / day @70%</div><div class="v">${t.fa70}</div><div class="n">${t.fa90} at 90% caught</div></div>
+        <div class="stat"><div class="k">Caught ≤20/day</div><div class="v">${t.b20}%</div><div class="n">${t.b5}% ≤5 · ${t.b50}% ≤50</div></div>
+        <div class="stat"><div class="k">Shared baseline</div><div class="v">87%</div><div class="n">≤1/day · SeizeIT2</div></div>
+      </div>
+      <div class="sec all">◆ All seizures <small>${d.name} · ${d.who}</small></div>
+      <div class="stats">
+        <div class="stat"><div class="k">FA / day @50%</div><div class="v">${s.fa50}</div><div class="n">${s.fa70} at 70% caught</div></div>
+        <div class="stat"><div class="k">Caught ≤5/day</div><div class="v">${s.b5}%</div><div class="n">${s.b20}% ≤20 · ${s.b50}% ≤50</div></div>
+        <div class="stat"><div class="k">Default setting</div><div class="v">${s.caught05}%</div><div class="n">${s.fa05} FA/day · ${s.lat} s</div></div>
+      </div>`;
+  }
+  const grow = animate && !reduce;
+  document.getElementById("rowsTC").innerHTML = barRows(TC.A, TC.B, TC.CAP, [
+    ["FA/day at 50% caught","fa50",true,""],
+    ["FA/day at 70% caught","fa70",true,""],
+    ["FA/day at 90% caught","fa90",true,""],
+    ["Caught at ≤5 FA/day","b5",false,"%"],
+    ["Caught at ≤20 FA/day","b20",false,"%"],
+    ["Caught at ≤50 FA/day","b50",false,"%"],
+  ], grow);
+  document.getElementById("rows").innerHTML = barRows(d.A, d.B, d.CAP, [
+    ["FA/day at 50% caught","fa50",true,""],
+    ["FA/day at 70% caught","fa70",true,""],
+    ["Caught at ≤1 FA/day","b1",false,"%"],
+    ["Caught at ≤5 FA/day","b5",false,"%"],
+    ["Caught at ≤20 FA/day","b20",false,"%"],
+    ["Caught at ≤50 FA/day","b50",false,"%"],
+  ], grow);
+  if (grow) requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%")));
+  const cut = Math.round((1-d.B.fa50/d.A.fa50)*100);
+  document.getElementById("cmpTitle").textContent = `◆ All seizures · ${d.name}`;
+  document.getElementById("cmpNote").textContent = `${d.who} · MK-II −${cut}% false alarms at 50% caught ≈ full cap`;
+  document.getElementById("ds-chb").setAttribute("aria-pressed", ds==="chb");
+  document.getElementById("ds-siena").setAttribute("aria-pressed", ds==="siena");
+  jarvis(ds==="chb"
+    ? `CHB-MIT loaded: 23 children, 185 seizures. MK-II cuts false alarms by ${cut}% at 50% sensitivity. Tonic-clonic baseline 87% at ≤1 false alarm/day.`
+    : `Siena loaded: 14 adults, 47 seizures. MK-II cuts false alarms by ${cut}% at 50% sensitivity and matches the full cap.`);
+}
+document.getElementById("ds-chb").onclick = ()=>{ds="chb"; renderStats(true);};
+document.getElementById("ds-siena").onclick = ()=>{ds="siena"; renderStats(true);};
+
+let jt = null;
+function jarvis(msg){
+  const el = document.getElementById("jtxt");
+  clearInterval(jt);
+  if (reduce) { el.textContent = msg; return; }
+  let i = 0; el.textContent = "";
+  jt = setInterval(()=>{ el.textContent = msg.slice(0, ++i); if (i >= msg.length) clearInterval(jt); }, 16);
+}
+
+/* ---------------------------------------------------------------- boot sequence */
+function gauge(){
+  const C = 2*Math.PI*50;
+  document.getElementById("gauge").setAttribute("stroke-dasharray", `${C*.87} ${C}`);
+  const n = document.getElementById("gnum"); let x = 0;
+  if (reduce) { n.textContent = "87%"; return; }
+  const iv = setInterval(()=>{ x += 2; n.textContent = Math.min(x,87)+"%"; if (x >= 87) clearInterval(iv); }, 22);
+}
+function boot(){
+  const box = document.getElementById("boot"), log = document.getElementById("bootlog");
+  const lines = ["> initialising neuro-wearable lab ...",
+                 "> loading electrode maps (10-20 system) ............ OK",
+                 "> loading CHB-MIT · Siena · SeizeIT2 results ........ OK",
+                 "> rendering hologram subjects A / B ................ OK",
+                 "> tonic-clonic alarm mode: 87% at ≤1 false alarm/day",
+                 "> all systems nominal. Welcome back."];
+  let done = false;
+  const finish = ()=>{ if (done) return; done = true; box.classList.add("gone"); renderStats(true); gauge(); resize(); };
+  box.addEventListener("click", finish);
+  if (reduce || location.hash === "#noboot") { finish(); return; }
+  let i = 0;
+  const step = ()=>{ if (done) return; log.textContent += lines[i++] + "\n"; if (i < lines.length) setTimeout(step, 330); else setTimeout(finish, 650); };
+  setTimeout(step, 250);
+}
+
+/* ---------------------------------------------------------------- 3D hologram heads */
+const RX=0.80, RY=1.0, RZ=0.95;
+const deg = Math.PI/180;
+function scalp(az, el, out=1.0){
+  const a=az*deg, e=el*deg;
+  return new THREE.Vector3(Math.sin(a)*Math.cos(e)*RX*out, 0.08+Math.sin(e)*RY*out, Math.cos(a)*Math.cos(e)*RZ*out);
+}
+const E = { T7:[-90,8], T8:[90,8], P7:[-128,6], P8:[128,6], O1:[-163,8], O2:[163,8], P3:[-148,44], P4:[148,44], M1:[-108,-22], M2:[108,-22] };
+const CYAN = 0x3fd8ff, GOLD = 0xffb23f, RED = 0xff3d5a;
+
+function makeScene(canvas, device){
+  const accent = device==="A" ? CYAN : GOLD;
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x02060d, 0.08);
+  const cam = new THREE.PerspectiveCamera(34, 1, .1, 50);
+  scene.add(new THREE.AmbientLight(0x4488cc, .5));
+  const key = new THREE.DirectionalLight(0xffffff, .7); key.position.set(2,3,4); scene.add(key);
+  const rim = new THREE.PointLight(accent, 1.2, 8); rim.position.set(-2,1.5,-2.5); scene.add(rim);
+  const root = new THREE.Group(); scene.add(root);
+  const add = (geo, mat, pos) => { const m = new THREE.Mesh(geo, mat); if (pos) m.position.copy(pos); root.add(m); return m; };
+  const glass = new THREE.MeshPhongMaterial({color:0x0f3a5c, transparent:true, opacity:.42, shininess:90, specular:0x88ddff, depthWrite:false});
+  const glow = (c, op) => new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:op, blending:THREE.AdditiveBlending, depthWrite:false});
+  const headGeo = new THREE.SphereGeometry(1, 64, 48); headGeo.scale(RX, RY, RZ); headGeo.translate(0,.08,0);
+  add(headGeo, glass);
+  add(headGeo, new THREE.MeshBasicMaterial({color:CYAN, wireframe:true, transparent:true, opacity:.10, blending:THREE.AdditiveBlending, depthWrite:false}));
+  const halo = add(headGeo.clone(), new THREE.MeshBasicMaterial({color:CYAN, transparent:true, opacity:.06, side:THREE.BackSide, blending:THREE.AdditiveBlending, depthWrite:false}));
+  halo.scale.setScalar(1.06);
+  const brain = add(new THREE.SphereGeometry(.62, 32, 24), glow(0x6a3cff, .14)); brain.scale.set(1,.85,1.15); brain.position.y=.22;
+  add(new THREE.CylinderGeometry(.34,.42,.9,32,1,true), glass, new THREE.Vector3(0,-.98,-.1));
+  const nose = add(new THREE.ConeGeometry(.1,.28,16), glass, new THREE.Vector3(0,.02,RZ+.08)); nose.rotation.x = Math.PI/2;
+  for (const s of [-1,1]) {
+    const ear = add(new THREE.TorusGeometry(.14,.045,12,24), glass, new THREE.Vector3(s*(RX+.02), 0, -.05));
+    ear.scale.set(1,1.45,1); ear.rotation.y = Math.PI/2;
+    add(new THREE.SphereGeometry(.045,16,12), new THREE.MeshBasicMaterial({color:0xaee9ff, transparent:true, opacity:.3, depthWrite:false}), new THREE.Vector3(s*.27,.2,RZ*.9));
+  }
+  const rings = [];
+  for (const [r, op, w] of [[1.25,.5,.012],[1.45,.28,.006],[1.62,.18,.02]]) {
+    const ring = add(new THREE.RingGeometry(r, r+w, 96), new THREE.MeshBasicMaterial({color:accent, transparent:true, opacity:op, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false}), new THREE.Vector3(0,-1.42,0));
+    ring.rotation.x = -Math.PI/2; rings.push(ring);
+  }
+  const ticks = add(new THREE.RingGeometry(1.33, 1.4, 48, 1, 0, Math.PI*1.2), new THREE.MeshBasicMaterial({color:accent, transparent:true, opacity:.45, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false}), new THREE.Vector3(0,-1.42,0));
+  ticks.rotation.x = -Math.PI/2; rings.push(ticks);
+  const scan = add(new THREE.RingGeometry(0, 1.05, 64), new THREE.MeshBasicMaterial({color:accent, transparent:true, opacity:.10, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false}));
+  scan.rotation.x = -Math.PI/2;
+  const scanEdge = add(new THREE.RingGeometry(1.0, 1.04, 96), new THREE.MeshBasicMaterial({color:accent, transparent:true, opacity:.7, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false}));
+  scanEdge.rotation.x = -Math.PI/2;
+  const pg = new THREE.BufferGeometry(), N = 260, P = new Float32Array(N*3);
+  for (let i=0;i<N;i++){ const r=1.3+Math.random()*1.1, a=Math.random()*Math.PI*2; P[i*3]=Math.cos(a)*r; P[i*3+1]=-1.3+Math.random()*2.8; P[i*3+2]=Math.sin(a)*r; }
+  pg.setAttribute("position", new THREE.BufferAttribute(P,3));
+  const dust = new THREE.Points(pg, new THREE.PointsMaterial({color:accent, size:.022, transparent:true, opacity:.55, blending:THREE.AdditiveBlending, depthWrite:false}));
+  root.add(dust);
+  const tubeMat = c => new THREE.MeshPhongMaterial({color:c, emissive:c, emissiveIntensity:.55, shininess:100});
+  const tube = (pts, r, c) => { add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 100, r, 12, false), tubeMat(c));
+                               add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 100, r*2.6, 12, false), glow(c, .14)); };
+  for (const s of [-1,1]) {
+    const x = s*(RX+.05);
+    tube([new THREE.Vector3(s*(RX-.02),-.06,.02), new THREE.Vector3(x,.12,.08), new THREE.Vector3(x,.26,-.02),
+          new THREE.Vector3(x,.22,-.2), new THREE.Vector3(x,.04,-.3), new THREE.Vector3(x*.98,-.18,-.28)], .028, CYAN);
+    add(new THREE.SphereGeometry(.05,16,12), new THREE.MeshBasicMaterial({color:RED}), new THREE.Vector3(s*(RX-.02),-.06,.02));
+    add(new THREE.SphereGeometry(.1,16,12), glow(RED, .25), new THREE.Vector3(s*(RX-.02),-.06,.02));
+  }
+  const used = device==="A" ? ["T7","P7","T8","P8","M1","M2"] : ["T7","P7","T8","P8","O1","O2","P3","P4","M1","M2"];
+  if (device==="B") {
+    const band=[]; for (let t=0;t<=32;t++){ const az=-128-(t/32)*104; band.push(scalp(az<-180?az+360:az, 6, 1.04)); }
+    tube(band, .026, GOLD);
+    const strap=[]; for (let t=0;t<=40;t++){ const u=t/40; const az=-100-u*160; strap.push(scalp(az<-180?az+360:az, 18+Math.sin(u*Math.PI)*42, 1.04)); }
+    tube(strap, .022, GOLD);
+  }
+  const labels=[], view = canvas.parentElement;
+  for (const n of used) {
+    const [az,el] = E[n]; const p = scalp(az, el, 1.05);
+    const isRef = n[0]==="M";
+    const col = isRef ? 0x9fb4c8 : (["O1","O2","P3","P4"].includes(n) ? GOLD : CYAN);
+    const m = add(new THREE.SphereGeometry(isRef?.04:.055,20,14), new THREE.MeshPhongMaterial({color:col, emissive:col, emissiveIntensity:1}), p);
+    m.userData.glow = add(new THREE.SphereGeometry(.12,16,12), glow(col, .22), p);
+    const div=document.createElement("div"); div.className="lbl"; div.textContent = isRef ? "REF" : n;
+    div.style.color = isRef ? "var(--dim)" : (col===GOLD?"var(--b)":"var(--a)"); view.appendChild(div);
+    labels.push({div, obj:m});
+  }
+  const pairs = device==="A" ? [["T7","P7"],["T8","P8"]] : [["T7","P7"],["T8","P8"],["P7","O1"],["P8","O2"],["P3","O1"],["P4","O2"]];
+  const pulses=[];
+  for (const [a,b] of pairs) {
+    const [aa,ae]=E[a], [ba,be]=E[b]; const pts=[];
+    for (let t=0;t<=24;t++){ const u=t/24; pts.push(scalp(aa+(ba-aa)*u, ae+(be-ae)*u, 1.075)); }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    add(new THREE.TubeGeometry(curve, 40, .01, 6, false), glow(0xffffff, .6));
+    const pulse = add(new THREE.SphereGeometry(.032,12,8), new THREE.MeshBasicMaterial({color:0xffffff}));
+    const trail = add(new THREE.SphereGeometry(.07,12,8), glow(0xffffff, .25));
+    pulses.push({curve, pulse, trail, off:Math.random()});
+  }
+  return {renderer, scene, cam, root, labels, pulses, canvas, view, rings, scan, scanEdge, dust, brain};
+}
+
+const scenes = [makeScene(document.getElementById("cA"),"A"), makeScene(document.getElementById("cB"),"B")];
+let yaw = -2.45, pitch = 0.3, spin = !reduce, target = null;
+document.getElementById("spin").setAttribute("aria-pressed", spin);
+function resize(){
+  for (const s of scenes) { const w = s.view.clientWidth, h = s.view.clientHeight; if (!w || !h) continue;
+    s.renderer.setSize(w, h, false); s.cam.aspect = w/h; s.cam.updateProjectionMatrix(); }
+}
+addEventListener("resize", resize);
+if (window.ResizeObserver) { const ro = new ResizeObserver(resize); scenes.forEach(s=>ro.observe(s.view)); }
+renderStats(false); resize(); boot();
+
+let drag=null;
+const stopSpin = ()=>{ spin=false; document.getElementById("spin").setAttribute("aria-pressed",false); };
+for (const s of scenes) {
+  s.canvas.addEventListener("pointerdown", e=>{drag={x:e.clientX,y:e.clientY,yaw,pitch}; s.canvas.setPointerCapture(e.pointerId); stopSpin(); target=null;});
+  s.canvas.addEventListener("pointermove", e=>{ if(!drag) return; yaw = drag.yaw + (e.clientX-drag.x)*.01; pitch = Math.max(-.6, Math.min(1.3, drag.pitch + (e.clientY-drag.y)*.008)); });
+  s.canvas.addEventListener("pointerup", ()=>drag=null);
+}
+const views = {front:[0,.12], side:[-Math.PI/2,.12], back:[Math.PI,.2], top:[Math.PI,1.25]};
+for (const [k,v] of Object.entries(views)) document.getElementById("v-"+k).onclick = ()=>{target=v; stopSpin();};
+document.getElementById("spin").onclick = ()=>{spin=!spin; target=null; document.getElementById("spin").setAttribute("aria-pressed",spin);};
+
+const tmp = new THREE.Vector3();
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(.05, (now-last)/1000); last = now;
+  if (spin) yaw += dt*.32;
+  if (target) {
+    const dy = ((target[0]-yaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
+    yaw += dy*Math.min(1,dt*4); pitch += (target[1]-pitch)*Math.min(1,dt*4);
+  }
+  const t = now/1000;
+  for (const s of scenes) {
+    const r = s.cam.aspect < .9 ? 5.1/Math.max(s.cam.aspect,.55)*.9 : 5.1;   // pull back when the view is tall and narrow
+    s.cam.position.set(Math.sin(yaw)*Math.cos(pitch)*r, Math.sin(pitch)*r + .05, Math.cos(yaw)*Math.cos(pitch)*r);
+    s.cam.lookAt(0,-.1,0);
+    if (!reduce) {
+      s.rings.forEach((g,i)=> g.rotation.z = t*(i%2 ? -.25 : .18)*(1+i*.3));
+      const y = -.9 + ((t*.35)%1)*2.1, k = Math.max(0, 1-((y-.08)/1.0)**2), rad = Math.sqrt(k);
+      s.scan.position.y = s.scanEdge.position.y = y;
+      s.scan.scale.setScalar(Math.max(rad,.001)*RX); s.scanEdge.scale.setScalar(Math.max(rad,.001)*RX*1.02);
+      s.dust.rotation.y = t*.05;
+      s.brain.material.opacity = .11 + .05*Math.sin(t*2.2);
+    }
+    for (const p of s.pulses) { const u = (t*.45 + p.off)%1; p.pulse.position.copy(p.curve.getPoint(u)); p.trail.position.copy(p.curve.getPoint(Math.max(0,u-.04))); }
+    for (const L of s.labels) {
+      L.obj.userData.glow.scale.setScalar(1 + .3*Math.sin(t*3 + L.obj.position.x*4));
+      tmp.copy(L.obj.position).project(s.cam);
+      const toCam = s.cam.position.clone().sub(L.obj.position).normalize();
+      const facing = L.obj.position.clone().normalize().dot(toCam) > -0.3;
+      L.div.style.display = facing && tmp.z < 1 ? "block" : "none";
+      L.div.style.left = ((tmp.x+1)/2*s.view.clientWidth)+"px";
+      L.div.style.top = ((1-tmp.y)/2*s.view.clientHeight)+"px";
+    }
+    s.renderer.render(s.scene, s.cam);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

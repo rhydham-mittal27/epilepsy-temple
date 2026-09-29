@@ -142,6 +142,8 @@ epilepsy_temple/
     │   └── results_siena/           14-patient Siena metrics
     └── viz/
         ├── epilepsy_live.html       Epilepsy Live Lab (open in a browser, works offline)
+        ├── device_compare.html      3D HUD: ear-hook (MK-I) vs ear + back + parietal (MK-II), tonic-clonic + all-seizure stats (offline)
+        ├── lib/three.min.js         three.js r128 (MIT), local copy so the 3D page works offline
         ├── data.js                  data for the lab (regenerate with export_data.py)
         └── export_data.py           packs simulation + EEG data for the lab
 ```
@@ -160,6 +162,7 @@ uv sync                                    # numpy, scipy, matplotlib, numba, mn
 | What | Command | Time |
 |---|---|---|
 | **Open the live lab** | double-click `viz/epilepsy_live.html` | instant |
+| **Open the device comparison (3D)** | double-click `viz/device_compare.html` (add `#noboot` to skip the intro) | instant |
 | Classic models (spiking network + Epileptor) | `uv run main.py` | ~10 s |
 | Validate the ionic model (Cressman 2009 Fig. 1) | `uv run ionic.py validate` | ~7 s |
 | Healthy / epileptic tissue | `uv run ionic.py healthy --t 90 --save` / `uv run ionic.py epileptic --t 120 --save` | ~6 / 7 min |
@@ -390,6 +393,10 @@ The ear-hook catches as many adult seizures as the full cap; the cap has 2–3×
 **Seizure-cluster prior** (lower the bar for 12 h after a confirmed seizure): −24% to −33% false alarms. **Resting mode** (alarms only after 10 min lying still, per accelerometer): same false-alarm rate per hour, but about 60% fewer alarms per day (rest-time seizures only). SeizeIT2 anonymises clock times (all `00.00.00`), so clock-based night mode could not be tested.
 
 **Eight kinds of false alarm**: muscle/chewing 12%, big movements 12%, electrode contact 8%, heart surge without movement 10%, bursts from 13 noisy patients 16%, subtle 42%. A type-aware verifier gave no gain with SeizeIT2's sensors; the types define Prototype 1's extra sensors (jaw EMG, head IMU, contact impedance). Full write-up: [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md).
+
+**See it in 3D:** [`epilepsy_sim/viz/device_compare.html`](epilepsy_sim/viz/device_compare.html) is a one-screen Stark-style HUD.
+- **Heads:** two hologram heads wearing MK-I (ear-hook) and MK-II (ear + back + parietal), with their electrodes and EEG channels.
+- **Stats:** tonic-clonic first (87% at ≤1 false alarm/day shared baseline; Siena PN10 per-device check), then all seizures (CHB-MIT or Siena), with bars against the full cap.
 
 ### 6.9 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
