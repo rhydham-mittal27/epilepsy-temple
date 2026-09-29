@@ -316,7 +316,7 @@ Takeaways:
    **It has plateaued, and the reason is known:** a quarter of all seizures never push the detector above 0.5, and only 30% ever reach 0.95. The remaining gap is a *signal* problem (too little brain information from two behind-the-ear electrodes), not an alarm-logic problem. Signal-quality features, a bigger model and alarm rules no longer help. The next gains must come from hardware: better electrode contact and more or better-placed EEG channels.
 
    **Good news for the ear-hook:**
-   - simulated **in-ear PPG** heart signals, with literature-based noise and motion dropouts, perform about as well as a chest ECG;
+   - simulated **in-ear PPG** heart signals, with literature-based noise and motion dropouts, perform nearly as well as a chest ECG: about 2–4 points lower overall, and 5–6 points lower for heart responders at strict budgets;
    - **100% of focal-to-bilateral tonic-clonic seizures** (the SUDEP-risk ones) are caught at ≤5 false alarms/day;
    - temporal-lobe seizures are caught about twice as often as others.
    - The blind spot is **short focal seizures under 30 s**, over half of all seizures and nearly invisible to two ear electrodes.

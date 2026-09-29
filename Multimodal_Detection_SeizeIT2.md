@@ -614,9 +614,23 @@ On a sample recording the simulated PPG heart rate differs from ECG by **2.7 bpm
 | EEG + **ECG** + context + HR-excess | 39.6 | 92.5 | 154.9 | 368.0 | 28% | 34% | 50% |
 | EEG + **PPG (sim)** + context + HR-excess | 44.8 | **83.5** | 175.2 | 376.5 | 26% | 35% | **53%** |
 
-**Finding: PPG-quality heart signals lose almost nothing.** The two setups are within noise of each other, better at some operating points and worse at others. The detector relies on **heart-rate changes** (tachycardia and its timing relative to movement), which PPG measures well. It relies much less on fine beat-to-beat variability, which PPG measures poorly.
+**Personalised (71 patients, later data):**
 
-**For the device:** an in-ear PPG sensor should deliver essentially the full benefit measured with chest ECG. A chest strap is not needed.
+| Setup | Group | ≤1/day | ≤5/day | ≤20/day |
+|---|---|---|---|---|
+| ECG, fine-tuned | responders | 33% | 60% | 75% |
+| **PPG (sim), fine-tuned** | responders | **28%** | **54%** | **69%** |
+| ECG, fine-tuned | all | 15% | 27% | 41% |
+| **PPG (sim), fine-tuned** | all | **13%** | **25%** | **37%** |
+| ECG, general, calibrated shared threshold | all | 14% at 1.0/day | 25% at 4.3/day | 38% at 20.2/day |
+| **PPG (sim), general, calibrated shared threshold** | all | **11% at 0.7/day** | **22% at 4.1/day** | **37% at 18.7/day** |
+
+**Findings:**
+- **Overall, PPG-quality heart signals lose little:** within noise for the general model, and 2–4 points for the personalised one.
+- **Heart responders lose about 5–6 points at strict budgets** (e.g. 60% → 54% at ≤5/day). They are the patients whose detection leans most on the heart, so they feel PPG's extra noise most.
+- **Why the loss is small:** the detector relies on **heart-rate changes** (tachycardia and its timing relative to movement), which PPG measures well. It relies much less on fine beat-to-beat variability, which PPG measures poorly.
+
+**For the device:** an in-ear PPG sensor should deliver most of the benefit measured with chest ECG, without a chest strap. For heart responders it is worth investing in PPG signal quality (fit, motion rejection), since that is where the residual loss is.
 
 **Caveat.** This is a feature-level simulation, not real PPG. Real in-ear PPG during seizures, with jaw clenching and head movement, may lose more data than modelled.
 
@@ -686,10 +700,9 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 | ✅ | Sensitivity ceiling (§6.16) | 25% of seizures never exceed 0.5, so the gap is a signal problem |
 | ★★★ | **Hardware: electrode contact / more EEG channels** | The remaining gap is information, not alarm logic (§6.16) |
 | ★★★ | **Personal verifier on top of the fine-tuned detector**, with calibration on a held-out slice | Combines the two strongest levers; gives calibrated numbers |
-| ✅ | PPG-quality heart signals (§6.18) | Lose almost nothing vs chest ECG |
+| ✅ | PPG-quality heart signals (§6.18) | Little loss overall; responders −5–6 points at strict budgets |
 | ✅ | Split by seizure type, duration, lobe and side (§6.17) | Tonic-clonic 100%; seizures <30 s nearly invisible; temporal 2× better |
 | ⏳ | **CNN on the raw ear EEG** (`detect/cnn.py`), alone and stacked into the best feature model | In progress: raw EEG streaming (47.6 GB at ~1.7 MB/s on Wi-Fi, ~7 h), then ~1–2 h of CPU training |
-| ⏳ | PPG results for heart responders | Fine-tuning + responder split running |
 | ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Slow pre-ictal autonomic change |
 
 ## 11. Reproduce
@@ -720,7 +733,7 @@ If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or 
 
 ## Appendix A. Experiment log (chronological)
 
-*Status (29 Sep 2026): experiments 1–21 are complete. Experiment 22 (raw-EEG CNN) and the PPG responder split are running.*
+*Status (29 Sep 2026): experiments 1–21 are complete, including the PPG responder split. Experiment 22 (raw-EEG CNN) is running.*
 
 Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
 
@@ -746,7 +759,7 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 18 | Signal-quality features in the verifier (general and personal) | `stage2.py --quality [--personal]` | No gain, ±1–3 points (§6.15) |
 | 19 | Sensitivity ceiling | analysis of cached outputs | 25% of seizures never exceed 0.5; only 30% reach 0.95, so the detector has plateaued (§6.16) |
 | 20 | Seizure type / duration / lobe / side split | `analysis_seizure_types.py` | Tonic-clonic 100% at ≤5/day; <30 s seizures 4%; temporal 43% vs 19% (§6.17) |
-| 21 | PPG-quality heart signals | `run --configs "EEG + PPG(sim) + context + HR-excess"` | ≈ ECG (§6.18). **Crash caught:** the all-NaN ECG-waveform column broke histogram binning; fixed by dropping the column. **Queue mistake caught:** a failed step didn't stop its queue, so two copies ran; the stale one was stopped |
+| 21 | PPG-quality heart signals | `run` + `personal --configs "EEG + PPG(sim) + context + HR-excess"` | ≈ ECG overall; responders 28% / 54% / 69% vs 33% / 60% / 75% at ≤1 / 5 / 20 per day (§6.18). **Crash caught:** the all-NaN ECG-waveform column broke histogram binning; fixed by dropping the column. **Queue mistake caught:** a failed step didn't stop its queue, so two copies ran; the stale one was stopped |
 
 | 22 | CNN on raw behind-the-ear EEG (32 Hz, 16 s context, same patient folds), alone and stacked | `cnn.py fetch / train / eval` | **In progress.** Raw EEG streaming, ~7 h at current Wi-Fi speed. The first attempt ran at 2 workers and competed with a CPU job; restarted with 6 workers (resumable). Profiling showed the download (0.3–0.7 MB/s per stream today), not filtering (0.4 s/run), is the bottleneck |
 

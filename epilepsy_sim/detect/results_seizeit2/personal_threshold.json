@@ -1603,5 +1603,540 @@
     }
    }
   }
+ },
+ "EEG + PPG(sim) + context + HR-excess | k=2": {
+  "patients": 71,
+  "general": {
+   "shared": {
+    "0.5": {
+     "sensitivity": 0.07395993836671803,
+     "detected": 48,
+     "seizures": 649,
+     "fa_per_24h": 0.35895690804132496,
+     "latency_median_s": 47.5,
+     "threshold_median": 0.99006,
+     "threshold_iqr": [
+      0.99006,
+      0.99006
+     ],
+     "fallback_patients": 0
+    },
+    "1": {
+     "sensitivity": 0.10631741140215717,
+     "detected": 69,
+     "seizures": 649,
+     "fa_per_24h": 0.657167262414118,
+     "latency_median_s": 42.0,
+     "threshold_median": 0.98696,
+     "threshold_iqr": [
+      0.98696,
+      0.98696
+     ],
+     "fallback_patients": 0
+    },
+    "2": {
+     "sensitivity": 0.1510015408320493,
+     "detected": 98,
+     "seizures": 649,
+     "fa_per_24h": 1.8223966100559574,
+     "latency_median_s": 34.0,
+     "threshold_median": 0.9804,
+     "threshold_iqr": [
+      0.9804,
+      0.9804
+     ],
+     "fallback_patients": 0
+    },
+    "3": {
+     "sensitivity": 0.17257318952234207,
+     "detected": 112,
+     "seizures": 649,
+     "fa_per_24h": 2.3856828349823442,
+     "latency_median_s": 34.0,
+     "threshold_median": 0.97755,
+     "threshold_iqr": [
+      0.97755,
+      0.97755
+     ],
+     "fallback_patients": 0
+    },
+    "5": {
+     "sensitivity": 0.21879815100154082,
+     "detected": 142,
+     "seizures": 649,
+     "fa_per_24h": 4.058974267851905,
+     "latency_median_s": 31.0,
+     "threshold_median": 0.97054,
+     "threshold_iqr": [
+      0.97054,
+      0.97054
+     ],
+     "fallback_patients": 0
+    },
+    "10": {
+     "sensitivity": 0.29275808936825887,
+     "detected": 190,
+     "seizures": 649,
+     "fa_per_24h": 8.167650261432609,
+     "latency_median_s": 26.0,
+     "threshold_median": 0.95573,
+     "threshold_iqr": [
+      0.95573,
+      0.95573
+     ],
+     "fallback_patients": 0
+    },
+    "20": {
+     "sensitivity": 0.37442218798151,
+     "detected": 243,
+     "seizures": 649,
+     "fa_per_24h": 18.671281632118763,
+     "latency_median_s": 21.0,
+     "threshold_median": 0.92378,
+     "threshold_iqr": [
+      0.92378,
+      0.92378
+     ],
+     "fallback_patients": 0
+    },
+    "50": {
+     "sensitivity": 0.4915254237288136,
+     "detected": 319,
+     "seizures": 649,
+     "fa_per_24h": 49.50844123985351,
+     "latency_median_s": 16.0,
+     "threshold_median": 0.84,
+     "threshold_iqr": [
+      0.84,
+      0.84
+     ],
+     "fallback_patients": 0
+    },
+    "100": {
+     "sensitivity": 0.5901386748844376,
+     "detected": 383,
+     "seizures": 649,
+     "fa_per_24h": 96.22806342492443,
+     "latency_median_s": 10.0,
+     "threshold_median": 0.72,
+     "threshold_iqr": [
+      0.72,
+      0.72
+     ],
+     "fallback_patients": 0
+    },
+    "200": {
+     "sensitivity": 0.699537750385208,
+     "detected": 454,
+     "seizures": 649,
+     "fa_per_24h": 192.0198561462294,
+     "latency_median_s": 8.0,
+     "threshold_median": 0.52,
+     "threshold_iqr": [
+      0.52,
+      0.52
+     ],
+     "fallback_patients": 0
+    }
+   },
+   "personal": {
+    "0.5": {
+     "sensitivity": 0.10939907550077041,
+     "detected": 71,
+     "seizures": 649,
+     "fa_per_24h": 1.1652293476418396,
+     "latency_median_s": 31.0,
+     "threshold_median": 0.98861,
+     "threshold_iqr": [
+      0.9759150000000001,
+      0.99006
+     ],
+     "fallback_patients": 12
+    },
+    "1": {
+     "sensitivity": 0.15408320493066255,
+     "detected": 100,
+     "seizures": 649,
+     "fa_per_24h": 1.6567241909599615,
+     "latency_median_s": 32.0,
+     "threshold_median": 0.98289,
+     "threshold_iqr": [
+      0.97428,
+      0.9877849999999999
+     ],
+     "fallback_patients": 12
+    },
+    "2": {
+     "sensitivity": 0.19106317411402157,
+     "detected": 124,
+     "seizures": 649,
+     "fa_per_24h": 2.7225500871442034,
+     "latency_median_s": 27.0,
+     "threshold_median": 0.97755,
+     "threshold_iqr": [
+      0.96626,
+      0.98289
+     ],
+     "fallback_patients": 12
+    },
+    "3": {
+     "sensitivity": 0.2218798151001541,
+     "detected": 144,
+     "seizures": 649,
+     "fa_per_24h": 4.070019095791639,
+     "latency_median_s": 26.0,
+     "threshold_median": 0.97428,
+     "threshold_iqr": [
+      0.96135,
+      0.97755
+     ],
+     "fallback_patients": 12
+    },
+    "5": {
+     "sensitivity": 0.27426810477657937,
+     "detected": 178,
+     "seizures": 649,
+     "fa_per_24h": 6.577195038111046,
+     "latency_median_s": 23.5,
+     "threshold_median": 0.96135,
+     "threshold_iqr": [
+      0.9456,
+      0.97054
+     ],
+     "fallback_patients": 12
+    },
+    "10": {
+     "sensitivity": 0.32973805855161786,
+     "detected": 214,
+     "seizures": 649,
+     "fa_per_24h": 10.923334832396012,
+     "latency_median_s": 21.0,
+     "threshold_median": 0.94929,
+     "threshold_iqr": [
+      0.92862,
+      0.95573
+     ],
+     "fallback_patients": 12
+    },
+    "20": {
+     "sensitivity": 0.3975346687211094,
+     "detected": 258,
+     "seizures": 649,
+     "fa_per_24h": 21.27786102589577,
+     "latency_median_s": 19.0,
+     "threshold_median": 0.92378,
+     "threshold_iqr": [
+      0.89,
+      0.93346
+     ],
+     "fallback_patients": 12
+    },
+    "50": {
+     "sensitivity": 0.49768875192604006,
+     "detected": 323,
+     "seizures": 649,
+     "fa_per_24h": 51.07680680729561,
+     "latency_median_s": 14.0,
+     "threshold_median": 0.84,
+     "threshold_iqr": [
+      0.8,
+      0.88
+     ],
+     "fallback_patients": 12
+    },
+    "100": {
+     "sensitivity": 0.5901386748844376,
+     "detected": 383,
+     "seizures": 649,
+     "fa_per_24h": 99.60778077448275,
+     "latency_median_s": 9.0,
+     "threshold_median": 0.72,
+     "threshold_iqr": [
+      0.68,
+      0.74
+     ],
+     "fallback_patients": 12
+    },
+    "200": {
+     "sensitivity": 0.6841294298921418,
+     "detected": 444,
+     "seizures": 649,
+     "fa_per_24h": 193.73732689085787,
+     "latency_median_s": 7.0,
+     "threshold_median": 0.52,
+     "threshold_iqr": [
+      0.48,
+      0.56
+     ],
+     "fallback_patients": 12
+    }
+   }
+  },
+  "finetuned": {
+   "shared": {
+    "0.5": {
+     "sensitivity": 0.4206471494607088,
+     "detected": 273,
+     "seizures": 649,
+     "fa_per_24h": 23.851305935853578,
+     "latency_median_s": 16.0,
+     "threshold_median": 0.84,
+     "threshold_iqr": [
+      0.84,
+      0.84
+     ],
+     "fallback_patients": 0
+    },
+    "1": {
+     "sensitivity": 0.4530046224961479,
+     "detected": 294,
+     "seizures": 649,
+     "fa_per_24h": 31.5053716980886,
+     "latency_median_s": 14.0,
+     "threshold_median": 0.8,
+     "threshold_iqr": [
+      0.8,
+      0.8
+     ],
+     "fallback_patients": 0
+    },
+    "2": {
+     "sensitivity": 0.4915254237288136,
+     "detected": 319,
+     "seizures": 649,
+     "fa_per_24h": 39.59570816394308,
+     "latency_median_s": 12.0,
+     "threshold_median": 0.76,
+     "threshold_iqr": [
+      0.76,
+      0.76
+     ],
+     "fallback_patients": 0
+    },
+    "3": {
+     "sensitivity": 0.522342064714946,
+     "detected": 339,
+     "seizures": 649,
+     "fa_per_24h": 48.39291361794047,
+     "latency_median_s": 12.0,
+     "threshold_median": 0.72,
+     "threshold_iqr": [
+      0.72,
+      0.72
+     ],
+     "fallback_patients": 0
+    },
+    "5": {
+     "sensitivity": 0.5546995377503852,
+     "detected": 360,
+     "seizures": 649,
+     "fa_per_24h": 57.526986324099724,
+     "latency_median_s": 11.0,
+     "threshold_median": 0.68,
+     "threshold_iqr": [
+      0.68,
+      0.68
+     ],
+     "fallback_patients": 0
+    },
+    "10": {
+     "sensitivity": 0.6040061633281972,
+     "detected": 392,
+     "seizures": 649,
+     "fa_per_24h": 78.04275422215392,
+     "latency_median_s": 9.5,
+     "threshold_median": 0.6,
+     "threshold_iqr": [
+      0.6,
+      0.6
+     ],
+     "fallback_patients": 0
+    },
+    "20": {
+     "sensitivity": 0.6425269645608629,
+     "detected": 417,
+     "seizures": 649,
+     "fa_per_24h": 103.30779813429332,
+     "latency_median_s": 9.0,
+     "threshold_median": 0.52,
+     "threshold_iqr": [
+      0.52,
+      0.52
+     ],
+     "fallback_patients": 0
+    },
+    "50": {
+     "sensitivity": 0.7226502311248074,
+     "detected": 469,
+     "seizures": 649,
+     "fa_per_24h": 163.75614144845244,
+     "latency_median_s": 7.0,
+     "threshold_median": 0.38,
+     "threshold_iqr": [
+      0.38,
+      0.38
+     ],
+     "fallback_patients": 0
+    },
+    "100": {
+     "sensitivity": 0.7719568567026194,
+     "detected": 501,
+     "seizures": 649,
+     "fa_per_24h": 253.30760638380823,
+     "latency_median_s": 6.0,
+     "threshold_median": 0.26,
+     "threshold_iqr": [
+      0.26,
+      0.26
+     ],
+     "fallback_patients": 0
+    },
+    "200": {
+     "sensitivity": 0.7889060092449923,
+     "detected": 512,
+     "seizures": 649,
+     "fa_per_24h": 396.42096441289954,
+     "latency_median_s": 5.0,
+     "threshold_median": 0.16,
+     "threshold_iqr": [
+      0.16,
+      0.16
+     ],
+     "fallback_patients": 0
+    }
+   },
+   "personal": {
+    "0.5": {
+     "sensitivity": 0.4391371340523883,
+     "detected": 285,
+     "seizures": 649,
+     "fa_per_24h": 30.804025123915547,
+     "latency_median_s": 15.0,
+     "threshold_median": 0.82,
+     "threshold_iqr": [
+      0.78,
+      0.84
+     ],
+     "fallback_patients": 12
+    },
+    "1": {
+     "sensitivity": 0.4637904468412943,
+     "detected": 301,
+     "seizures": 649,
+     "fa_per_24h": 35.55330113800077,
+     "latency_median_s": 14.0,
+     "threshold_median": 0.8,
+     "threshold_iqr": [
+      0.76,
+      0.8
+     ],
+     "fallback_patients": 12
+    },
+    "2": {
+     "sensitivity": 0.49768875192604006,
+     "detected": 323,
+     "seizures": 649,
+     "fa_per_24h": 44.5603583228531,
+     "latency_median_s": 12.0,
+     "threshold_median": 0.76,
+     "threshold_iqr": [
+      0.7,
+      0.76
+     ],
+     "fallback_patients": 12
+    },
+    "3": {
+     "sensitivity": 0.5130970724191063,
+     "detected": 333,
+     "seizures": 649,
+     "fa_per_24h": 51.485465441065735,
+     "latency_median_s": 12.0,
+     "threshold_median": 0.72,
+     "threshold_iqr": [
+      0.68,
+      0.74
+     ],
+     "fallback_patients": 12
+    },
+    "5": {
+     "sensitivity": 0.5531587057010786,
+     "detected": 359,
+     "seizures": 649,
+     "fa_per_24h": 60.45938814209886,
+     "latency_median_s": 11.0,
+     "threshold_median": 0.68,
+     "threshold_iqr": [
+      0.64,
+      0.7
+     ],
+     "fallback_patients": 12
+    },
+    "10": {
+     "sensitivity": 0.600924499229584,
+     "detected": 390,
+     "seizures": 649,
+     "fa_per_24h": 77.59543869059472,
+     "latency_median_s": 10.0,
+     "threshold_median": 0.6,
+     "threshold_iqr": [
+      0.58,
+      0.64
+     ],
+     "fallback_patients": 12
+    },
+    "20": {
+     "sensitivity": 0.6486902927580893,
+     "detected": 421,
+     "seizures": 649,
+     "fa_per_24h": 103.98705505258691,
+     "latency_median_s": 9.0,
+     "threshold_median": 0.52,
+     "threshold_iqr": [
+      0.48,
+      0.56
+     ],
+     "fallback_patients": 12
+    },
+    "50": {
+     "sensitivity": 0.7149460708782742,
+     "detected": 464,
+     "seizures": 649,
+     "fa_per_24h": 161.67971379578262,
+     "latency_median_s": 7.0,
+     "threshold_median": 0.38,
+     "threshold_iqr": [
+      0.36,
+      0.42
+     ],
+     "fallback_patients": 12
+    },
+    "100": {
+     "sensitivity": 0.7704160246533128,
+     "detected": 500,
+     "seizures": 649,
+     "fa_per_24h": 242.52785431462874,
+     "latency_median_s": 6.5,
+     "threshold_median": 0.26,
+     "threshold_iqr": [
+      0.24,
+      0.3
+     ],
+     "fallback_patients": 12
+    },
+    "200": {
+     "sensitivity": 0.7873651771956857,
+     "detected": 511,
+     "seizures": 649,
+     "fa_per_24h": 377.1753517279147,
+     "latency_median_s": 5.0,
+     "threshold_median": 0.16,
+     "threshold_iqr": [
+      0.15000000000000002,
+      0.2
+     ],
+     "fallback_patients": 12
+    }
+   }
+  }
  }
 }
