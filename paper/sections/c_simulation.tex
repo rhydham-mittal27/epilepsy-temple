@@ -1,0 +1,93 @@
+% ============================================================================
+\section{Simulator details}
+\label{app:sim}
+
+\subsection{Parameters of the ionic model}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Main parameters of the ionic model and their sources.}
+\label{tab:params}
+\begin{tabularx}{\linewidth}{@{}l l L@{}}
+\toprule
+Parameter & Value & Source / rationale \\
+\midrule
+$g_{Na}, g_K, g_{AHP}$ & 100, 40, 0.01 mS/cm\textsuperscript{2} & \cite{cressman2009} Table 1 \\
+$g_{NaL}, g_{KL}, g_{ClL}$ & 0.0175, 0.05, 0.05 mS/cm\textsuperscript{2} & \cite{cressman2009} \\
+$\gamma$, $\beta$ & 0.0445, 7 & ModelDB code (as corrected by the 2011 erratum) \\
+$\rho$, $G_{glia}$ & 1.25, 66.7 mM/s & \cite{cressman2009} \\
+$\varepsilon$, $K_{bath}$ & 1.33 s\textsuperscript{$-1$}, 4 mM & Cressman code; plasma \Kp \\
+$D_{lat}$ & 0.625 s\textsuperscript{$-1$} & $D=2.5\times10^{-6}$ cm\textsuperscript{2}/s, $\Delta x=20$ \textmu m \\
+$[\mathrm{Cl}]_o$, $[\mathrm{HCO_3}]_{i/o}$ & 130, 16/26 mM & Standard physiology \\
+$U_{KCC2}$ & 0.4 mM/s & Gives resting \Cli{} $\approx$5--6 mM, \EGABA{} $\approx-70$ mV \cite{doyon2016} \\
+$g_{KNa}$ & 1.33 mS/cm\textsuperscript{2}, EC50 68.6 mM & \cite{compte2003}, shifted \\
+$g_{ado}, \alpha_A, \tau_A$ & 0.3 mS/cm\textsuperscript{2}, 0.5, 20 s & \cite{during1992} \\
+Recurrent $g_E/g_I$ & 1.3 / 2.6 mS/cm\textsuperscript{2} & Balanced E/I, calibrated \\
+Background & 60 Hz $\times$ 0.07 mS/cm\textsuperscript{2} & 4--6 Hz asynchronous baseline \\
+Pump-current scale $s_p$ & 1.0 & See calibration log \\
+Neurovascular gain $k$ & 0.12 & CBF rise of $\approx$+40--100\% \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Calibration log}
+
+Table~\ref{tab:calib} records every step by which the ionic model reached its final form.
+
+\begin{longtable}{@{}p{0.4cm} p{3.9cm} p{4.6cm} p{5.6cm}@{}}
+\caption{Development log of the ionic model.}\label{tab:calib}\\
+\toprule
+\# & Symptom & Diagnosis & Fix \\
+\midrule
+\endfirsthead
+\toprule
+\# & Symptom & Diagnosis & Fix \\
+\midrule
+\endhead
+1 & Printed Cressman equations gave wrong dynamics & Typographical errors in the paper's concentration equations & Used the ModelDB C code ($\gamma=0.0445$, $\div1000$, $\beta$ on $I_K$) per the 2011 erratum \\
+2 & -- & Validation & Reproduced Cressman Fig.~1 \\
+3 & Baseline firing 245 Hz & One background AMPA event moved $V$ by $\approx$50 mV (tiny leak conductance) & Recalibrated background to 60 Hz $\times$ 0.02 mS/cm\textsuperscript{2} ($\approx$3 Hz) \\
+4 & Network locked into permanent 100--200 Hz firing & \Nai{} pinned at 32 mM, no termination & Added electrogenic pump current and \Nap-activated \Kp{} current \cite{krishnan2011,compte2003} \\
+5 & E cells silent while I cells fire & Compte's curve assumes resting \Nai{} $\approx$11 mM; here $\approx$19.5 mM & Shifted EC50 38.7$\to$68.6 mM \\
+6 & \Nai{} drifting upward & Start state not steady & 60 s warm-up \\
+7 & Epileptic tissue did not seize & \Kp{} clearance too fast & Pathology includes glia $\times$0.3 and clearance $\times$0.35 as well as KCC2 loss \\
+8 & NaN crash at seizure-level activity & Forward Euler unstable & Exponential Euler (a sign bug in its first version, $v_\infty = v_i + dv/g_{tot}$, was fixed and re-validated) \\
+9 & Seizures never terminated & Sustained by depolarising GABA & Tried Tsodyks--Markram depression \cite{tsodyks1997} (U = 0.07, $\tau$ = 700 ms) \\
+10 & With depression: no seizures or a 30--50 Hz steady state & Depression caps drive, no slow brake & Depression made optional; adenosine added \\
+11 & Per-spike adenosine damped even baseline & Unphysiological & Adenosine proportional to pump ATP use above rest \\
+12 & Healthy vs epileptic clearly different & -- & Adopted as default \\
+13 & Ictal event stops with the trigger & Pump after-hyperpolarisation 30 mV vs 1--10 mV measured \cite{gulledge2013} & \code{--pump-i}: at 0.15 seizures self-sustain (10--20 s), self-terminate and recur, but healthy tissue becomes bistable \\
+14 & Sweep at \code{--pump-i 0.35} & Stopped (machine ran low on memory) & Open \\
+\bottomrule
+\end{longtable}
+
+\subsection{Corrections to reported simulator outputs}
+
+\begin{enumerate}
+\item \textbf{\EGABA{} values.} The first values printed ($-70.7$, $-66$, $-57.7$, $-52$\,mV) came from a diagnostic that used the GHK form, not the chord form that the simulated current obeys. The recomputed chord values are $-69.6$, $-63.7$, $-54.1$ and $-48.3$\,mV. The dynamics were unaffected, and the code now records the chord form.
+\item \textbf{Healthy silence metric.} It first printed 0.0\,s because the smoothing window still contained the trigger. The corrected metric searches from 1\,s after the trigger and gives 13.7\,s.
+\item \textbf{Healthy discharge count.} The ``36 discharges'' in healthy tissue are threshold crossings by normal fluctuations, not epileptiform events; only rates should be compared.
+\end{enumerate}
+
+\subsection{Mapping onto seizure biology}
+
+\paragraph{Reproduced.} The model reproduces:
+\begin{itemize}
+\item the ictal \Kp{} ceiling;
+\item chloride loading and KCC2 loss;
+\item KCC2-mediated \Kp{} loading;
+\item interictal discharges;
+\item \Nap{} accumulation and pump activation;
+\item the adenosine surge;
+\item postictal depression and the postictal \Kp{} undershoot;
+\item ictal hyperperfusion followed by hypoperfusion;
+\item spatial spread by lateral diffusion.
+\end{itemize}
+
+\paragraph{Not reproduced.} At the default pump setting the model does not produce a self-sustained 30--120\,s focal seizure. Loss of consciousness and motor signs are out of scope.
+
+\paragraph{Scope.} Two further limitations define its scope:
+\begin{itemize}
+\item \textbf{Size and structure:} it is a 1-D network without dendrites, layers, thalamus or long-range connections.
+\item \textbf{EEG readout:} it uses an LFP proxy rather than a volume-conductor EEG, and a simple threshold IED counter.
+\end{itemize}

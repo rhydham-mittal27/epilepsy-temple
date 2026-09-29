@@ -1,0 +1,47 @@
+% ============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Epilepsy affects about 50 million people worldwide \cite{who}. Roughly one in three has seizures that persist despite medication \cite{kwan2000}. People with frequent tonic-clonic seizures carry a markedly raised risk of sudden unexpected death in epilepsy (SUDEP), which nocturnal supervision reduces \cite{sudep,ryvlin2013}. Patients also miss or under-report many of their own seizures \cite{hoppe2007,elger2018}. Objective seizure counts are therefore clinically valuable even when no alarm is raised, and reliable alarms could save lives.
+
+\subsection{Related work}
+
+Cleared seizure wearables rely on wrist accelerometry and electrodermal activity (Embrace \cite{onorati2017}), upper-arm PPG and motion (NightWatch \cite{arends2018}), or surface EMG \cite{beniczky2018}. They reach high sensitivity at low false-alarm rates, but almost exclusively for \emph{convulsive} seizures \cite{beniczky2021}. Focal seizures, the majority in adults, often lack a motor signature. Detecting them requires EEG.
+
+Ear-EEG and behind-the-ear EEG capture temporal-lobe activity with a discreet form factor. Ear-EEG detected ictal abnormalities comparably to scalp EEG in focal and generalised epilepsy \cite{zibrandtsen2017}. A two-channel behind-the-ear wearable detected 98\% of typical absence seizures \cite{swinnen2021}. Behind-the-ear channels supported visual annotation and automated detection of focal seizures \cite{vandecasteele2020}. Adding ECG to behind-the-ear EEG improved semi-automated review \cite{bhagubai2023}.
+
+Heart rate rises during most focal seizures \cite{jeppesen2019,jeppesen2024}. Patient-adaptive heart-rate-variability detectors work well for seizures with ictal tachycardia \cite{jeppesen2024}, and smartphone-connected ECG has reached phase-3 validation \cite{phase3ecg2025}. The SeizeIT2 dataset \cite{bhagubai2025}, recorded with a multimodal wearable in five monitoring units, now allows these modalities to be combined at scale. Published SeizeIT2 detectors, however, report tens to thousands of false alarms per day \cite{bhagubai2025,reintjes2025}.
+
+Separately, mechanistic seizure models describe how seizures start and stop. These range from ion-concentration models \cite{cressman2009,ullah2009,krishnan2011,wei2014} to phenomenological neural masses such as the Epileptor \cite{jirsa2014} and whole-brain virtual patients built in The Virtual Brain \cite{sanzleon2013,jirsa2017,hashemi2020}. Such models could in principle let a wearable infer hidden variables, such as extracellular potassium or intracellular chloride, rather than merely detect events \cite{ullah2010}.
+
+\subsection{Motivation and aims}
+
+In 2025--2026 a temple-worn optical wearable, \emph{Temple}, was introduced \cite{temple}. Our technical analysis (Appendix~\ref{app:temple}) concluded that it measures scalp blood flow and pulse over the superficial temporal artery and cannot sense the brain's electrical activity, so it cannot detect seizures as shipped. This raised the broader question addressed here: \emph{what would a small head-worn device need to measure to detect seizures, and how far can software push such a device?} We pursued five aims:
+\begin{enumerate}[label=\textbf{A\arabic*.}]
+\item Simulate seizure generation and termination with ion-concentration and haemodynamic detail, and validate the simulator against published models.
+\item Derive, audit and test formulas for inferring hidden seizure variables from non-invasive signals, and cross-validate our phenomenological model against an established simulator.
+\item Quantify how well temple and ear-level electrode positions detect seizures on real scalp EEG, for new and known users.
+\item Quantify, on real wearable data, how much heart, muscle and motion signals, temporal context and personalisation reduce false alarms, and identify what limits performance.
+\item Integrate the above into an interactive model of the proposed device.
+\end{enumerate}
+
+\subsection{Contributions}
+
+\begin{enumerate}
+\item A validated 100-neuron ionic seizure simulator with \Kp, \Nap, \Clm, KCC2, glia, an electrogenic pump, a \Nap-activated \Kp{} current, adenosine and haemodynamics, with a complete calibration record.
+\item An audited set of inference formulas: three errors in earlier derivations were corrected. Seven twin experiments show when each formula works and fails, and a numerical cross-validation against The Virtual Brain is included.
+\item Evidence from CHB-MIT that two ear-position channels detect as many seizures as an 18-channel cap in new users, that per-person normalisation and fine-tuning are essential, and that two ears outperform one.
+\item The largest multimodal evaluation we are aware of on SeizeIT2 (all 125 patients), including:
+\begin{itemize}
+\item a novel movement-adjusted heart-rate feature;
+\item a two-stage personal alarm verifier;
+\item simulated in-ear PPG;
+\item a false-alarm anatomy;
+\item a seizure-type breakdown;
+\item a sensitivity-ceiling diagnosis.
+\end{itemize}
+\item A proposed bilateral ``?''-shaped ear-hook architecture, an offline interactive model of it, and an evidence-based assessment of whether to build it.
+\item A transparent record of every error found and corrected during the work (Appendix~\ref{app:record}).
+\end{enumerate}
+
+The paper is organised as follows. Section~\ref{sec:methods} describes the simulators, the inference methods, the datasets and the detection pipelines. Section~\ref{sec:results} reports the results in the same order. Section~\ref{sec:discussion} discusses implications, limitations and future work. Supplementary appendices give the clinical and physiological background (\ref{app:background}), the Temple analysis (\ref{app:temple}), simulator details and the calibration log (\ref{app:sim}), inference details and the formula audit (\ref{app:inference}), the interactive model (\ref{app:livelab}), and the complete research record (\ref{app:record}).

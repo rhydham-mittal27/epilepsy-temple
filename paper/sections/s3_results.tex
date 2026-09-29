@@ -1,0 +1,477 @@
+% ============================================================================
+\section{Results}
+\label{sec:results}
+
+% ----------------------------------------------------------------------------
+\subsection{Seizure simulation}
+
+\paragraph{Models 1 and 2.} Weakening inhibition in the spiking network raised the synchrony index from 0.02 to 0.98, and restoring it brought the index back to 0.02 (Figure~\ref{fig:net}). The Epileptor produced 3 seizures in 6,000 time units at $x_0=-1.6$, with 51.6\% of the time ictal, and none at $x_0=-2.2$ (Figure~\ref{fig:epileptor}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\linewidth]{epilepsy_sim/output/network_seizure.png}
+\caption{Model 1: weakening inhibition turns asynchronous firing into lock-step population bursts.}
+\label{fig:net}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\linewidth]{epilepsy_sim/output/epileptor_seizures.png}
+\caption{Model 2: Epileptor seizures driven by the slow permittivity variable $z$.}
+\label{fig:epileptor}
+\end{figure}
+
+\paragraph{Model 3: validation.} In the reduced single-neuron configuration, the ionic model reproduced the periodic seizure-like events of \cite{cressman2009} (Table~\ref{tab:valid}, Figure~\ref{fig:valid}).
+
+\begin{table}[htbp]
+\centering\small
+\caption{Validation against Cressman et al.\ (2009), Fig.~1.}
+\label{tab:valid}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Quantity & Cressman 2009 & This implementation \\
+\midrule
+Seizure-like events & Periodic, every $\approx$30 s & Every $\approx$29.5 s \\
+\Ko{} range & $\approx$6.7$\to$10.2 mM & 6.7$\to$10.7 mM \\
+\Nai{} range & $\approx$16.3$\to$19 mM & 15.5$\to$19.1 mM \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.65\linewidth]{epilepsy_sim/output/ionic_validation.png}
+\caption{Single-neuron validation against Cressman et al.\ (2009), Fig.~1.}
+\label{fig:valid}
+\end{figure}
+
+\paragraph{Model 3: healthy vs epileptic tissue.} With identical neurons, wiring and trigger, the pathological tissue showed every hallmark listed in Table~\ref{tab:ionic}; Figure~\ref{fig:ionic} shows the time courses.
+\begin{itemize}
+\item \textbf{Interictal state:} synchronous population bursts at $\approx$33/min, each sending local \Ko{} to 7--9\,mM with a saw-tooth in \Cli.
+\item \textbf{Ictal event:} the trigger drove \Ko{} to the 12\,mM ceiling and \Cli{} to 15.2\,mM (\EGABA{} $-48.3$\,mV, so inhibition collapsed). Pump flux reached $\approx$1\,mM/s and adenosine 0.68, 5.7$\times$ the healthy peak.
+\item \textbf{Postictal state:} a 25\,s silence, a \Kp{} undershoot to 3.66\,mM (as predicted by \cite{krishnan2011}) and a CBF fall to $-46$\%.
+\end{itemize}
+Healthy tissue capped \Ko{} near 6\,mM and recovered after a 13.7\,s pump after-hyperpolarisation. The ictal CBF peak was smaller in epileptic tissue because its baseline was already hyperactive.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Ionic model, healthy vs epileptic tissue (same neurons, wiring and trigger). \EGABA{} in the chord form.}
+\label{tab:ionic}
+\begin{tabularx}{\linewidth}{@{}l l l L@{}}
+\toprule
+Measure & Healthy & Epileptic & Physiological reference \\
+\midrule
+Baseline E firing & 6.1 Hz & 17.3 Hz & Hyperexcitable cortex \\
+Resting \Cli{} & 5.6 mM & \best{11.6 mM} & Elevated in human epileptic tissue \\
+Resting \EGABA{} & $-69.6$ mV & \best{$-54.1$ mV} & Depolarised with KCC2 loss \\
+Resting \Ko{} & 4.18 mM & 4.59 mM & Impaired buffering \\
+Interictal discharges & not epileptiform & \best{33/min} & IEDs on EEG \\
+Peak \Ko{} (trigger) & 6.1 mM & \best{12.2 mM} & Ictal \Kp{} ceiling $\approx$10--12 mM \\
+Peak \Cli{} & 7.4 mM & \best{15.2 mM} & Ictal \Clm{} loading \\
+Peak \EGABA{} & $-63.7$ mV & \best{$-48.3$ mV} & Depolarising GABA \\
+Peak \Nai{} & 26.2 mM & 29.8 mM & Ictal \Nap{} loading \\
+Peak adenosine & 0.12 & \best{0.68} & Ictal adenosine surge \\
+Postictal silence & 13.7 s & \best{25 s} & Postictal depression \\
+Minimum \Ko{} after & 3.88 mM & \best{3.66 mM} & Postictal \Kp{} undershoot \\
+CBF peak $\to$ minimum & +42\% $\to$ $-47$\% & +31\% $\to$ $-46$\% & Hyperperfusion then hypoperfusion \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.49\linewidth]{epilepsy_sim/output/ionic_healthy.png}
+\includegraphics[width=0.49\linewidth]{epilepsy_sim/output/ionic_epileptic.png}
+\caption{Ionic model, healthy (left) and epileptic (right) tissue. Panels show the raster, LFP proxy, space--time \Ko{} map, mean \Ko, \Nai, \EGABA/$E_K$/\Cli, pump flux and adenosine, and CBF/HbO/HbR.}
+\label{fig:ionic}
+\end{figure}
+
+The model also reproduced KCC2-mediated \Kp{} loading and spatial spread by lateral diffusion. Its haemodynamic panel is what an optical sensor would record: a CBF/HbO surge, delayed by seconds, during the event, then a dip below baseline. Brief interictal events were nearly invisible optically. At the default pump setting, however, ictal events did not self-sustain beyond the trigger. Scaling the pump current down to 0.15 produced self-sustaining, self-terminating and recurring 10--20\,s seizures, but also made healthy tissue bistable (Appendix Table~\ref{tab:calib}).
+
+% ----------------------------------------------------------------------------
+\subsection{Inference of hidden variables}
+
+\paragraph{E1: \Ko{} from a glial electrode.} With the textbook slope (61.54\,mV/decade), the RMSE was 0.239\,mM and the estimated peak 10.29\,mM (true 12.21, $-16$\%). With the measured slope (51), the RMSE fell to \textbf{0.062}\,mM and the peak was 12.32\,mM (+1\%).
+
+\paragraph{E2: \Ko{} from DC-EEG.} The process model was calibrated on healthy data ($a=0.093$, $\tau=0.51$\,s) and applied to epileptic data with 3$\times$ slower clearance.
+\begin{itemize}
+\item Naive constant-gain conversion: RMSE 1.41\,mM, peak \textbf{29.2}\,mM (2.4$\times$ too high).
+\item Activity-driven process model alone: RMSE 0.51\,mM (peak 14.1).
+\item EKF combining process model and DC: RMSE \textbf{0.50}\,mM (peak 14.0), with estimated skull gain 0.015 (true 0.010).
+\end{itemize}
+With unknown gain and drift, the DC channel added little beyond the EEG-driven model.
+
+\paragraph{E3: \Cli{} from \EGABA.} The chord inverse gave RMSE \textbf{1.12}\,mM (bias $-0.13$). The GHK inverse was biased:
+\begin{itemize}
+\item $r=0.20$: RMSE 3.05, bias \textbf{+2.72};
+\item $r=0.25$: RMSE 2.50, bias +2.09;
+\item $r=0.44$: RMSE 1.47, bias $-0.32$ (a coincidental crossing).
+\end{itemize}
+With the correct formula, $\pm$2\,mV of \EGABA{} error became $\approx\pm$1.1\,mM of chloride error. That is enough to separate healthy (5.6\,mM) from epileptic (11.6\,mM) tissue.
+
+\paragraph{E4: E/I from the spectrum.} The 30--50\,Hz fit gave $\chi=1.65$ in healthy tissue ($R^2$ 0.87) vs 1.50 in epileptic tissue (0.75), the direction associated with more excitation. The broadband 2--200\,Hz knee fit failed in epileptic tissue ($\chi\approx0$, $R^2$ 0.74) because interictal spikes inject high-frequency power.
+
+\paragraph{E5: HbO/HbR from fNIRS.}
+\begin{itemize}
+\item Naive MBLL: RMSE 10.3\,\uM, $r=0.873$, recovered amplitude 22\%.
+\item With short-channel regression: $r=$ \textbf{0.996}, amplitude 16\%.
+\item With partial-volume correction added: RMSE \textbf{1.40}\,\uM, amplitude 1.10; the residual +10\% equals the injected DPF error.
+\item HbR, full pipeline: RMSE 0.49\,\uM, $r=0.999$.
+\end{itemize}
+A temple PPG device without a short channel and depth resolution would underestimate cortical changes about 5$\times$.
+
+\paragraph{E6: adenosine.} The decay law $A_{peak}e^{-T/20}$ reproduced adenosine at recovery exactly (0.060 vs 0.061 healthy; 0.195 vs 0.196 epileptic). However, the level at which firing resumed differed 3.2$\times$ between tissues, so no universal threshold exists and the closed-form formula was withdrawn.
+
+\paragraph{E7: KCC2 strength.} Table~\ref{tab:e7} shows the posterior. Its mean was \textbf{0.36$\pm$0.09} (true 0.30). The MAP fell on 0.45 because the noisy \EGABA{} ``measurement'' was $-55.3$ vs $-54.0$\,mV. \EGABA{} carried almost all of the information, since rate was non-monotonic in KCC2. Healthy and severe-loss values were correctly ruled out; 0.3 vs 0.45 could not be separated.
+
+\begin{table}[htbp]
+\centering\small
+\caption{E7: posterior over KCC2 strength (true 0.3).}
+\label{tab:e7}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+KCC2 ($\times$ normal) & 0.15 & 0.2 & \textbf{0.3} & 0.45 & 0.7 & 1.0 \\
+\midrule
+Simulated \EGABA{} (mV) & $-51.3$ & $-52.5$ & $-54.2$ & $-56.4$ & $-60.7$ & $-63.5$ \\
+Simulated E rate (Hz) & 13.2 & 12.4 & 9.9 & 12.2 & 10.3 & 10.9 \\
+Posterior & 0.014 & 0.103 & \textbf{0.414} & \textbf{0.468} & 0.001 & $\approx$0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\linewidth]{epilepsy_sim/output/infer_results.png}
+\caption{Twin experiments E1--E7.}
+\label{fig:twin}
+\end{figure}
+
+\paragraph{T1: Epileptor vs TVB.} The first onset was identical (886.2), and all differences shrank with the time step (Table~\ref{tab:t1}). The residual discrepancy therefore comes from the integrator (Euler vs Heun), not from the model. Our implementation was 7--30$\times$ faster for a single region.
+
+\begin{table}[htbp]
+\centering\small
+\caption{T1: cross-validation of our Epileptor against TVB.}
+\label{tab:t1}
+\begin{tabular}{@{}llll@{}}
+\toprule
+& TVB (Heun, dt 0.05) & Ours (Euler, dt 0.05) & Ours (Euler, dt 0.01) \\
+\midrule
+Seizures in 6000 a.u. & 3 & 3 & 3 \\
+Onsets & 886.2, 2820.2, 4754.2 & 887.0, 2883.0, 4880.0 & \textbf{886.2}, 2827.6, 4769.0 \\
+Seizure duration & 968.7 & 1030 & \textbf{976.2} \\
+$z$ RMSE vs TVB & -- & 0.139 & \textbf{0.018} \\
+LFP correlation & -- & 0.71 & 0.87 \\
+Runtime & 43 s & 1.5 s & 6.4 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{T2: whole-brain inference.} The epileptogenic zone seized first (onset 1022\,ms, recurring every $\approx$1.4\,s). The seizure spread to \textbf{36 of 38} right-hemisphere regions and to none on the left. From onset times alone, the zone was localised correctly and its excitability recovered as $-1.60\pm0.0002$ (posterior $8\times10^{-8}$ at $-1.7$ and $3\times10^{-6}$ at $-1.5$). This is an \emph{inverse crime}: the same model, parameters and grid generated and fitted the data, so the posterior collapsed unrealistically (Figure~\ref{fig:tvb}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.82\linewidth]{epilepsy_sim/output/tvb_compare.png}
+\caption{TVB cross-validation (T1) and VEP-style whole-brain inference (T2).}
+\label{fig:tvb}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+\subsection{Scalp-EEG montage study (CHB-MIT)}
+
+\paragraph{Patient-specific models.} Every temple montage caught all 19 seizures (Table~\ref{tab:chb3}, Figure~\ref{fig:chb3}). Both temples produced 9.8 \FAd{}, against 5.2 for the full cap. One-sided montages produced 3--6$\times$ more false alarms than bilateral ones. Cross-patient models trained on only two patients generalised poorly (205--414 \FAd). With 36.6\,h of data, one false alarm corresponds to 0.66/day, so these rates are coarse.
+
+\begin{table}[htbp]
+\centering\small
+\caption{CHB-MIT, 3 patients (19 seizures, 36.6 h), threshold 0.5.}
+\label{tab:chb3}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& \multicolumn{3}{c}{Patient-specific} & \multicolumn{3}{c}{Cross-patient} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Montage & Caught & FA/day & Latency & Caught & FA/day & Latency \\
+\midrule
+Full cap (18 ch) & 95\% (18/19) & \textbf{5.2} & 4.5 s & 37\% & 273.8 & 3.0 s \\
+Both temples (4 ch) & \textbf{100\%} (19/19) & 9.8 & 6.0 s & 63\% & 306.6 & 18.0 s \\
+Right temple (2 ch) & 100\% & 36.0 & 5.0 s & 84\% & 205.0 & 12.5 s \\
+Left temple (2 ch) & 100\% & 32.1 & 10.0 s & 79\% & 414.0 & 17.0 s \\
+Right temple (1 ch) & 100\% & 62.9 & 5.0 s & 100\% & 226.0 & 8.0 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.78\linewidth]{epilepsy_sim/detect/results/detection.png}
+\caption{CHB-MIT patient-specific detection by montage.}
+\label{fig:chb3}
+\end{figure}
+
+\paragraph{General model for new users.} Per-person normalisation raised temple-montage sensitivity from 62\% to 85\% (43 more seizures) while reducing false alarms (Table~\ref{tab:general}). The two-channel ear-hook caught as many seizures as the 18-channel cap (88\% vs 85\%) with lower median latency. It produced $\approx$1.7$\times$ the false alarms (382 vs 229 \FAd). Using both ears instead of one added about 6\% more seizures and reduced false alarms by 25--30\%.
+
+\begin{table}[htbp]
+\centering\small
+\caption{CHB-MIT general model, new users (leave-one-subject-out; 23 subjects, 185 seizures), threshold 0.5.}
+\label{tab:general}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Montage & Caught & FA/day & Median latency \\
+\midrule
+Temple (4 ch), raw features & 62\% (114/185) & 525 & 6.5 s \\
+Temple (4 ch), per-person normalised & 85\% (157/185) & 342 & 6.0 s \\
+\textbf{Ear-hook both ears (2 ch)}, normalised & \textbf{88\%} (162/185) & 382 & \textbf{5.0 s} \\
+Ear-hook one ear (1 ch), normalised & 83\% (154/185) & 556 & 6.0 s \\
+Full cap (18 ch), normalised & 85\% (157/185) & \textbf{229} & 5.0 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Fine-tuning.} Fine-tuning on two of the user's own seizure recordings cut false alarms by 40--65\% without losing seizures (Table~\ref{tab:generalft}, Figure~\ref{fig:general}). Patient-only models had few false alarms but missed about a third of seizures. At stricter thresholds, chosen post hoc and therefore optimistic, fine-tuned detectors reached $\approx$18--23 \FAd{} while catching 64\% (ear-hook, both ears) to 75\% (full cap) of seizures.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Fine-tuning on the first $k$ seizure recordings (caught / FA per day on later recordings).}
+\label{tab:generalft}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Montage & $k$ & General only & Patient-only & General + fine-tuned \\
+\midrule
+Temple (4 ch) & 1 & 84\% / 351 & 53\% / 8 & 83\% / 162 \\
+ & 2 & 84\% / 361 & 68\% / 16 & \textbf{86\% / 138} \\
+Ear-hook both ears (2 ch) & 1 & 86\% / 385 & 54\% / 9 & 83\% / 186 \\
+ & 2 & 87\% / 397 & 65\% / 18 & \textbf{86\% / 162} \\
+Ear-hook one ear (1 ch) & 1 & 81\% / 547 & 44\% / 13 & 74\% / 241 \\
+ & 2 & 81\% / 550 & 66\% / 79 & 80\% / 216 \\
+Full cap (18 ch) & 1 & 83\% / 240 & 56\% / 3 & 84\% / 95 \\
+ & 2 & 84\% / 246 & 68\% / 6 & \textbf{89\% / 88} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{epilepsy_sim/detect/results_general/general.png}
+\caption{CHB-MIT general model on all subjects and personal fine-tuning.}
+\label{fig:general}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+\subsection{Multimodal wearable study (SeizeIT2)}
+
+\paragraph{Modalities.} Adding ECG to ear EEG reduced false alarms by 18\%, 24\% and 31\% at 50\%, 60\% and 70\% sensitivity (Table~\ref{tab:sz2main}). It also raised the share of seizures caught at $\le$5 \FAd{} from 14\% to 21\% (Table~\ref{tab:sz2budget}).
+
+Per patient, the median false-alarm rate at threshold 0.5 fell with each added modality:
+\begin{itemize}
+\item EEG only: 618 (IQR 533--686);
+\item EEG+ECG: 373 (329--440);
+\item all four modalities: 342 (299--400).
+\end{itemize}
+EEG+ECG had fewer false alarms than EEG alone in \textbf{115/125} patients (all four: 120/125), while detections per patient barely changed (more in 16 patients, fewer in 21). ECG alone rivalled ear EEG under strict budgets. EMG and motion, used as direct features, gave no consistent gain for these mostly non-convulsive seizures. Two interim snapshots taken during streaming (48 patients: $-7$\% to $-20$\%; 78 patients: $-21$\% to $-44$\%) converged to the final estimate.
+
+\begin{table}[htbp]
+\centering\small
+\caption{SeizeIT2 (125 patients, 883 seizures): false alarms per 24 h at matched sensitivity (lower is better). Percentages are relative to EEG only.}
+\label{tab:sz2main}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Setup & 50\% caught & 60\% & 70\% & 80\% \\
+\midrule
+EEG only (ear) & 103.7 & 161.7 & 294.4 & not reached \\
+ECG only & 132.6 & 225.6 & 378.2 & 677.8 \\
+Body only (ECG+EMG+motion) & 116.3 & 193.5 & 283.8 & 583.1 \\
+\textbf{EEG + ECG} & \textbf{85.5} ($-18$\%) & \textbf{122.8} ($-24$\%) & \textbf{204.0} ($-31$\%) & \textbf{459.2} \\
+EEG + ECG + EMG + motion & 75.4 ($-27$\%) & 139.3 ($-14$\%) & 211.7 ($-28$\%) & 539.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Seizures caught within a daily false-alarm budget, and at the default threshold 0.5.}
+\label{tab:sz2budget}
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{@{}lccccc|ccc@{}}
+\toprule
+Setup & $\le$5 & $\le$20 & $\le$50 & $\le$100 & $\le$200 & Caught @0.5 & FA/day & Latency \\
+\midrule
+EEG only & 14\% & 23\% & 23\% & 42\% & 62\% & 79.4\% & 608 & 6 s \\
+ECG only & 16\% & 29\% & 29\% & 48\% & 60\% & 74.0\% & 438 & 7 s \\
+Body only & 16\% & 28\% & 42\% & 50\% & 64\% & 75.4\% & 386 & 8 s \\
+\textbf{EEG + ECG} & \textbf{21\%} & \textbf{35\%} & 35\% & \textbf{57\%} & 66\% & 78.7\% & \textbf{399} & 7 s \\
+All four & 20\% & 34\% & \textbf{45\%} & 53\% & \textbf{68\%} & 78.3\% & 348 & 7 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Context and HR-excess.} Minute-scale context and HR-excess each reduced false alarms, and combined they gave the best general model (Table~\ref{tab:ctx}, Figure~\ref{fig:sz2}). Relative to ear EEG alone, it had $-62$\%, $-43$\% and $-47$\% false alarms at 50\%, 60\% and 70\% sensitivity, and it caught 28\% of seizures at $\le$5 \FAd.
+
+HR-excess alone reduced false alarms by 42\% at 50\% sensitivity. This was despite a univariate pre-check that suggested little value (AUC 0.62 vs 0.61 for raw HR in separating false alarms from detections).
+
+The bigger model gave mixed results at 3$\times$ the compute, which indicates that model capacity and training-set size were not the bottleneck.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Context and HR-excess configurations (125 patients, general model): FA/day at matched sensitivity and seizures caught within budgets.}
+\label{tab:ctx}
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Setup & 50\% & 60\% & 70\% & 80\% & $\le$5/d & $\le$50/d & $\le$200/d \\
+\midrule
+Ear EEG only & 103.7 & 161.7 & 294.4 & -- & 14\% & 23\% & 62\% \\
+EEG + context & 72.2 & 148.2 & 287.7 & 770.6 & 21\% & 48\% & 65\% \\
+EEG + ECG & 85.5 & 122.8 & 204.0 & 459.2 & 21\% & 35\% & 66\% \\
+EEG + ECG + context & 59.5 & 98.5 & 194.6 & 401.8 & 25\% & 48\% & 72\% \\
+EEG + ECG + HR-excess & 49.2 & 111.7 & 177.7 & 385.8 & 20\% & 50\% & 72\% \\
+\textbf{EEG + ECG + context + HR-excess} & \textbf{39.6} & \textbf{92.5} & \textbf{154.9} & \textbf{368.0} & \textbf{28\%} & \textbf{50\%} & \textbf{73\%} \\
+same, big model & 48.2 & 82.8 & 165.0 & 500.6 & 25\% & 54\% & 72\% \\
+EEG + PPG(sim) + context + HR-excess & 44.8 & 83.5 & 175.2 & 376.5 & 26\% & 53\% & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{epilepsy_sim/detect/results_seizeit2/seizeit2.png}
+\caption{SeizeIT2: sensitivity vs false alarms, false alarms at matched sensitivity, and latency for all configurations.}
+\label{fig:sz2}
+\end{figure}
+
+\paragraph{Personal fine-tuning.} With two tuning seizures (71 patients), ECG and fine-tuning reduced false alarms at 50\% sensitivity by 44\% and 42\% respectively. Together they reduced them by 62\%, close to the 67\% expected for independent effects, with no change in delay (Table~\ref{tab:ft}). With a single tuning seizure, EEG-only tuning was inconsistent: better at 40\% sensitivity, worse at 60\% and under strict budgets. With ECG, even one seizure helped ($-16$\% to $-45$\%). Requiring 10 or 20\,s sustained above threshold helped only at low sensitivity, was worse at 60--70\%, and added 3--7\,s of delay.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Fine-tuning on 2 own seizures (71 patients, later data): FA/day at matched sensitivity and seizures caught within budgets.}
+\label{tab:ft}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Setup & 40\% & 50\% & 60\% & 70\% & $\le$1/d & $\le$5/d & $\le$20/d \\
+\midrule
+EEG, general & 100.8 & 157.9 & 221.3 & 289.0 & 0\% & 11\% & 20\% \\
+EEG, fine-tuned & 61.5 & 91.6 & 127.9 & 217.1 & 8\% & 15\% & 28\% \\
+EEG+ECG, general & 52.4 & 88.7 & 168.0 & 254.7 & 10\% & 18\% & 32\% \\
+\textbf{EEG+ECG, fine-tuned} & \textbf{40.5} & \textbf{60.5} & \textbf{107.2} & \textbf{192.5} & \textbf{14\%} & \textbf{21\%} & 27\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Personal thresholds and calibration.} Personal thresholds gave no meaningful gain: at most 2--4 points at loose budgets, they overshot their own budgets, and they never reached $\le$1/day. At 5/day, personal thresholds had an IQR of 0.956--0.971 against a shared threshold of 0.971, showing that per-person normalisation already places patients on a common scale.
+
+The general model's shared threshold was predictable (EEG+ECG): budgets of 1, 5 and 20 \FAd{} set on tuning data gave 1.4, 5.2 and 20.2 \FAd{} on later data. Fine-tuned models calibrated on their own training data were $\approx$10$\times$ optimistic: 0.5--1/day became 10--18/day, and 30--37/day for the richest model.
+
+\paragraph{Anatomy of false alarms.} Ruling out two candidate explanations:
+\begin{itemize}
+\item \textbf{Impedance checks:} ``impd'' epochs explained $<$1\% of false alarms (2--5$\times$ chance; 0.19\% of time).
+\item \textbf{Hidden seizures:} false alarms were not unlabelled seizures; 7--10\% fell within 1--30\,min of a seizure, vs 8.9\% of recording time.
+\end{itemize}
+Where they came from:
+\begin{itemize}
+\item \textbf{Concentration.} At 5/day, the worst 10\% of patients produced 47\% (EEG) and 32\% (EEG+ECG) of all false alarms; the worst 25\% produced 77\% and 59\%. The median patient had 1.4 and 4.0/day.
+\item \textbf{Patient traits.} Of 22 traits, only \textbf{ear-EEG amplitude instability} (IQR of log-variance) survived Bonferroni correction ($\rho=0.49$, $p=1\times10^{-5}$; 2.10 vs 1.18). No association was found with missing sensors, seizure type, number of seizures, electrode side, sex, recording fragmentation or ECG quality; age was not available.
+\item \textbf{Signals at alarm time.} For EEG+ECG (3,655 false alarms vs 267 detections), false alarms resembled seizures physiologically: HR 103 vs 110\,bpm (normal 73), a 30\,s HR rise of +20 vs +22\,bpm, and raised movement, EEG power and shoulder EMG. These are consistent with getting up or arousal. EEG-only false alarms instead showed muscle and movement contamination of the EEG (gamma share 0.06$\to$0.13) with a calm heart, which is why ECG removed them.
+\item \textbf{Predictability.} Each patient's tuning-period false-alarm rate predicted their later rate ($\rho=0.56$--0.83), flagging 73--81\% of the worst quartile.
+\end{itemize}
+
+\paragraph{Heart responders.} Twenty-three of 69 patients with ECG were responders. Responders' seizures were detected 3--5$\times$ more often than non-responders' at strict budgets (Table~\ref{tab:resp}).
+
+\begin{table}[htbp]
+\centering\small
+\caption{Responders vs non-responders (71 patients, later data): seizures caught within budgets.}
+\label{tab:resp}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Model (responders / non-responders) & $\le$1/day & $\le$5/day & $\le$20/day \\
+\midrule
+EEG only, general & 10\% / 2\% & 21\% / 7\% & 44\% / 16\% \\
+EEG+ECG, general & 25\% / 6\% & 46\% / 10\% & 68\% / 18\% \\
+EEG+ECG, fine-tuned & 30\% / 7\% & 50\% / 15\% & 72\% / 24\% \\
+Best (ctx+HRx), general & 31\% / 7\% & 55\% / 14\% & 74\% / 23\% \\
+Best (ctx+HRx), fine-tuned & \textbf{33\%} / 8\% & \textbf{60\%} / 16\% & \textbf{75\%} / 27\% \\
+PPG(sim), fine-tuned & 28\% / 8\% & 54\% / 14\% & 69\% / 26\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Two-stage detection and the personal verifier.} The general verifier improved on single-stage detection only at loose budgets. The personal verifier gave the largest strict-budget gain of any method (Table~\ref{tab:twostage}): 19\% of all seizures and 39\% of responders' seizures were caught at $\le$1 \FAd, and 64\% of responders' at $\le$5. Gains saturated at weights $\times$20--50. Signal-quality features added nothing.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Two-stage detection (candidates at 0.5, decision +10 s; 71 patients, later data): seizures caught within budgets.}
+\label{tab:twostage}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Setup & $\le$1/d & $\le$2/d & $\le$5/d & $\le$20/d & $\le$50/d \\
+\midrule
+One stage (general), all & 14\% & -- & 25\% & 36\% & 47\% \\
+Two stage, general verifier, all & 15\% & 18\% & 25\% & 38\% & 54\% \\
+Two stage, general + quality features & 14\% & 17\% & 26\% & 39\% & 54\% \\
+\textbf{Two stage, personal verifier ($\times$20), all} & \textbf{19\%} & \textbf{22\%} & \textbf{30\%} & \textbf{45\%} & \textbf{60\%} \\
+Personal verifier $\times$5 / $\times$50, all & 18\% / 19\% & 22\% / 23\% & 29\% / 30\% & 43\% / 46\% & 57\% / 61\% \\
+Personal verifier + quality features, all & 19\% & 23\% & 31\% & 45\% & 61\% \\
+\textbf{Personal verifier, responders} & \textbf{39\%} & \textbf{47\%} & \textbf{64\%} & \textbf{77\%} & \textbf{85\%} \\
+Personal verifier, non-responders & 11\% & 14\% & 17\% & 32\% & 51\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Sensitivity ceiling.} Among all later seizures, 25\% (31\% of non-responders') never raised the smoothed stage-1 probability above 0.5, and only 30\% ever reached 0.95. For responders, 65\% of seizures exceeded 0.95.
+
+\paragraph{Which seizures are caught.} Table~\ref{tab:types} breaks down detection at shared thresholds calibrated in advance (best general model, 649 later seizures).
+\begin{itemize}
+\item \textbf{Tonic-clonic:} focal-to-bilateral tonic-clonic seizures were all caught (95\% even with ear EEG alone).
+\item \textbf{Short seizures:} seizures shorter than 30\,s made up over half of all seizures and were rarely caught; 40\% of them never exceeded 0.5.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Seizures caught by subgroup at calibrated shared thresholds (best general model).}
+\label{tab:types}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Subgroup & $\le$5 \FAd & $\le$20 \FAd \\
+\midrule
+Focal-to-bilateral tonic-clonic (22 seizures) & \textbf{100\%} & \textbf{100\%} \\
+Focal motor & 30\% & 44\% \\
+Focal aware, non-motor & 17\% & 29\% \\
+Focal impaired awareness, non-motor & 14\% & 26\% \\
+Duration $<$30 s (349 seizures) & \textbf{4\%} & 13\% \\
+Duration 30--90 s & 40\% & 59\% \\
+Duration $>$90 s & 62\% & 78\% \\
+Temporal lobe / extratemporal & 43\% / 19\% & 54\% / 33\% \\
+Both-ear (generalized) / same-side montage & 42\% / 33\% & 55\% / 51\% \\
+Awake / asleep & 28\% / 22\% & 41\% / 36\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Simulated in-ear PPG.} On a sample recording, simulated PPG heart rate differed from ECG by 2.7\,bpm (bias +0.9), and 16\% of windows were lost. Across analyses, PPG retained most of the ECG benefit:
+\begin{itemize}
+\item \textbf{General model:} within noise of ECG (Table~\ref{tab:ctx}).
+\item \textbf{Fine-tuned:} 13/25/37\% of seizures caught at $\le$1/5/20 \FAd{}, vs 15/27/41\% with ECG.
+\item \textbf{Responders:} 28/54/69\%, vs 33/60/75\% with ECG.
+\item \textbf{Calibrated general model:} 11/22/37\% at 0.7/4.1/18.7 \FAd{}, vs 14/25/38\% at 1.0/4.3/20.2 with ECG.
+\end{itemize}
+
+\paragraph{Raw-EEG CNN.} Data acquisition was ongoing at the time of writing, and results will be reported in a revision.
+
+% ----------------------------------------------------------------------------
+\subsection{Interactive system model}
+
+In the Live Lab, the \Kp-DC detector alarmed in epileptic tissue at $t=11$\,s, 1\,s after trigger onset, and stayed silent in healthy tissue. The line-length detector failed on the virtual EEG, as described in Appendix~\ref{app:livelab}. With a walking episode switched on, EEG-only detection raised one false alarm per scenario. Multimodal confirmation removed it at a cost of 4--8\,s of latency, but missed the seizure without a heart-rate response (Table~\ref{tab:live}). This anticipated, qualitatively, the trade-off later measured on SeizeIT2.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Live Lab with the walking episode enabled.}
+\label{tab:live}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Body setting & EEG-only & Multimodal (EEG confirmed by body) \\
+\midrule
+Focal non-motor & caught +1 s, 1 false alarm (walk) & caught +9 s, 0 false \\
+Focal motor & caught +1 s, 1 false & caught +5 s, 0 false \\
+Tonic-clonic & caught +1 s, 1 false & caught +6 s, 0 false \\
+No HR response & caught +1 s, 1 false & \textbf{missed}, 0 false \\
+Healthy tissue & 1 false & 0 false \\
+\bottomrule
+\end{tabular}
+\end{table}

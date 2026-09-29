@@ -1,0 +1,151 @@
+% ============================================================================
+\section{Inference details and formula audit}
+\label{app:inference}
+
+\subsection{Measured vs inferred variables}
+
+Several variables in Table~\ref{tab:ionic} can only be \emph{measured} with probes inside brain tissue:
+\begin{itemize}
+\item intracellular chloride;
+\item extracellular potassium;
+\item adenosine;
+\item KCC2 strength.
+\end{itemize}
+The probes are ion-selective microelectrodes, perforated-patch clamp, genetically encoded sensors and microdialysis. A wearable can only \emph{infer} such variables: it computes their most likely value, with an uncertainty, from the signals it records plus a model of how the hidden quantity produces those signals. ``Inferred'' therefore means \emph{calculated, not measured}; it is only as good as the model, and it must always be reported with its uncertainty.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Which seizure variables need inference (values from the ionic model).}
+\label{tab:needinf}
+\begin{tabularx}{\linewidth}{@{}l l l L l@{}}
+\toprule
+Variable & Healthy & Epileptic & Gold standard (invasive) & Non-invasive? \\
+\midrule
+Resting \Cli & 5.6 mM & 11.6 mM & 2-photon imaging of Cl\textsuperscript{--} sensors & Infer \\
+Resting \EGABA & $-69.6$ mV & $-54.1$ mV & Gramicidin perforated patch & Infer (TMS-EEG proxy) \\
+Interictal discharges & -- & 33/min & Intracranial EEG & Scalp/ear EEG \\
+Peak \Ko & 6.1 mM & 12.2 mM & \Kp-selective microelectrodes & DC-EEG proxy, infer \\
+Adenosine surge & 0.12 & 0.68 & Microdialysis, biosensors & Infer \\
+Blood flow & +42\% $\to$ $-47$\% & +31\% $\to$ $-46$\% & Laser Doppler, SPECT, fMRI & fNIRS, DCS, PPG \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Derivations}
+
+\paragraph{Nernst.} At equal electrochemical potential across the membrane, $E_X = \frac{RT}{zF}\ln\frac{[X]_{out}}{[X]_{in}}$. $RT/F$ is 26.64\,mV at 36\,\textdegree C, the value used in \cite{cressman2009} (61.34\,mV/decade), and 26.73\,mV at 37\,\textdegree C (61.54\,mV/decade).
+
+\paragraph{Glial electrode.} Glial membranes behave like \Kp{} electrodes, but not perfectly Nernstian ones: $\Delta V_{glia} = S\log_{10}([\mathrm K]_{o,new}/[\mathrm K]_{o,rest})$. Measured slopes are:
+\begin{itemize}
+\item 61.5\,mV/decade in theory;
+\item approximately Nernstian in amphibians;
+\item \textbf{51}\,mV/decade in mammalian primary glia;
+\item 40\,mV/decade in the C6 cell line.
+\end{itemize}
+
+\paragraph{Scalp DC shift: no closed form.} The scalp DC shift is a field potential produced by currents through the glial syncytium. Its polarity is opposite to the glial membrane voltage, and it is attenuated to roughly 7\% by skull, CSF and dura, depending on geometry and conductivity. No single constant converts scalp \uV{} to mM. The correct approach is model-based tracking with \Ko{} as a hidden state. The DC shift nevertheless remains a strong qualitative marker of seizure onset.
+
+\paragraph{Chloride.} The chord form follows from zero net current through parallel Cl\textsuperscript{--} and \HCO{} conductances. Worked check at epileptic rest:
+\begin{enumerate}
+\item start from $E_{GABA}=-54.1$\,mV and $E_{HCO_3}=26.64\ln(16/26)=-12.9$\,mV;
+\item then $E_{Cl}=(E_{GABA}-0.2E_{HCO_3})/0.8=-64.4$\,mV;
+\item hence $[\mathrm{Cl}]_i = 130e^{-64.4/26.64}=11.6$\,mM.
+\end{enumerate}
+The GHK form gives different values for the same chloride (Table~\ref{tab:ghk}). \EGABA{} itself could be estimated non-invasively from TMS-EEG paired-pulse inhibition (SICI/LICI) plus model inversion, which carries its own uncertainty.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Chord vs GHK \EGABA{} for the same chloride levels.}
+\label{tab:ghk}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+State & \Cli{} (mM) & $E_{Cl}$ (mV) & Chord \EGABA & GHK \EGABA{} ($r=0.25$) \\
+\midrule
+Healthy rest & 5.6 & $-83.8$ & $-69.6$ & $-70.7$ \\
+Healthy peak & 7.4 & $-76.4$ & $-63.7$ & $-66.1$ \\
+Epileptic rest & 11.6 & $-64.4$ & $-54.1$ & $-57.8$ \\
+Epileptic peak & 15.2 & $-57.2$ & $-48.3$ & $-52.3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{E/I balance.} The aperiodic component is fitted with specparam/FOOOF \cite{donoghue2020}, either with a knee, $L(f) = b - \log_{10}(k+f^\chi)$, or in fixed form, $b-\chi\log_{10}f$. Summed exponentially decaying synaptic currents have a Lorentzian spectrum. \cite{gao2017} showed that the 30--50\,Hz exponent tracks E/I balance, with a higher $\chi$ indicating more inhibition. The exponent gives relative, not absolute, balance.
+
+\paragraph{Adenosine.} An earlier draft proposed $A_{peak} = A_{th}e^{T_{silence}/\tau_A}$. The simulation's own data require thresholds of 0.195 (epileptic: $A_{peak}=0.68$, $T=25$\,s) and 0.093 (healthy), which differ 2$\times$. Postictal silence is not set by adenosine alone, since the pump current also contributes, so the formula was withdrawn. Adenosine can only be inferred by fitting the full model.
+
+\paragraph{Optics.} Optical density is $OD = -\log_{10}(I/I_0) = \varepsilon cL + G$. In tissue the path length is $L = d\cdot DPF$, and the scattering term $G$ cancels when changes are taken. The resulting two-wavelength system is solved by inverting a $2\times2$ extinction matrix. For the adult frontal head \cite{scholkmann2013},
+\begin{equation}
+DPF(\lambda,A) = 223.3 + 0.05624A^{0.8493} - 5.723\times10^{-7}\lambda^3 + 0.001245\lambda^2 - 0.9025\lambda,
+\end{equation}
+which gives DPF $\approx$6.3 at 760\,nm and age 30. Partial volume (the brain is only part of the light path) causes underestimation. Short-channel regression and time-domain NIRS reduce scalp contamination. A temple PPG device samples mostly scalp and superficial arterial flow.
+
+\paragraph{Joint fit.} The strongest approach fits all signals at once, $\hat{\boldsymbol\theta} = \arg\min[\sum_{signals}\sum_t((y_t-f_t(\boldsymbol\theta))/\sigma)^2 - 2\ln P(\boldsymbol\theta)]$, with the ionic model as $f$. This yields full time courses of \Ko, \Cli, \EGABA{} and adenosine, with uncertainty.
+
+\subsection{Non-invasive routes in the literature}
+
+\paragraph{Direct nuclear MRI.} MRI can map ions in a scanner:
+\begin{itemize}
+\item \textsuperscript{23}Na and triple-quantum-filtered MRI show raised sodium in the epileptogenic zone, and 7T sodium features are already used as priors;
+\item \textsuperscript{39}K MRI is feasible at 7T with $\approx$1\,cm\textsuperscript{3} voxels in $\approx$30\,min;
+\item \textsuperscript{35}Cl MRI is feasible but $\approx$15$\times$ weaker than sodium;
+\item 7T MRS and GluCEST measure glutamate and GABA.
+\end{itemize}
+
+\paragraph{Proxies.}
+\begin{itemize}
+\item DC and infraslow EEG for \Kp;
+\item TMS-EEG SICI/LICI for GABA-A efficacy;
+\item the aperiodic exponent for E/I balance;
+\item [\textsuperscript{18}F]CPFPX PET for A1 receptors (not endogenous adenosine);
+\item postictal suppression plus hypoperfusion for adenosine, via a model.
+\end{itemize}
+
+\paragraph{Digital twins and emerging routes.} Digital twins, such as the Virtual Epileptic Patient \cite{jirsa2017,hashemi2020} and neural-mass models of TMS-EEG, invert models against data. Emerging routes are not yet usable in humans: photoacoustic \Kp{} imaging requires injected nanoparticles, and implantable ion-selective arrays are still experimental.
+
+\paragraph{A practical wearable pipeline.} It would combine:
+\begin{itemize}
+\item DC-capable EEG;
+\item fNIRS/DCS and PPG features;
+\item optionally, a one-off 7T sodium MRI as a prior;
+\item a patient-fitted model with UKF or simulation-based inference.
+\end{itemize}
+Validation against invasive ground truth, for example in patients undergoing intracranial monitoring, is mandatory.
+
+\subsection{Verification audit}
+
+Each formula was re-derived, checked against the literature and tested numerically (Table~\ref{tab:audit}). Three errors in earlier drafts were found and corrected.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Verification audit of the inference formulas.}
+\label{tab:audit}
+\begin{tabularx}{\linewidth}{@{}c l l L@{}}
+\toprule
+\# & Formula & Verdict & Correction \\
+\midrule
+1 & Bayes, posterior, credible interval & Correct & -- \\
+2 & Least squares = best estimate & Conditional & Only with Gaussian noise and a flat prior (derived) \\
+3 & Kalman filter & Correct & UKF for nonlinear models \\
+4 & Nernst 61.5 mV/decade & Correct at 37\,\textdegree C & The model's RT/F = 26.64 mV corresponds to 36\,\textdegree C; comment fixed \\
+5 & $[\mathrm K]_o = [\mathrm K]_{o,rest}10^{\Delta V/61.5k}$ from scalp DC & \textbf{Wrong (oversimplified)} & Mammalian glia slope is 51; scalp DC is a field potential; attenuation not constant; replaced by glial formula + model tracking \\
+6 & GHK inverse for \Cli & \textbf{Mismatch} & Valid formula, but the model's current is chord; recorded \EGABA{} values were 1--4 mV off; code and text corrected \\
+7 & Aperiodic fit & Correct & Relative E/I only \\
+8 & $A_{peak}=A_{th}e^{T/\tau}$ & \textbf{Withdrawn} & Inconsistent thresholds (0.195 vs 0.093) \\
+9 & MBLL, DPF $\approx$6 & Correct & Scholkmann--Wolf gives 6.3 at 760 nm, age 30 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Ionic model and TVB: complementary roles}
+
+The two models answer different questions:
+\begin{itemize}
+\item \textbf{The ionic model} is biophysical and local ($\approx$1\,mm\textsuperscript{2}). It infers ions in physical units and answers \emph{why} tissue is epileptic.
+\item \textbf{TVB} is phenomenological and whole-brain. It localises and propagates seizures and answers \emph{where}.
+\end{itemize}
+They could be combined in three steps:
+\begin{enumerate}
+\item TVB locates the epileptogenic zone;
+\item the ionic model, fitted to that region's EEG, TMS-EEG and fNIRS, infers the mechanism (KCC2 vs glia vs clearance);
+\item the ionic pathology is mapped back onto TVB's $x_0$, the motivation behind Epileptor-2 \cite{chizhov2018}.
+\end{enumerate}

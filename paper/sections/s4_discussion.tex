@@ -1,0 +1,135 @@
+% ============================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Principal findings}
+
+\begin{enumerate}
+\item \textbf{Seizure chemistry can be simulated, and in principle inferred.} The ionic model reproduced the known ionic and haemodynamic hallmarks and was validated against \cite{cressman2009}; our Epileptor matched TVB. Inference formulas worked only when their assumptions held, and they failed exactly as predicted when they did not:
+\begin{itemize}
+\item textbook glial slope: $-16$\%;
+\item naive DC conversion: 2.4$\times$ too high;
+\item GHK formula for a chord current: +2.7\,mM bias;
+\item naive fNIRS: 22\% of the true amplitude.
+\end{itemize}
+Model-based inference outperformed single-formula conversion. Adenosine and KCC2 require the full model.
+\item \textbf{Ear-level EEG sees most seizures but cannot stand alone.} Two ear-position channels matched an 18-channel cap for new users with about 1.7$\times$ the false alarms. Per-person normalisation and fine-tuning were each essential, and two ears clearly outperformed one.
+\item \textbf{The heart is the body signal that pays.} ECG reduced false alarms by 18--31\% at matched sensitivity for 115/125 patients. Simulated in-ear PPG retained most of the benefit, because detection relies on heart-rate \emph{changes}, which PPG measures well.
+\item \textbf{Movement matters through the heart, and minutes matter more than seconds.} Heart rate not explained by movement, plus 15\,s--5\,min context, reduced false alarms by up to 62\%. A weak univariate pre-check (AUC 0.62) did not predict the feature's value in combination.
+\item \textbf{False alarms are personal.} A quarter of patients produced most of them. The one associated trait was unstable ear-EEG amplitude, which suggests electrode fit. Each patient's rate was predictable from early wear, and a personal alarm verifier that learns each user's false alarms was the most effective strict-budget tool.
+\item \textbf{The dangerous seizures are caught.} All focal-to-bilateral tonic-clonic seizures were caught at $\le$5 \FAd.
+\item \textbf{The ceiling is the signal.} Short focal seizures ($<$30\,s, more than half of all seizures) were nearly invisible to two mastoid channels, and a quarter of seizures never raised the detector above 0.5. Better alarm logic cannot close this gap; hardware must (contact quality, more or better-placed electrodes).
+\end{enumerate}
+
+\subsection{Comparison with prior work}
+
+Table~\ref{tab:bench} compares our results with published SeizeIT2 detectors at similar false-alarm rates. Protocols differ, so the comparison indicates order of magnitude only. Our configurations matched or exceeded each published operating point.
+
+No published SeizeIT2 result approaches 1 \FAd. The 69\% at 0.49 \FAd{} of \cite{vandecasteele2020} was obtained on the earlier SeizeIT1 hospital dataset, with a 3-channel setup, patient-specific models, and only seizures visible on behind-the-ear EEG. The SeizeIT2 authors describe their own wearable results as ``sub par'' \cite{bhagubai2025}.
+
+Deployed devices keep false alarms low mainly in five ways:
+\begin{itemize}
+\item targeting convulsive seizures \cite{onorati2017,arends2018,beniczky2018};
+\item night-only use;
+\item personal tuning \cite{jeppesen2024};
+\item user cancellation \cite{phase3ecg2025};
+\item better electrodes and artefact rejection \cite{artifact2024}.
+\end{itemize}
+Our two-stage design is conceptually close to recent two-stage wearable-EEG detectors \cite{twostage2026}. The personal verifier extends this approach by learning each user's own false alarms.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Published SeizeIT2 results vs ours at similar false-alarm rates (protocols differ; order-of-magnitude comparison).}
+\label{tab:bench}
+\begin{tabularx}{\linewidth}{@{}L l l L@{}}
+\toprule
+Published & Caught & FA/day & This work \\
+\midrule
+Dataset paper, SVM, bte-EEG (29 held-out patients) \cite{bhagubai2025} & 71.1\% & 264 (11.0/h) & EEG only 62\% at $\le$200; EEG+ECG+context 72\% at $\le$200 \\
+Dataset paper, ChronoNet \cite{bhagubai2025} & 84.2\% & 2,412 & EEG+ECG+context 80\% at 402 \\
+ECG Matrix Profile, FAR-optimised \cite{reintjes2025} & 19.6\% & $<$48 & ECG only 29\% at $\le$20 \\
+ECG TimeVQVAE-AD, FAR-optimised \cite{reintjes2025} & 36.9\% & 206 & ECG only 60\% at $\le$200 \\
+ECG TimeVQVAE-AD, sensitivity-optimised \cite{reintjes2025} & 82.8\% & 627 & EEG+ECG+context 80\% at 402 \\
+ECG Matrix Profile, responders only \cite{reintjes2025} & 70.7\% & $\approx$46 & EEG+ECG fine-tuned, responders 81\% at $\le$50 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Implications for device design}
+
+The evidence defines a concrete architecture, which we call Prototype~1. Its hardware is:
+\begin{itemize}
+\item a bilateral ``?''-shaped ear-hook with dry EEG electrodes above and behind each ear (near T7/T8 and P7/P8) and a mastoid reference;
+\item an in-ear PPG/SpO\textsubscript{2} and temperature sensor;
+\item a 6-axis IMU;
+\item optional temporalis EMG;
+\item a phone connection.
+\end{itemize}
+The software would:
+\begin{itemize}
+\item compute features over a rolling few-minute history, including HR-excess;
+\item start from a general model and fine-tune after about two confirmed seizures;
+\item run a personal alarm verifier;
+\item offer responder-dependent modes: alarm mode for heart responders (39\% of seizures caught at $\le$1 \FAd, 64\% at $\le$5) and a log-only seizure diary for non-responders;
+\item gate on signal quality and prompt the user to reseat the device;
+\item allow user cancellation of alarms;
+\item raise SUDEP-relevant safety alarms for tonic-clonic seizures, bradycardia and desaturation \cite{lacuey2018,ryvlin2013}.
+\end{itemize}
+
+\paragraph{Should it be built?} Five arguments weigh against building it now as an alarm device:
+\begin{itemize}
+\item overall performance at $\le$1 \FAd{} (19\%) is inadequate for most users;
+\item all numbers come from adhesive mastoid electrodes, chest ECG and hospital conditions, and dry ear electrodes in daily life will perform worse;
+\item electrode fit, the main false-alarm driver, is unmeasured for our own hardware;
+\item the PPG results are simulated;
+\item a seizure alarm is a regulated medical device whose misses can create false reassurance.
+\end{itemize}
+Four arguments favour building it as a research recording and seizure-diary device:
+\begin{itemize}
+\item only hardware can answer the largest open questions: dry-electrode signal quality, and real in-ear PPG during walking, chewing and sleep;
+\item tonic-clonic seizures are already caught;
+\item objective seizure counts are clinically valuable because patients under-report \cite{hoppe2007,elger2018};
+\item all components exist off the shelf, and the software pipeline is ready.
+\end{itemize}
+We therefore recommend building it first as a recording and seizure-diary device and validating it in phases: bench testing, self-wear by healthy volunteers, then an ethics-approved partnership with an epilepsy monitoring unit. Alarms should be enabled only when device-specific data support them.
+
+\subsection{Limitations}
+
+\begin{itemize}
+\item \textbf{Simulation.} Ictal events do not self-sustain at the default pump setting. The network is small and one-dimensional, with one cell type per population. Conservation is simplified (no cell swelling), energy is implicit (no ATP or O\textsubscript{2}), the haemodynamics are generic with no initial dip, and the LFP is a proxy rather than a volume-conductor EEG.
+\item \textbf{Inference.} All results are simulation-only. T2 is an inverse crime, and E2's DC channel needs a calibrated gain. Non-identifiability (weak KCC2 and weak GABA receptors both reduce inhibition) and parameter uncertainty (e.g.\ $r$ = 0.2--0.44, glial slope 40--59\,mV/decade) limit what can be concluded.
+\item \textbf{CHB-MIT.} The recordings are paediatric, in hospital and mostly at rest. Ear montages were approximated with scalp channels rather than dry ear electrodes. The patient-specific samples are small, and stricter thresholds were chosen post hoc.
+\item \textbf{SeizeIT2.} The recordings are from hospitals, with less movement than daily life. The heart signal is chest ECG, with PPG only simulated at feature level, and the EEG uses adhesive mastoid electrodes rather than a hook. Best-along-the-curve numbers are slightly optimistic, and fine-tuned models need held-out calibration. The personalisation experiments cover the 71 patients with $\ge$3 seizures; responder status requires ECG and two seizures; age was unavailable. No confidence intervals are reported for detection metrics; patient-level bootstrap intervals are planned.
+\item \textbf{Interactive model.} Body signals follow literature timings rather than the neuron model, and the fusion rule and \Kp-DC threshold are hand-set.
+\end{itemize}
+
+\subsection{Future work}
+
+\begin{enumerate}
+\item Complete the raw-EEG CNN and stacking experiment.
+\item Combine the personal verifier with the fine-tuned detector, calibrated on a held-out slice of the tuning period.
+\item Build a hardware prototype: dry ear electrodes with contact-quality sensing, in-ear PPG/SpO\textsubscript{2}, an IMU, and a phone app with cancellation.
+\item Record real in-ear PPG to replace the simulation.
+\item Train sequence models over minutes of HR/HRV and EEG; pre-ictal HRV changes occur in $\approx$41\% of seizures.
+\item Forecast seizures from multi-day cycles.
+\item Extend the simulator:
+\begin{itemize}
+\item recalibrate the pump current so that seizures self-sustain;
+\item add ATP/O\textsubscript{2} and interneuron classes;
+\item use a 2-D sheet and a volume-conductor EEG forward model.
+\end{itemize}
+\item Fit the ionic model to patients with simultaneous intracranial and scalp recordings.
+\end{enumerate}
+
+% ============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+Starting from a question about a temple-worn optical wearable, this work built the scientific and engineering basis for a different device: a bilateral ear-hook combining ear-EEG, in-ear PPG and motion, with a personalised, multimodal, two-stage detector. On the largest public wearable dataset, several ingredients together raised the share of seizures caught at $\le$1 false alarm/day from 4\% (ear EEG) to 19\% overall and to 39\% in heart responders:
+\begin{itemize}
+\item the heart signal;
+\item minute-scale context;
+\item a movement-adjusted heart-rate feature;
+\item personalisation.
+\end{itemize}
+The system caught every focal-to-bilateral tonic-clonic seizure at $\le$5 false alarms/day and remained robust to simulated PPG. The remaining limitation is the information available from two behind-the-ear electrodes, which points the next phase toward hardware.

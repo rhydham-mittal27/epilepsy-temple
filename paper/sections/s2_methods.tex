@@ -1,0 +1,420 @@
+% ============================================================================
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Study design}
+
+The work comprised five linked studies (Table~\ref{tab:design}). Studies~1--2 are computational; Studies~3--4 use public, de-identified patient data; Study~5 integrates the models into an interactive visualisation. The background review that motivated each design choice is summarised in Appendix~\ref{app:background}.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Overview of the studies.}
+\label{tab:design}
+\begin{tabularx}{\linewidth}{@{}l L L L@{}}
+\toprule
+Study & Question & Data / model & Primary outcome \\
+\midrule
+1. Simulation & Can seizure ion and blood-flow dynamics be reproduced? & Spiking network, Epileptor, 100-neuron ionic model & Agreement with Cressman 2009; physiological hallmarks \\
+2. Inference & Can hidden variables be inferred from wearable-type signals? & Twin experiments E1--E7; TVB T1--T2 & Error vs known truth \\
+3. CHB-MIT & How well do temple/ear electrode positions detect seizures? & 23 subjects, 185 seizures, 297 h scalp EEG & Sensitivity, FA/day, latency \\
+4. SeizeIT2 & How much do body signals, context and personalisation cut false alarms? & 125 patients, 883 seizures, 11,626 h wearable data & FA/day at matched sensitivity; seizures caught within FA budgets \\
+5. Live Lab & Can the system be made inspectable end to end? & All of the above & Qualitative (EEG-only vs multimodal) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ----------------------------------------------------------------------------
+\subsection{Seizure simulators (Study 1)}
+\label{sec:m-sim}
+
+Three models of increasing realism were implemented in Python (numba-compiled where needed); Table~\ref{tab:models} summarises them.
+
+\begin{table}[htbp]
+\centering\small
+\caption{The three simulators.}
+\label{tab:models}
+\begin{tabularx}{\linewidth}{@{}l L L L@{}}
+\toprule
+& Model 1: spiking network & Model 2: Epileptor & Model 3: ionic model \\
+\midrule
+Type & 1,000 Izhikevich neurons \cite{izhikevich2003} & 6 ODEs, phenomenological \cite{jirsa2014} & 100 Hodgkin--Huxley neurons with ion concentrations \cite{cressman2009} \\
+Seizure cause & GABA strength reduced & Slow variable $z$ crosses threshold & Emerges from \Kp/\Clm/\Nap/adenosine dynamics and pathology \\
+Termination & Inhibition restored & $z$ dynamics & Pump, \Nap-activated \Kp{} current, adenosine \\
+Variables & Spikes, LFP proxy & Abstract & \Ko, \Nai, \Cli, \EGABA, $E_K$, pump flux, adenosine, CBF, HbO, HbR \\
+Validation & Qualitative & TVB (Study 2) & Cressman 2009 Fig.~1 (quantitative) \\
+Runtime & $\approx$5\,s & $\approx$2\,s & 7\,s (validation) to $\approx$6\,min \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Model 1.} 800 regular-spiking excitatory and 200 fast-spiking inhibitory neurons obeyed
+\begin{equation}
+\dot v = 0.04v^2 + 5v + 140 - u + I,\qquad \dot u = a(bv-u),\qquad v\ge 30\,\mathrm{mV}\Rightarrow v\leftarrow c,\ u\leftarrow u+d .
+\end{equation}
+GABA weights were scaled to 0.35 between 1.5 and 2.8\,s. Synchrony was quantified as the variance of the population rate divided by the mean single-cell variance.
+
+\paragraph{Model 2.} The Epileptor \cite{jirsa2014} was integrated with forward Euler:
+\begin{align}
+\dot x_1 &= y_1 - f_1(x_1,x_2) - z + I_1, & \dot y_1 &= y_0 - 5x_1^2 - y_1,\\
+\dot z &= \tfrac{1}{\tau_0}\big(4(x_1-x_0) - z\big), & \dot x_2 &= -y_2 + x_2 - x_2^3 + I_2 + 2g - 0.3(z-3.5),\\
+\dot y_2 &= \tfrac{1}{\tau_2}\big(-y_2 + f_2(x_2)\big), & \dot g &= -0.01\,(g - 0.1x_1),
+\end{align}
+with excitability $x_0=-1.6$ (epileptic) or $-2.2$ (healthy) over 6,000 time units.
+
+\paragraph{Model 3: ionic network.} A seizure is modelled as a contest between fast positive and slow negative feedback:
+\begin{itemize}
+\item positive feedback:
+\begin{itemize}
+\item \Kp{} accumulation depolarises neighbours (0.1--5\,s);
+\item \Clm{} loading makes GABA depolarising (1--30\,s);
+\item KCC2 co-extrudes \Kp{} with \Clm{} (seconds);
+\end{itemize}
+\item negative feedback:
+\begin{itemize}
+\item \Nap{} accumulation drives an electrogenic pump current and a \Nap-activated \Kp{} (Slack) current \cite{krishnan2011,compte2003};
+\item pump ATP use produces adenosine, which opens GIRK channels and reduces release (5--60\,s) \cite{during1992};
+\item glia, diffusion and the vasculature clear \Kp.
+\end{itemize}
+\end{itemize}
+
+The network has 100 neurons on a ring, 80 excitatory and 20 inhibitory (every fifth cell inhibitory). Wiring is local and random within $\pm$10 cells, with connection probability $p=0.6$ from E cells and $0.8$ from I cells. Each cell has its own extracellular micro-compartment, coupled to its neighbours by lateral \Kp{} diffusion, and receives Poisson background excitation. The state variables per neuron are:
+\begin{itemize}
+\item membrane potential $V$ and gates $n,h$;
+\item concentrations $[\mathrm{Ca}]_i$, \Ko, \Nai{} and \Cli;
+\item synaptic conductances $g_e,g_i$;
+\item vesicle resources $x$ (optional depression \cite{tsodyks1997});
+\item adenosine $A$.
+\end{itemize}
+Two concentrations are derived rather than tracked: $[\mathrm{K}]_i = 158-[\mathrm{Na}]_i$ and $[\mathrm{Na}]_o = 144-\beta([\mathrm{Na}]_i-18)$.
+
+The membrane equation (positive outward) is
+\begin{equation}
+C\frac{dV}{dt} = -\big(I_{Na} + I_K + I_{Cl} + I_{AMPA} + I_{GABA} + s_p I_{pump}\big),
+\end{equation}
+with intrinsic currents following \cite{cressman2009}:
+\begin{align}
+I_{Na} &= g_{Na} m_\infty^3 h (V-E_{Na}) + g_{NaL}(V-E_{Na}),\\
+I_K &= \Big(g_K n^4 + g_{AHP}\tfrac{[\mathrm{Ca}]_i}{1+[\mathrm{Ca}]_i} + g_{KNa}w_\infty([\mathrm{Na}]_i) + g_{GIRK}(A)\Big)(V-E_K) + g_{KL}(V-E_K),\\
+I_{Cl} &= g_{ClL}(V-E_{Cl}).
+\end{align}
+The gates use classical Hodgkin--Huxley rates, with $m$ at steady state and $\phi=3$. Reversal potentials use $RT/F=26.64$\,mV (36\,\textdegree C):
+\begin{equation}
+E_K = 26.64\ln\frac{[\mathrm{K}]_o}{[\mathrm{K}]_i},\quad
+E_{Cl} = 26.64\ln\frac{[\mathrm{Cl}]_i}{[\mathrm{Cl}]_o},\quad
+E_{GABA} = 0.8E_{Cl} + 0.2E_{HCO_3},\quad E_{HCO_3}\approx-12.9\ \mathrm{mV}.
+\end{equation}
+Synapses are exponential conductances ($\tau_{AMPA}=5$\,ms, $\tau_{GABA}=8$\,ms) split by ion so that they feed the concentration equations:
+\begin{equation}
+I_{AMPA} = 0.64g_e(V-E_{Na}) + 0.36g_e(V-E_K),\qquad I_{GABA} = 0.8g_i(V-E_{Cl}) + 0.2g_i(V-E_{HCO_3}).
+\end{equation}
+Pump, glia, diffusion and KCC2 fluxes (mM/s) follow the corrected ModelDB implementation of \cite{cressman2009}:
+\begin{align}
+I_{pump} &= \frac{\rho}{1+e^{(25-[\mathrm{Na}]_i)/3}}\cdot\frac{1}{1+e^{5.5-[\mathrm{K}]_o}},\quad
+I_{glia} = \frac{s_g G_{glia}}{1+e^{(18-[\mathrm{K}]_o)/2.5}},\quad
+I_{diff} = s_c\varepsilon([\mathrm{K}]_o - K_{bath}),\\
+J_{KCC2} &= s_k U_{KCC2}\ln\frac{[\mathrm{K}]_i[\mathrm{Cl}]_i}{[\mathrm{K}]_o[\mathrm{Cl}]_o}.
+\end{align}
+Concentrations evolve as ($\gamma=0.0445$ current-to-concentration, $\beta=7$ volume ratio, $\div1000$ for ms$\to$s):
+\begin{align}
+\frac{d[\mathrm{K}]_o}{dt} &= \tfrac{1}{1000}\big(\gamma\beta(I_K+I_{AMPA,K}) - 2\beta I_{pump} - I_{glia} - I_{diff} + \beta J_{KCC2}\big) + D_{lat}\nabla^2[\mathrm{K}]_o,\\
+\frac{d[\mathrm{Na}]_i}{dt} &= \tfrac{1}{1000}\big(-\gamma(I_{Na}+I_{AMPA,Na}) - 3I_{pump}\big),\qquad
+\frac{d[\mathrm{Cl}]_i}{dt} = \tfrac{1}{1000}\big(\gamma(I_{Cl}+I_{GABA,Cl}) - J_{KCC2}\big).
+\end{align}
+The electrogenic pump current is $s_p I_{pump}/\gamma$ (\textmu A/cm\textsuperscript{2}). The Slack activation follows \cite{compte2003}, with its EC50 shifted from 38.7 to 68.6\,mM to match this model's resting \Nai: $w_\infty = 0.37/(1+(68.6/[\mathrm{Na}]_i)^{3.5})$. Adenosine is produced in proportion to pump ATP use above rest and cleared with $\tau_A=20$\,s:
+\begin{equation}
+\frac{dA}{dt} = \alpha_A\max(I_{pump}-0.25,0) - \frac{A}{\tau_A},\qquad g_{GIRK} = g_{ado}\frac{A}{1+A},\qquad \text{release}\times\frac{1}{1+A}.
+\end{equation}
+Neurovascular coupling uses the Balloon--Windkessel model \cite{buxton1998,friston2000}, driven by $u = k\ln(\mathrm{rate}/\mathrm{baseline})$ clipped to $[0.3\times,30\times]$:
+\begin{equation}
+\dot s = u - \kappa s - \gamma_f(f-1),\quad \dot f = s,\quad \tau_0\dot v = f - v^{1/\alpha},\quad
+\tau_0\dot q = \frac{f(1-(1-E_0)^{1/f})}{E_0} - v^{1/\alpha}\frac{q}{v},
+\end{equation}
+The outputs are CBF $=f$, HbT $\propto v$, HbR $\propto q$ and HbO $=(\mathrm{HbT}-0.4\,\mathrm{HbR})/0.6$. All parameters and their sources are listed in Appendix Table~\ref{tab:params}.
+
+\paragraph{Healthy vs epileptic tissue.} Both tissues share neurons and wiring. Only the pathology differs; it is modelled on hippocampal sclerosis:
+\begin{itemize}
+\item KCC2 $\times$0.3 \cite{doyon2016};
+\item glial \Kp{} buffering $\times$0.3 (Kir4.1 loss);
+\item vascular \Kp{} clearance $\times$0.35 (gliosis).
+\end{itemize}
+Each run settles for a 60\,s warm-up. Both tissues then receive the same 2\,s trigger (+400\,Hz excitatory input) at $t=10$--12\,s.
+
+\paragraph{Numerics.} Voltage and gates use exponential Euler, $V_{t+dt} = V_\infty + (V_t - V_\infty)e^{-dt\,g_{tot}}$, which remains stable at large conductances, with $dt=0.02$\,ms. Concentrations use forward Euler. A 100-neuron, 360\,s simulation runs in $\approx$6\,min.
+
+\paragraph{Validation protocol.} With all additions disabled (fixed \Clm, no pump current, no $I_{KNa}$, no adenosine), a single neuron in 8\,mM bath \Kp{} was compared with Fig.~1 of \cite{cressman2009}. The calibration steps that led to the final model are listed in Appendix Table~\ref{tab:calib}.
+
+% ----------------------------------------------------------------------------
+\subsection{Inference of hidden variables (Study 2)}
+\label{sec:m-inf}
+
+\paragraph{Framework.} A forward model maps hidden quantities $\boldsymbol\theta$ (KCC2 strength, \Cli, \Ko, adenosine) to sensor measurements $\mathbf y$ (EEG discharge rate, DC shift, $1/f$ slope, HbO/HbR): $\mathbf y = f(\boldsymbol\theta)+\boldsymbol\varepsilon$. Inversion follows Bayes' theorem, $P(\boldsymbol\theta\mid\mathbf y) \propto P(\mathbf y\mid\boldsymbol\theta)P(\boldsymbol\theta)$. With Gaussian noise the log-likelihood is $\mathrm{const} - \frac12\sum_i (y_i-f_i(\boldsymbol\theta))^2/\sigma_i^2$. With a flat prior the maximum a posteriori estimate is therefore weighted least squares; an informative prior adds $-2\ln P(\boldsymbol\theta)$. Estimates are reported as posterior mean $\pm$ SD. Time-varying hidden states are tracked with a Kalman filter \cite{kalman1960},
+\begin{align}
+\hat x_t^- &= F\hat x_{t-1},\quad P_t^- = FP_{t-1}F^\top + Q,\quad K_t = P_t^-H^\top(HP_t^-H^\top+R)^{-1},\\
+\hat x_t &= \hat x_t^- + K_t(y_t - H\hat x_t^-),\quad P_t = (I-K_tH)P_t^-,
+\end{align}
+or by its extended and unscented variants for nonlinear models \cite{wan2000,ullah2010}. When the likelihood is intractable, approximate Bayesian computation is used: candidates are drawn from the prior, simulated, and accepted if their outputs are close to the data \cite{beaumont2002,hashemi2020}.
+
+\paragraph{Formulas.} Six formulas were derived; derivations and the audit are in Appendix~\ref{app:inference}.
+\begin{enumerate}
+\item \Ko{} from a glial electrode, $[\mathrm K]_{o} = [\mathrm K]_{o,rest}\cdot10^{\Delta V_{glia}/S}$, with mammalian slope $S=51$\,mV/decade.
+\item \Cli{} from \EGABA. The chord form is
+\begin{align}
+E_{GABA} &= \frac{g_{Cl}E_{Cl}+g_{HCO_3}E_{HCO_3}}{g_{Cl}+g_{HCO_3}} = 0.8E_{Cl}+0.2E_{HCO_3},\\
+\Rightarrow\quad E_{Cl} &= \frac{E_{GABA}-0.2E_{HCO_3}}{0.8},\qquad [\mathrm{Cl}]_i = [\mathrm{Cl}]_o\exp\!\left(\frac{E_{Cl}}{RT/F}\right).
+\end{align}
+The Goldman--Hodgkin--Katz (GHK) permeability form is
+\begin{align}
+E_{GABA} &= \frac{RT}{F}\ln\frac{P_{Cl}[\mathrm{Cl}]_i+P_{HCO_3}[\mathrm{HCO_3}]_i}{P_{Cl}[\mathrm{Cl}]_o+P_{HCO_3}[\mathrm{HCO_3}]_o},\\
+\Rightarrow\quad [\mathrm{Cl}]_i &= ([\mathrm{Cl}]_o + r[\mathrm{HCO_3}]_o)\,e^{E_{GABA}/(RT/F)} - r[\mathrm{HCO_3}]_i,
+\end{align}
+with $r=P_{HCO_3}/P_{Cl}$ between 0.2 and 0.44.
+\item Excitation/inhibition balance from the aperiodic EEG exponent $\chi$ \cite{donoghue2020,gao2017}, fitted as $L(f) = b-\chi\log_{10}f$ over 30--50\,Hz (or with a knee over a broad band).
+\item Haemoglobin from optics by the modified Beer--Lambert law \cite{delpy1988},
+\begin{equation}
+\Delta OD(\lambda) = \big(\varepsilon_{HbO}(\lambda)\Delta[\mathrm{HbO}] + \varepsilon_{HbR}(\lambda)\Delta[\mathrm{HbR}]\big)\,d\,DPF(\lambda),
+\end{equation}
+with the age- and wavelength-dependent DPF of \cite{scholkmann2013}.
+\item Adenosine from the duration of postictal silence (tested and withdrawn; see Results).
+\item \Kp{} from a scalp DC shift, via model-based tracking (no closed form exists).
+\end{enumerate}
+
+\paragraph{Twin experiments E1--E7.} A simulator with known hidden values synthesised the signals a sensor would record. Realistic confounds were then added (Table~\ref{tab:confounds}), the inference method was applied, and the result was compared with the truth; without confounds, inverting the generating equation would be trivially exact. The seven experiments were:
+\begin{itemize}
+\item E1: \Ko{} from a glial electrode;
+\item E2: \Ko{} from scalp DC-EEG, with a process model $d[\mathrm K]_o/dt = a\cdot\mathrm{rate} - ([\mathrm K]_o - K_0)/\tau$ calibrated on healthy data and an extended Kalman filter (EKF) that also estimates skull gain;
+\item E3: \Cli{} from an \EGABA{} estimate (chord vs GHK);
+\item E4: E/I balance from the EEG spectrum;
+\item E5: HbO/HbR from fNIRS (naive MBLL, short-channel regression, partial-volume correction);
+\item E6: adenosine from postictal silence;
+\item E7: KCC2 strength by Bayesian grid inference over six ionic simulations, using resting \EGABA{} ($\pm$1.5\,mV) and mean excitatory rate ($\pm$25\%).
+\end{itemize}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Confounds injected in the twin experiments.}
+\label{tab:confounds}
+\begin{tabularx}{\linewidth}{@{}l l l L@{}}
+\toprule
+Confound & Used in & Value & Realism \\
+\midrule
+Glial slope unknown & E1 & true 51 vs textbook 61.5 mV/decade & Measured mammalian glia \\
+Skull attenuation unknown & E2 & true $\alpha=0.01$, guessed 0.005 & Cortex-to-scalp gain varies \\
+Electrode drift & E2 & random walk 0.4 \uV/step & Main practical problem of DC-EEG \\
+\EGABA{} estimation error & E3 & $\pm$2 mV & TMS-EEG estimates are indirect \\
+\HCO/\Clm{} permeability & E3 & $r$ = 0.2--0.44 & Literature range \\
+Scalp haemodynamics & E5 & Mayer waves 0.1 Hz + cardiac 1.2 Hz & Dominant fNIRS contaminant \\
+Partial volume & E5 & 15\% of photon path in cortex & Layered head \\
+Individual DPF & E5 & true DPF 10\% above formula & Inter-subject variation \\
+Onset-picking noise & T2 & $\pm$20 ms & SEEG annotation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Cross-validation with The Virtual Brain.} Two comparisons were made against TVB \cite{sanzleon2013}.
+\begin{itemize}
+\item \textbf{T1} compared our Epileptor with TVB's official implementation. The equations were checked line by line against TVB's source; parameters and initial state were identical ($x_0=-1.6$, $I_{ext}=3.1$, $r=1/2857$). TVB used Heun integration at $dt=0.05$; ours used Euler at $dt=0.05$ and $dt=0.01$.
+\item \textbf{T2} was a Virtual-Epileptic-Patient-style whole-brain inference \cite{jirsa2017,hashemi2020}:
+\begin{itemize}
+\item network: TVB's 76-region connectome, conduction speed 3\,m/s, Difference coupling $a=1$, permittivity coupling $K_s=-0.2$;
+\item regional excitability: epileptogenic zone rAMYG ($x_0=-1.6$), propagation zone rPHC, rTCV and rTCPOL ($-2.0$), all other regions $-2.2$;
+\item inference: the zone and its excitability were recovered from region onset times with $\pm$20\,ms noise.
+\end{itemize}
+\end{itemize}
+
+% ----------------------------------------------------------------------------
+\subsection{Scalp-EEG montage study (Study 3, CHB-MIT)}
+\label{sec:m-chb}
+
+\paragraph{Data.} The CHB-MIT Scalp EEG Database \cite{shoeb2009,goldberger2000} contains long-term paediatric recordings. They are sampled at 256\,Hz with bipolar 10--20 montages, and seizure onsets and offsets are marked by clinicians. Two analyses were run.
+\begin{itemize}
+\item \textbf{Patient-specific study.} Three patients (chb01, chb03, chb05): all seizure recordings plus six seizure-free files each; 19 seizures, 36.6\,h.
+\item \textbf{General-model study.} All subjects, with chb01 and chb21 (the same child) merged, giving 23 subjects. Each contributed every seizure recording plus three seizure-free recordings: 207 recordings, 185 seizures, 297\,h. Files lacking the 18 standard channels were skipped. Each EDF was downloaded, converted to features and deleted.
+\end{itemize}
+
+\paragraph{Montages.} The patient-specific study compared five montages:
+\begin{itemize}
+\item full 18-channel bipolar cap;
+\item ``both temples'' (T7--FT9, F7--T7, FT10--T8, F8--T8; FT9/FT10 lie just in front of the ears);
+\item right temple (FT10--T8, F8--T8);
+\item left temple (T7--FT9, F7--T7);
+\item a single right-temple channel (FT10--T8).
+\end{itemize}
+The general study used four montages:
+\begin{itemize}
+\item temple (F7--T7, T7--P7, F8--T8, T8--P8; FT9/FT10 are absent for some subjects);
+\item \emph{ear-hook, both ears} (T7--P7, T8--P8: the standard channels closest to a hook, with T7/T8 above the ear and P7/P8 above and behind it);
+\item ear-hook, one ear (T8--P8);
+\item full cap.
+\end{itemize}
+
+\paragraph{Pipeline.} Every step is causal, i.e.\ usable in real time.
+\begin{enumerate}
+\item The signal is band-passed at 0.5--45\,Hz (4th-order Butterworth) and cut into 2\,s windows every 1\,s, each scored at its end.
+\item Fourteen features are computed per channel:
+\begin{itemize}
+\item line length \cite{esteller2001} and log variance;
+\item Hjorth mobility and complexity \cite{hjorth1970};
+\item log band power in $\delta$ (0.5--4\,Hz), $\theta$ (4--8), $\alpha$ (8--13), $\beta$ (13--30) and $\gamma$ (30--45\,Hz);
+\item the five relative band powers.
+\end{itemize}
+\item In the general study, each feature is z-scored against a causal exponential moving average (EMA) of the same recording's previous $\approx$10\,min (600 windows, initialised from the first minute).
+\item A class-balanced histogram gradient-boosting classifier \cite{pedregosa2011,ke2017} (150 trees, learning rate 0.1, 31 leaves) scores each window.
+\item The probability is smoothed with a causal 5\,s moving average. An alarm fires when it crosses the threshold (default 0.5) and is followed by a 60\,s refractory period.
+\end{enumerate}
+
+\paragraph{Evaluation.} The protocol differed by analysis:
+\begin{itemize}
+\item \textbf{Patient-specific:} leave-one-recording-out, plus a cross-patient model trained on the other two patients.
+\item \textbf{General (new users):} leave-one-subject-out. The training pool held all seizure windows plus 5\% of the other windows.
+\item \textbf{Fine-tuning:} subjects with $\ge$3 seizure recordings and at least one seizure-free recording. The first $k\in\{1,2\}$ seizure recordings plus one seizure-free hour were added with weight $\times$10, and the model was tested on all later recordings. It was compared with the general model and with a patient-only model trained on the same data.
+\item \textbf{Ablation:} raw vs normalised features, on the temple montage.
+\end{itemize}
+
+% ----------------------------------------------------------------------------
+\subsection{Multimodal wearable study (Study 4, SeizeIT2)}
+\label{sec:m-sz2}
+
+\paragraph{Data.} SeizeIT2 \cite{bhagubai2025} (OpenNeuro ds005873 v1.1.0 \cite{markiewicz2021}, CC0) was recorded with the Byteflies Sensor Dot in five European epilepsy monitoring units (Leuven, Freiburg, Aachen, Karolinska, Coimbra). Its sensor set closely matches the proposed ear-hook (Table~\ref{tab:sz2data}). The ``impd'' annotation is defined in the dataset's \code{events.json} as an impedance control check.
+
+\begin{table}[htbp]
+\centering\small
+\caption{SeizeIT2 as used here.}
+\label{tab:sz2data}
+\begin{tabularx}{\linewidth}{@{}l L@{}}
+\toprule
+Patients & 125 with focal epilepsy (51 female; children only from Leuven) \\
+Seizures & 883 focal (aware, impaired awareness, focal-to-bilateral tonic-clonic, unclear); mean 58 s (3 s -- 16 min) \\
+Recording & 11,626 h in 2,850 runs \\
+EEG & 2 behind-the-ear (mastoid) channels at 256 Hz: a same-side and a cross-head channel (or two lateral channels in a ``generalized'' montage); montage left/right/generalized in 65/44/16 patients \\
+ECG, EMG & 1 chest ECG and 1 left-deltoid EMG channel, 256 Hz \\
+Motion & Accelerometer and gyroscope on two devices (upper back, chest), 25 Hz \\
+Missing & ECG/EMG absent in 46 runs, motion in 299 runs \\
+Labels & Clinician-marked onset/offset from video-EEG; type, lateralisation, localisation, vigilance; ``bckg'' and ``impd'' epochs \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Streaming.} The dataset (126\,GB) exceeded the available disk (19\,GB free), so it was processed as a stream. The four EDF files of each run were fetched in parallel from Amazon S3 into memory and decoded by a minimal EDF reader. The reader parses the header (labels, physical and digital ranges, samples per record), scales int16 samples to physical units and skips the annotation channel. Only the extracted features were saved, written atomically (1.8\,GB in total). Streaming reads exactly the samples that a download would, so no quality is lost. Three runs were streamed concurrently over 12 connections (18--25\,MB/s), and the job was resumable.
+
+\paragraph{Features.} Signals were cut into 4\,s windows every 2\,s. A window is labelled seizure if its centre lies within a marked seizure.
+\begin{itemize}
+\item \textbf{EEG (2 channels, 28 features):} the 14 CHB-MIT features per channel, after a 0.5--45\,Hz band-pass and Hann-windowed FFT.
+\item \textbf{ECG (8 features):}
+\begin{itemize}
+\item R-peak detection, Pan--Tompkins style \cite{pan1985}: 5--20\,Hz band-pass, squared derivative, 120\,ms moving average, an adaptive threshold at 30\% of the 98th percentile per 10\,s block, and a 270\,ms refractory period;
+\item RR-interval cleaning: an interval is kept if it lies within 0.27--2.0\,s and within 30\% of a 9-beat running median;
+\item features: HR over 4, 10 and 30\,s; 30\,s HR rise; RMSSD and SDNN over 30\,s; beat quality (beats found vs expected); ECG line length.
+\end{itemize}
+\item \textbf{EMG (5 features):} after a 20--120\,Hz band-pass and 48--52\,Hz notch: log RMS, line length, zero-crossing rate, fraction of power above 60\,Hz, and 0.5--20\,Hz log power.
+\item \textbf{Motion (8 features):} per device, the log SD and line length of acceleration magnitude, the fraction of power at 2--8\,Hz (clonic band), and the mean gyroscope magnitude.
+\end{itemize}
+Every feature was z-scored against a causal EMA of the previous $\approx$10\,min of the same recording (300 windows). Absolute HR and beat quality were also kept. Missing sensors were left as NaN and routed natively by the trees, so no patient was excluded.
+
+\paragraph{Temporal context.} Several key features were given longer context: EEG line length, log variance, and the $\delta$ and $\theta$ shares; HR, RMSSD, SDNN and beat quality. For each, causal EMAs over 15\,s, 1\,min and 5\,min were added, along with fast-minus-slow differences, the 1-min running maximum, and heart features relative to a 30-min baseline. Each context configuration was trained on exactly the same windows as its twin (shared random seed). Causality was verified by altering future samples and confirming that past features were unchanged.
+
+\paragraph{HR-excess (new feature).} Heart rate rises with movement as well as with seizures. We therefore estimated, per recording and causally, the heart rate that the current movement explains. Let $A_t$ be the 15\,s EMA of the larger of the two log-acceleration features and $H_t$ the 10\,s heart rate. Running EMAs of $A$, $H$, $A^2$ and $AH$, with 30-min memory and using only past values, give
+\begin{equation}
+b_t = \mathrm{clip}\!\left(\frac{\overline{AH}_{t-1}-\bar A_{t-1}\bar H_{t-1}}{\max(\overline{A^2}_{t-1}-\bar A^2_{t-1},0.05)},0,30\right),\qquad
+\hat H_t = \bar H_{t-1} + b_t(A_t - \bar A_{t-1}).
+\end{equation}
+Four features are derived from this fit:
+\begin{itemize}
+\item $H_t-\hat H_t$ (the HR excess);
+\item its 1\,min EMA;
+\item $A_t$;
+\item the 30\,s rise not explained by activity, $(H_t-H_{t-30s}) - b_t(A_t-A_{t-30s})$.
+\end{itemize}
+
+\paragraph{Configurations and classifier.} The main configurations were:
+\begin{itemize}
+\item single modalities: EEG only, ECG only, body only (ECG+EMG+motion);
+\item fusions: EEG+ECG; EEG+ECG+EMG+motion;
+\item context and HR-excess variants: EEG+context; EEG+ECG+context; EEG+ECG+HR-excess; EEG+ECG+context+HR-excess;
+\item a ``big'' variant of the last configuration;
+\item EEG+simulated PPG+context+HR-excess.
+\end{itemize}
+The classifier was a class-balanced histogram gradient boosting model (150 trees) trained on all seizure windows plus 3\% of the others. The big variant used 8\% of the other windows (a superset of the 3\% pool), 400 trees, learning rate 0.05 and 63 leaves.
+
+\paragraph{Cross-validation and scoring.} Patient-wise 5-fold cross-validation was used, with folds balanced by seizure count through a round-robin assignment, so every patient was scored by a model that never saw them. Scoring proceeded as follows:
+\begin{itemize}
+\item the probability was smoothed over 3 windows (6\,s), thresholded, and followed by a 60\,s refractory period;
+\item a seizure counted as detected if an alarm fired from 15\,s before its onset to its end;
+\item any other alarm was a false alarm, except within 60\,s after a seizure;
+\item thresholds were swept from 0.05 to 0.99.
+\end{itemize}
+The primary outcome was false alarms per 24\,h (FA/day) at \emph{matched sensitivity}: the fewest false alarms at any threshold that caught at least X\% of seizures. We used the minimum over thresholds rather than interpolation, because sensitivity is not monotonic in the threshold. The secondary outcome was the share of seizures caught within a daily false-alarm budget. We report two kinds of numbers:
+\begin{itemize}
+\item \emph{calibrated} numbers fix the threshold on earlier (tuning) data and score later data, as a device would experience;
+\item \emph{best-along-the-curve} numbers sweep the threshold over the test data; they compare setups fairly but are slightly optimistic.
+\end{itemize}
+A vectorised event scorer was verified to give results identical to the reference scorer before use.
+
+\paragraph{Personalisation.} Each patient's record was split chronologically: tuning data ran up to 10\,min after the $k$-th seizure, and testing used only later data. With $k=2$ this gave 71 patients and 649 test seizures; with $k=1$, 97 patients and 751 test seizures. Four personalisation methods were evaluated:
+\begin{itemize}
+\item \textbf{Fine-tuning:} the patient's tuning windows were added ($\times$10) to the general model's training data.
+\item \textbf{Alarm rules:} 6\,s smoothing was compared with requiring 10\,s or 20\,s sustained above threshold.
+\item \textbf{Personal thresholds:} for each budget (0.5--200 \FAd), the lowest threshold whose false alarms on the patient's own tuning data stayed within budget. Patients with $<$6\,h of tuning data fell back to the shared threshold (12 of 71; median tuning 23\,h). The shared threshold applied the same rule to pooled tuning data.
+\item \textbf{Two-stage personal verifier:} described next.
+\end{itemize}
+
+\paragraph{Two-stage verifier.} Stage~1, the best general model (out-of-fold outputs), raises candidates at 0.5 or 0.7, with a 10\,s candidate refractory period. Stage~2 is a gradient-boosting model (200 trees, 15 leaves). It accepts or rejects each candidate at 0 or 10\,s after the trigger, using four groups of features:
+\begin{itemize}
+\item the shape of the probability: peak, mean, fraction of time above 0.8 and 0.95, and current value;
+\item recent noisiness: candidates in the last 10\,min and the last hour, and the 5\,min mean probability;
+\item changes relative to the preceding 5\,min in HR, HR slope, RMSSD, beat quality, EEG log variance, line length, the gamma and delta shares, EMG and movement;
+\item the HR-excess features.
+\end{itemize}
+The 60\,s refractory period applies only to accepted alarms. Stage~2 was trained with patient-wise folds and scored on held-out patients' later data. The \emph{personal} verifier additionally trains on the patient's own tuning-period candidates, which are out-of-sample for stage~1, with weight $\times$5, $\times$20 or $\times$50. An optional set of ear-EEG signal-quality features was also tested:
+\begin{itemize}
+\item 5-min log-variance instability per channel;
+\item the fraction of artefact bursts more than 3$\times$ a 30-min median;
+\item the shift in balance between the two channels.
+\end{itemize}
+
+\paragraph{False-alarm analysis.} All analyses used cached outputs from the general model at the shared threshold (71 patients). Five questions were examined:
+\begin{itemize}
+\item \textbf{Hidden seizures and impedance checks:} the overlap of false alarms with ``impd'' epochs, and their timing relative to seizures.
+\item \textbf{Concentration:} how false alarms are distributed across patients.
+\item \textbf{Patient traits:} 22 traits tested by Spearman correlation with Bonferroni correction.
+\item \textbf{Signals at alarm time:} values at false alarms compared with those at detections.
+\item \textbf{Predictability:} whether each patient's tuning-period rate predicts their later rate.
+\end{itemize}
+
+\paragraph{Heart responders.} A patient was classed as a responder if their heart rate rose by $>$50\,bpm in at least one of their first two seizures. The rise was the maximum 10\,s HR from onset to 60\,s after the end, minus the 5-min pre-onset median. A device could apply this definition prospectively.
+
+\paragraph{Sensitivity ceiling and seizure types.} For each later seizure, we recorded the peak smoothed stage-1 probability. Detection at shared thresholds calibrated in advance was broken down by five factors:
+\begin{itemize}
+\item seizure type;
+\item duration ($<$30\,s, 30--90\,s, $>$90\,s);
+\item localisation;
+\item EEG montage;
+\item vigilance.
+\end{itemize}
+
+\paragraph{Simulated in-ear PPG.} ECG-derived features were degraded to in-ear PPG quality using published error figures \cite{inear2022,prv2021}. At rest, a slowly varying (30\,s) HR error was added, with bias +0.78\,bpm and SD 2.54\,bpm (in-ear PPG vs ECG, 97 patients, 2,048\,h). The remaining degradations were:
+\begin{itemize}
+\item $\pm$15\% relative HR error during movement;
+\item 10\% of resting windows and 50\% of moving windows lost;
+\item RMSSD $\pm$30\% and SDNN $\pm$9\% relative error;
+\item lowered beat quality;
+\item ECG-waveform features removed.
+\end{itemize}
+
+\paragraph{Raw-EEG deep learning (ongoing).} To test whether raw waveforms carry information that the hand-crafted features miss, the EEG was streamed again (47.6\,GB). It was band-passed at 0.5--14\,Hz, downsampled to 32\,Hz and stored as int16 (0.1\,\uV{} resolution). A 1D CNN \cite{paszke2019} with four conv--BN--ReLU blocks (16--64 channels), global mean and max pooling and 39k parameters is trained on 16\,s of 2-channel EEG ending at each 2\,s decision point. It uses the same folds, amplitude augmentation and positive-class weighting. Its out-of-fold output will be evaluated alone and stacked into the best feature model.
+
+% ----------------------------------------------------------------------------
+\subsection{Interactive system model (Study 5)}
+\label{sec:m-live}
+
+An offline, single-page HTML visualisation (the ``Live Lab'') was built from four sources: the saved ionic simulations, the inference results, a CHB-MIT excerpt and the detector outputs. It includes:
+\begin{itemize}
+\item a virtual ear-EEG forward model;
+\item a \Kp-DC detector;
+\item a body-signal generator (ECG with HR, EMG, accelerometry) for four seizure types, with an optional walking artefact;
+\item a hand-set EEG$\times$body fusion rule.
+\end{itemize}
+Its equations and design are given in Appendix~\ref{app:livelab}.
+
+\subsection{Implementation}
+
+All code is Python~3.13 managed with \code{uv}, using numpy, scipy, numba \cite{lam2015}, matplotlib, mne, scikit-learn \cite{pedregosa2011}, fooof and tqdm. The Virtual Brain and CPU PyTorch \cite{paszke2019} are optional extras. Experiments ran on a Windows~11 laptop (12 logical cores, 15.3\,GB RAM) with limited free disk, which motivated streaming, feature-only storage and detached, resumable background jobs. Commands and run times are listed in Appendix~\ref{app:record}.

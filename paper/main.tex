@@ -1,5 +1,6 @@
 % ============================================================================
-%  Epilepsy Temple: a complete research record
+%  From a temple-worn optical wearable to a multimodal ear-hook seizure monitor
+%  Research article (IMRaD) with supplementary appendices.
 %  Compile from this folder with:  latexmk -pdf main.tex   (or pdflatex x2)
 % ============================================================================
 \documentclass[11pt,a4paper]{article}
@@ -8,7 +9,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{textcomp}
-\usepackage[margin=2.2cm]{geometry}
+\usepackage[margin=2.3cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -20,14 +21,21 @@
 \usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{microtype}
+\usepackage[section]{placeins}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
 
-\setlength{\parskip}{4pt}
+\setlength{\parskip}{3pt}
 \setlist{itemsep=1pt,topsep=3pt}
 \captionsetup{font=small,labelfont=bf}
 \renewcommand{\arraystretch}{1.15}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \graphicspath{{../}}
+\setcounter{topnumber}{4}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.8}
 
 % --- ions and units (text mode) ---
 \newcommand{\Kp}{K\textsuperscript{+}}
@@ -46,42 +54,45 @@
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\best}[1]{\textbf{#1}}
 
-\title{\textbf{Epilepsy Temple}\\[4pt]
-\large From a temple-worn optical wearable to a multimodal ``?''-shaped ear-hook seizure monitor:\\
-research, biophysical simulation, inference, and detection on real patient data\\[6pt]
-\normalsize A complete research record}
-\author{Rhydham Mittal\\\small with Claude (Anthropic) as research and engineering assistant}
-\date{29 September 2026}
+\title{\textbf{From a temple-worn optical wearable to a bilateral ear-hook seizure monitor: biophysical simulation, inference of hidden seizure variables, and multimodal detection on 148 patients}}
+\author{Rhydham Mittal\\[2pt]\small Independent research project\\\small\texttt{github.com/rhydham-mittal27/epilepsy-temple}}
+\date{Preprint, 29 September 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-\noindent
-This paper records every step of a research project that asked whether a small consumer-style wearable could detect epileptic seizures. The starting point was \emph{Temple}, a temple-worn multi-wavelength photoplethysmography (PPG) device; a technical teardown showed that it measures scalp blood flow and cannot see the brain's electrical activity. We therefore (i)~reviewed epilepsy, the second-by-second neurophysiology of seizures and the whole-body physiological changes that accompany them; (ii)~built three seizure simulators of increasing realism, culminating in a 100-neuron conductance-based network with potassium, sodium, chloride, adenosine and haemodynamic dynamics that is validated against Cressman et al.\ (2009) and reproduces the ictal \Kp{} ceiling ($\approx$12\,mM), chloride loading, depolarising GABA, an adenosine surge, postictal silence, a \Kp{} undershoot and postictal hypoperfusion; (iii)~derived, audited and corrected the formulas needed to \emph{infer} hidden variables (\Kp, \Clm, $E_{\mathrm{GABA}}$, adenosine, excitation/inhibition balance, haemoglobin) from non-invasive signals, and tested them in twin experiments; (iv)~cross-validated our Epileptor against The Virtual Brain (identical first onset, 886.2); (v)~measured seizure detection on real scalp EEG (CHB-MIT, 23 subjects, 185 seizures), showing that two ear-level electrodes catch as many seizures as an 18-channel cap (88\% vs 85\% for a never-seen user) but with about twice the false alarms; (vi)~redesigned the concept as a bilateral ``?''-shaped ear-hook; (vii)~built an offline, single-screen interactive visualisation of the whole system; and (viii)~ran a large multimodal study on SeizeIT2 (125 patients, 883 seizures, 11,626\,h of behind-the-ear EEG, ECG, EMG and motion), streamed from the cloud through memory. Adding ECG to behind-the-ear EEG cut false alarms by 18--31\% at matched sensitivity and helped 115/125 patients; minute-scale context and a novel ``heart rate not explained by movement'' feature reduced false alarms by up to 62\% versus ear EEG alone; personal fine-tuning and a personal alarm verifier raised the share of seizures caught at $\le$1 false alarm/day from 4\% (ear EEG) to 19\% overall and to 39--40\% in ``heart responders''. All focal-to-bilateral tonic-clonic seizures were caught at $\le$5 false alarms/day, and simulated in-ear PPG retained most of the ECG benefit. A ceiling analysis showed that a quarter of seizures never raise the detector above 0.5: the remaining gap is a signal (hardware) problem, not an alarm-logic problem. Every experiment, result, failure, bug and correction is reported.
+\noindent\textbf{Background.} Cleared seizure wearables detect convulsive seizures but miss most focal seizures, and ear-level EEG, the most discreet electrical sensor, produces too many false alarms on its own. Starting from a technical analysis of \emph{Temple}, a temple-worn multi-wavelength photoplethysmography (PPG) device, we asked what a small head-worn device would need in order to detect seizures, and how far software can push such a device.
+
+\noindent\textbf{Methods.} (i)~We built three seizure simulators, culminating in a 100-neuron conductance-based network with \Kp, \Nap, \Clm, KCC2, glial buffering, an electrogenic pump, a \Nap-activated \Kp{} current, adenosine and Balloon--Windkessel haemodynamics, validated against Cressman et al.\ (2009). (ii)~We derived and audited formulas for inferring hidden variables (\Ko, \Cli, \EGABA, adenosine, excitation/inhibition balance, haemoglobin) from non-invasive signals and tested them in seven twin experiments with injected confounds. We also cross-validated our Epileptor against The Virtual Brain (TVB). (iii)~We compared cap, temple and ear-level montages on CHB-MIT scalp EEG (23 subjects, 185 seizures, 297\,h) with patient-specific, cross-patient, leave-one-subject-out and fine-tuned models. (iv)~On SeizeIT2 (125 patients, 883 focal seizures, 11,626\,h of behind-the-ear EEG, ECG, EMG and motion), streamed through memory, we evaluated gradient-boosted detectors with patient-wise cross-validation. These covered multimodal fusion, minute-scale context, a movement-adjusted heart-rate feature (``HR-excess''), personal fine-tuning, personal thresholds, a two-stage personal alarm verifier, simulated in-ear PPG, seizure-type analysis and a sensitivity-ceiling analysis.
+
+\noindent\textbf{Results.} The ionic model reproduced the ictal \Kp{} ceiling (12.2\,mM), chloride loading (\Cli{} 15.2\,mM; \EGABA{} $-48.3$\,mV), an adenosine surge, 25\,s postictal silence, a \Kp{} undershoot and postictal hypoperfusion ($-46$\%). Inference formulas worked only when their assumptions held (naive conversions erred by 16\%--2.4$\times$). Model-based inference recovered KCC2 strength as $0.36\pm0.09$ (true 0.30), and our Epileptor matched TVB's first onset exactly (886.2). On CHB-MIT, two ear-position channels caught as many seizures as an 18-channel cap in new users (88\% vs 85\%) with about twice the false alarms. On SeizeIT2, adding ECG to ear EEG reduced false alarms by 18--31\% at matched sensitivity and helped 115/125 patients. Context plus HR-excess reduced them by up to 62\%. A personal verifier raised the share of seizures caught at $\le$1 false alarm/day from 4\% (ear EEG) to 19\%, and to 39\% in heart-rate responders. Every focal-to-bilateral tonic-clonic seizure was caught at $\le$5 false alarms/day, and simulated in-ear PPG retained most of the ECG benefit. A quarter of seizures never raised the detector output above 0.5.
+
+\noindent\textbf{Conclusions.} A bilateral ear-hook combining ear-EEG, in-ear PPG and motion is a sound architecture, and personalisation is the most effective software lever. The remaining gap is set by the signal rather than by the alarm logic, which points to hardware as the next step.
 \end{abstract}
 
-\noindent\textbf{Keywords:} epilepsy; wearable seizure detection; ear-EEG; behind-the-ear EEG; ECG; photoplethysmography; ion-concentration dynamics; Cressman model; Epileptor; The Virtual Brain; Bayesian inference; CHB-MIT; SeizeIT2; personalisation; false alarms.
+\noindent\textbf{Keywords:} epilepsy; wearable seizure detection; ear-EEG; behind-the-ear EEG; ECG; photoplethysmography; ion-concentration dynamics; Epileptor; The Virtual Brain; Bayesian inference; CHB-MIT; SeizeIT2; personalisation; false alarms.
 
 \vspace{4pt}
-\noindent\fbox{\parbox{0.97\linewidth}{\small\textbf{Disclaimer.} This is a research and educational project. Nothing here is a medical device or has been clinically validated; it must not be used to diagnose, monitor or treat epilepsy. Temple is a product of Temple Wearables / Continue Research; this project is independent and not affiliated with it.}}
+\noindent\fbox{\parbox{0.97\linewidth}{\small\textbf{Disclaimer.} This is a research and educational study. No system described here is a medical device or has been clinically validated; it must not be used to diagnose, monitor or treat epilepsy. Temple is a product of Temple Wearables / Continue Research; this work is independent and not affiliated with it.}}
 
-\tableofcontents
+\input{sections/s1_introduction}
+\input{sections/s2_methods}
+\input{sections/s3_results}
+\input{sections/s4_discussion}
+\input{sections/s5_declarations}
+
+\input{sections/references}
+
 \clearpage
-
-\input{sections/01_introduction}
-\input{sections/02_background}
-\input{sections/03_temple}
-\input{sections/04_simulation}
-\input{sections/05_inference}
-\input{sections/06_twin_tvb}
-\input{sections/07_chbmit}
-\input{sections/08_device_livelab}
-\input{sections/09_seizeit2}
-\input{sections/10_discussion}
 \appendix
-\input{sections/11_appendix}
-
-\input{sections/12_references}
+\renewcommand{\thesection}{\Alph{section}}
+\begin{center}\Large\bfseries Supplementary material\end{center}
+\input{sections/a_background}
+\input{sections/b_temple}
+\input{sections/c_simulation}
+\input{sections/d_inference}
+\input{sections/e_livelab}
+\input{sections/f_record}
 
 \end{document}

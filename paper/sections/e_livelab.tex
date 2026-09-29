@@ -1,0 +1,178 @@
+% ============================================================================
+\section{Device concept and interactive system model}
+\label{app:livelab}
+
+\subsection{The ``?''-shaped ear-hook}
+
+Instead of a temple pod, we propose a device shaped like a question mark, worn on both ears (Figure~\ref{fig:hook}). Its components are:
+\begin{itemize}
+\item \textbf{top curve:} dry EEG electrodes above and behind the ear (near T7/T8 and P7/P8);
+\item \textbf{back stem:} a mastoid reference electrode;
+\item \textbf{ear-canal tip:} in-ear EEG, PPG and temperature;
+\item \textbf{optional:} earlobe PPG and jaw-muscle (temporalis) EMG;
+\item a 6-axis IMU;
+\item a Bluetooth link to a phone.
+\end{itemize}
+Table~\ref{tab:whyear} summarises why the ear was chosen.
+
+\begin{figure}[htbp]
+\centering
+{\footnotesize
+\begin{verbatim}
+        ___
+      /     \   <- top curve: dry EEG electrodes above/behind the ear (~T7/T8, P7/P8)
+     |       |
+      \      |  <- back stem: mastoid reference electrode, temporalis EMG
+       ?     |
+       |    /   <- ear-canal tip: in-ear EEG + PPG + SpO2 + temperature
+       .   /    <- optional earlobe PPG
+   + 6-axis IMU (accelerometer, gyroscope) . Bluetooth to phone . worn on BOTH ears
+\end{verbatim}
+}
+\caption{Schematic of the proposed bilateral ear-hook.}
+\label{fig:hook}
+\end{figure}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Rationale for the ear as a sensing site.}
+\label{tab:whyear}
+\begin{tabularx}{\linewidth}{@{}l L@{}}
+\toprule
+Reason & Evidence \\
+\midrule
+Over the temporal lobe, the commonest seizure origin in adults & Ear-EEG matched scalp EEG for temporal-lobe seizures \cite{zibrandtsen2017} \\
+Proven for seizure detection & Behind-the-ear 2-channel wearable caught 98\% of absence seizures \cite{swinnen2021} \\
+Good PPG site & Earlobe PPG up to 6.3$\times$ better signal than the wrist; in-ear SpO\textsubscript{2} valid 70--100\% \cite{bubb2023} \\
+Discreet and stable & Looks like a hearing aid or earbud \\
+Both ears $>$ one ear & 3--6$\times$ fewer false alarms than one-sided montages (Table~\ref{tab:chb3}); +6\% seizures and $-$25--30\% false alarms in the general model (Table~\ref{tab:general}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{The Live Lab}
+
+\paragraph{Overview.} The Live Lab (\code{viz/epilepsy_live.html}) is a single self-contained offline page that uses no libraries and no network connection. It is fed by \code{viz/data.js} ($\approx$3.4\,MB), which \code{viz/export_data.py} generates from four sources: the saved ionic simulations, the inference results, the CHB-MIT data and the detector outputs.
+
+\paragraph{Layout.} A one-screen grid (12$\times$7) holds:
+\begin{itemize}
+\item the neuron field and live readouts;
+\item nine model charts:
+\begin{itemize}
+\item LFP and firing rate;
+\item \Ko, with the Kalman-filter and naive device estimates;
+\item \Cli, with the inferred value and \EGABA;
+\item \Nai{} and pump flux;
+\item adenosine;
+\item CBF/HbO/HbR;
+\item reversal potentials;
+\item a 100-cell $\times$ 20\,s \Ko{} space map;
+\end{itemize}
+\item an EEG panel, the detector probability, and band powers with line length;
+\item a row of body sensors.
+\end{itemize}
+Controls select the tissue, playback speed, pause and the EEG source.
+
+\paragraph{Neuron field.} The first version placed the 100 neurons on a ring (excitatory blue-white, inhibitory pink) that flashed on spikes. The overlays were:
+\begin{itemize}
+\item orange particles for local \Ko;
+\item a gold core glow for \Nai;
+\item cyan orbiting satellites for \Cli{} loading;
+\item a violet haze for adenosine;
+\item blood vessels coloured by HbO/HbR balance and pulsing at the heart rate.
+\end{itemize}
+
+A later 3D view lays the neurons on a 10$\times$10 grid in ring order, snaking row by row so that ring neighbours remain plane neighbours. Each neuron's height encodes its own data: local \Ko{} (slow swell), its spike trace (fast jolt), or both. The rendering, in plain canvas 3D projection, consists of:
+\begin{itemize}
+\item an interpolated surface coloured by \Kp{} (magma palette);
+\item ripples emitted by spikes;
+\item rising \Kp{} ``vapour'';
+\item orbiting \Clm{} satellites;
+\item vessels beneath the plane;
+\item auto-rotation, drag and zoom.
+\end{itemize}
+Initial renders were too large and saturated to white at the seizure peak, so heights, perspective, particle rate and glow were reduced. The ring view remains available. Only 100 neurons exist in the simulation; a denser plane would require re-running the ionic model with more cells. URL parameters (\code{?scen=&t=&eeg=&speed=&paused=&type=&walk=&view=&h=&boot=}) reproduce any view.
+
+\paragraph{Virtual ear-EEG forward model.} The first EEG panel showed a 3-minute, 5-channel excerpt of CHB-MIT \code{chb01_03.edf} (2926--3106\,s; clinician-marked seizure at 2996--3036\,s) with the both-temples detector. Because model and real EEG are separate sources, a forward model was written to compute what ear electrodes around the simulated patch would record:
+\begin{equation}
+\mathrm{ch}_e(t) = g\sum_c w_{ec}\,s_c\,(\mathrm{spikes}_c * \kappa)(t) \;-\; \alpha\cdot51\,\mathrm{mV}\cdot\log_{10}\frac{[\mathrm K]_{o,\mathrm{local}}}{[\mathrm K]_{o,\mathrm{rest}}} \;+\; \eta_{1/f}(t).
+\end{equation}
+Its terms are:
+\begin{itemize}
+\item Gaussian ring-distance weights $w_{ec}$ ($\sigma=20$ cells);
+\item signs $s_c=+1$ (excitatory) or $-1.5$ (inhibitory);
+\item a synaptic kernel $\kappa(t)=e^{-t/8\,\mathrm{ms}}-e^{-t/2\,\mathrm{ms}}$;
+\item a gain $g$ giving $\approx$10\,\uV{} RMS of neural signal at healthy baseline;
+\item a glial \Kp{} DC shift reaching the scalp with $\alpha=1$\%;
+\item pink noise: 6\,\uV{} (half shared across channels), and 3\,\uV{} on the DC channel.
+\end{itemize}
+Four virtual electrodes (two per ear) plus a DC channel were exported at 128\,Hz with the same 14 features as the real detector.
+
+\paragraph{\Kp-DC detector.} A line-length detector \emph{failed} on the virtual EEG, because the model's ictal event is tonic firing, which band-passed EEG barely separates from interictal bursts. It was replaced by a \Kp-DC detector:
+\begin{itemize}
+\item an alarm is raised when the causal 1\,s mean of the DC channel falls below $-150$\,\uV{} (local \Ko{} $\gtrsim$8\,mM);
+\item the probability is $1/(1+e^{(\mathrm{DC}+150)/15})$;
+\item alarms are followed by a 60\,s refractory period.
+\end{itemize}
+The threshold was chosen on the model itself and is not independently validated.
+
+\paragraph{Body-signal model.} The 100-neuron patch models only the onset zone, so spread to autonomic and motor areas follows literature timings: the clinical seizure starts 40\,s after the trigger, and ictal HR rises +53\% in focal seizures \cite{hampel2016} and $\approx$+100\% in tonic-clonic seizures. Four seizure types are selectable:
+\begin{itemize}
+\item focal non-motor;
+\item focal motor (hyperkinetic);
+\item focal-to-bilateral tonic-clonic;
+\item no HR response ($\approx$18\% of patients).
+\end{itemize}
+An optional 12\,s walking episode can be added.
+\begin{itemize}
+\item \textbf{Heart.} A sympathetic drive $s$ follows the clinical seizure (rise/recovery time constants 6/50\,s), and walking adds a drive $w$ (8/20\,s). On a 10\,Hz grid,
+\[HR = HR_0(1+h_{type}s) + 18w + d,\]
+with $HR_0=68$\,bpm and slow drift $d$. Beats include respiratory sinus arrhythmia at 0.25\,Hz, whose 3\,bpm amplitude shrinks with vagal withdrawal as $(1-0.8s)$, plus 10\,ms jitter. The ECG is synthesised as Gaussian P, Q, R, S and T waves per beat \cite{mcsharry2003}, with T placement by Bazett's $\sqrt{RR}$ \cite{bazett1920}, baseline wander, noise and muscle contamination.
+\item \textbf{Muscle.} Shoulder EMG is enveloped white noise:
+\begin{itemize}
+\item 5\,\uV{} at baseline, with arm swing when walking;
+\item irregular 45\,\uV{} activity in hyperkinetic seizures;
+\item in tonic-clonic seizures, a 130\,\uV{} tonic phase (10\,s), then clonic bursts of 120\,ms slowing from 4 to 1\,Hz, then postictal atonia.
+\end{itemize}
+\item \textbf{Motion.} Accelerometer magnitude shows:
+\begin{itemize}
+\item 1.8\,Hz step impulses when walking;
+\item irregular large movements in hyperkinetic seizures;
+\item a 9\,Hz tremor in the tonic phase;
+\item decaying jerks in the clonic phase.
+\end{itemize}
+\item \textbf{Walking artefact.} Each step rocks the ear electrodes (biphasic transients), and a slow $-240$\,\uV{} electrode-pressure drift on the DC channel deliberately fools the EEG-only detector.
+\end{itemize}
+
+\paragraph{Fusion rule (illustrative, hand-set).} On a 1\,s grid, the rule uses:
+\begin{itemize}
+\item $HR_{10}$, the mean instantaneous HR over the last 10\,s;
+\item a causal 1-min baseline $B$;
+\item activity $a$, the 10\,s SD of acceleration;
+\item the explained heart rate $E = B + \min(20, 150a)$;
+\item the EMG ratio $r$, the 4\,s RMS over its causal 2-min log-baseline.
+\end{itemize}
+Body evidence is
+\begin{equation}
+b = \max\!\Big(\sigma\big((HR_{10}-E-12)/2.5\big),\ \sigma\big((r-4)/0.6\big)\Big),
+\end{equation}
+and the multimodal score multiplies the maximum EEG probability over the last 30\,s by the maximum body evidence over the last 10\,s. An early 40\,s body look-back caused a false multimodal alarm: when a walk followed a seizure, lingering postictal tachycardia combined with the walking artefact. The look-back was therefore shortened to 10\,s.
+
+\paragraph{Interface.} The final interface is styled as a heads-up display. It includes:
+\begin{itemize}
+\item a boot sequence;
+\item holographic panels;
+\item ring gauges for the eight readouts;
+\item a targeting reticle over the neuron field that shifts from cyan to red with \Kp{} load and flashes at the ictal threshold;
+\item a narration box.
+\end{itemize}
+Everything remains offline.
+
+\paragraph{Defects fixed.} Five defects were found and fixed:
+\begin{itemize}
+\item int64 JSON serialisation in the exporter;
+\item a CSS class clash (\code{.dash});
+\item a negative animation time step that produced NaN;
+\item the 40\,s look-back and a premature ``MISSED'' label, which now reads ``watching\dots'' during a seizure;
+\item a hanging headless-browser screenshot job.
+\end{itemize}

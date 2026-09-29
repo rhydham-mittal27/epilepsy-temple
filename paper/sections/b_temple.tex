@@ -1,8 +1,8 @@
 % ============================================================================
-\section{The Temple wearable: technical analysis}
-\label{sec:temple}
+\section{Technical analysis of the Temple wearable}
+\label{app:temple}
 
-The project started from a request to gather ``every single technical detail'' of Temple, both hardware and software, by aggressive web research and engineering reasoning. Facts were tagged \emph{confirmed} (Temple's own preprints or website), \emph{reported} (press, sometimes conflicting) or \emph{inferred} (our engineering estimate).
+The study began with a systematic analysis of Temple's hardware and software from public sources \cite{temple} and engineering reasoning. Facts were tagged \emph{confirmed} (Temple's own preprints or website), \emph{reported} (press, sometimes conflicting) or \emph{inferred} (our engineering estimate).
 
 \subsection{Company and research setup}
 
@@ -59,4 +59,4 @@ The authors themselves note that the signal is extracranial, MCA velocity is not
 
 We estimated (unconfirmed) a multi-LED/multi-photodiode optical front end (MAX86141/ADPD4100 class), an nRF52/nRF54-class BLE processor, a 6-axis IMU, a 20--50\,mAh cell (1--3 days), on-device filtering with BFI/Entropy computed in the app or cloud.
 
-\textbf{Conclusion: Temple cannot detect seizures as shipped.} It measures optical blood-flow and pulse signals over a scalp artery, not the brain's electrical activity; at most it could pick up peri-ictal heart-rate and blood-flow changes, which nobody has validated. A device that combines optical sensing with EEG electrodes would fill a real gap; this redirected the project towards EEG plus body signals and, later, towards the ear (Section~\ref{sec:device}).
+\textbf{Conclusion: Temple cannot detect seizures as shipped.} It measures optical blood-flow and pulse signals over a scalp artery, not the brain's electrical activity; at most it could pick up peri-ictal heart-rate and blood-flow changes, which nobody has validated. A device that combines optical sensing with EEG electrodes would fill a real gap; this redirected the study towards EEG plus body signals and, later, towards the ear (Appendix~\ref{app:livelab}).
