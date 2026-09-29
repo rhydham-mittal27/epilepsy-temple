@@ -193,7 +193,15 @@ A device knows from its own accelerometer when the wearer has been still. Restin
 
 ## 6. Combined pipeline
 
-*Running at the time of writing; results will be added.*
+**Result: no gain.** Personalisation saturates, so one personal layer is enough.
+
+| Stage 1 under the personal verifier (71 patients, 649 later seizures) | Caught at ≤0.5 / 1 / 2 / 5 / 10 / 20 / 50 FA/day |
+|---|---|
+| General model (existing two-stage baseline, reproduced) | 15 / **19** / 22 / **30** / **37** / **45** / **60**% |
+| Fine-tuned model (k = 1) | 14 / 17 / **24** / **30** / **37** / **45** / 58% |
+| Mean of fine-tuned + general | 14 / 17 / 22 / 29 / 36 / 44 / 59% |
+
+The fine-tuned detector and the personal verifier learn the same patient-specific information. Differences of 1–2 points are within noise (1 point ≈ 6–7 seizures). For Prototype 1 the simpler design wins: **general detector + personal alarm verifier**.
 
 **Design** (`fa_reduction.py stack`):
 - **Stage 1:** the best model **fine-tuned after the 1st seizure** (k = 1).
@@ -276,6 +284,7 @@ This is why alarms need well below 1 false alarm/day, and why tonic-clonic mode 
 | Ear + back of head halves false alarms (adults and children) | Prototype 1 should be able to record **ear + back of head** (band behind the head) and compare it with ear-only on the same wearer |
 | Cluster prior −24% to −33% | App: seizure diary + caregiver confirmation drive a 12-h lowered threshold |
 | Resting mode = fewer alarms, same rate | Optional "sleep-safety" mode, not an accuracy fix |
+| Fine-tuning + personal verifier = no gain over the verifier alone | One personal layer: general detector + personal alarm verifier |
 | False-alarm types | Sensors: jaw EMG (chewing), head IMU (movement), contact impedance (electrodes); label artefacts during self-wear to re-run §7 |
 | Precision collapses at real-life seizure rates | Alarm target must be ≪1 FA/day; tonic-clonic mode is the only one there today |
 | SUDEP relevance | In-ear SpO₂ for peri-/postictal desaturation |

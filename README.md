@@ -459,7 +459,7 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | ✅ | ~~CNN on the raw ear EEG~~ (33-patient subset: weaker alone, helps strict budgets when fused; §6.6) |
 | ✅ | ~~Are the electrodes the problem? Adult validation~~ (contact drives false alarms, not misses; Siena confirms ear-hook ≈ cap in catches, ECG helps; §6.7) |
 | ✅ | ~~Cut false alarms further~~ (tonic-clonic mode 87% at ≤1 FA/day; ear + back of head halves false alarms; cluster prior −24–33%; 8 false-alarm types; §6.8) |
-| ⏳ | Combined pipeline: fine-tuned detector + personal verifier (running) |
+| ✅ | ~~Combined pipeline: fine-tuned detector + personal verifier~~ (no gain; one personal layer is enough) |
 | ★★★ | **Hardware Prototype 1 (tonic-clonic alarm + diary)**: bilateral ear-hook + band around the back of the head, dry electrodes (T7/T8, P7/P8, O1/O2), jaw EMG, head IMU, contact-impedance sensing, in-ear PPG/SpO₂, phone app with seizure diary and cancellation |
 | ★★ | TUSZ (675 patients, requires registration) for a larger general model and the CNN |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |

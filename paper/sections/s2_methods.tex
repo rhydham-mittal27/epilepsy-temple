@@ -446,7 +446,7 @@ each with or without the eight ECG features. The SeizeIT2 feature pipeline, clas
 \subsection{False-alarm reduction strategies}
 \label{sec:m-fa}
 
-Five further strategies were evaluated with the same event scoring as above. The last is a combined pipeline, still running at the time of writing.
+Five further strategies were evaluated with the same event scoring as above.
 \begin{enumerate}
 \item \textbf{Target-seizure alarm modes.} The device alarms only for \emph{target} seizures and logs the rest. The targets tested were focal-to-bilateral tonic-clonic seizures, seizures longer than 90\,s, and seizures of 30\,s or more. Non-target seizures count as neither misses nor false alarms, and alarms during them are not false; the alarm sequence itself is unchanged. The existing best model was evaluated on the 71 patients' later data. In addition, a \emph{dedicated convulsive model} was trained on all 125 patients with patient-wise 5-fold cross-validation (55 tonic-clonic seizures):
 \begin{itemize}
