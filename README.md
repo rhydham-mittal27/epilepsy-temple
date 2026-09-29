@@ -313,6 +313,8 @@ Takeaways:
    | two-stage with a **personal alarm verifier** | **19%** | **30%** | **45%** |
    | … for **heart responders** (≈1 in 3 users) | **39%** | **64%** | **77%** |
 
+   **It has plateaued, and the reason is known:** a quarter of all seizures never push the detector above 0.5, and only 30% ever reach 0.95. The remaining gap is a *signal* problem (too little brain information from two behind-the-ear electrodes), not an alarm-logic problem. Signal-quality features, a bigger model and alarm rules no longer help. The next gains must come from hardware: better electrode contact and more or better-placed EEG channels.
+
    **Long context helps.** Adding 15 s / 1 min / 5 min trends of EEG and heart features (**EEG + ECG + context**) cuts false alarms by **34–43%** vs ear EEG alone at matched sensitivity, and catches **25%** of seizures at ≤5 false alarms/day (vs 14%). Adding a **"heart rate not explained by movement"** feature (a running fit of heart rate vs accelerometer activity) pushes this to **−62% / −43% / −47%** false alarms at 50 / 60 / 70% caught, and **28%** caught at ≤5/day. The accelerometer earns its place by explaining away exercise heart rate.
 
 ### 6.7 Epilepsy Live Lab (`viz/epilepsy_live.html`)

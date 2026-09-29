@@ -33,6 +33,7 @@ from detect import POST, PRE, REFRACT  # noqa: E402
 CFG = "EEG + ECG + context + HR-excess"
 THETA0 = (0.5, 0.7)  # stage-1 candidate thresholds (loose)
 PERSONAL_W = 20.0  # weight of the user's own tuning-period candidates in the personal verifier
+QUALITY = False  # + ear-EEG signal-quality features (set by --quality)
 DELAYS = (0, 10)  # s after the trigger at which stage 2 decides
 CAND_REFRACT = 10  # s between candidates
 BUDGETS = (0.5, 1, 2, 5, 10, 20, 50)
@@ -66,6 +67,17 @@ def event_features(ps, t, X, H, a, delay, hist):
         c = H[:, q]
         seg = c[max(0, j - 2): j + 1]
         f.append(np.nanmean(seg) if np.isfinite(seg).any() else np.nan)
+    if QUALITY:  # ear-EEG signal quality (unstable amplitude = the one trait linked to false alarms, §6.7)
+        lv = X[:, [S.NAMES.index("ch1_logvar"), S.NAMES.index("ch2_logvar")]]
+        long = slice(max(0, i - 900), max(1, i - 5))  # previous 30 min
+        for ch in range(2):
+            v5, v30 = lv[pre, ch], lv[long, ch]
+            ok5, ok30 = np.isfinite(v5), np.isfinite(v30)
+            f.append(np.std(v5[ok5]) if ok5.sum() > 5 else np.nan)  # amplitude instability, 5 min
+            f.append(np.mean(v5[ok5] > np.median(v30[ok30]) + 3) if ok5.sum() > 5 and ok30.sum() > 5 else np.nan)  # artefact bursts
+        imb_now = abs(np.nanmean(lv[max(0, j - 2): j + 1, 0]) - np.nanmean(lv[max(0, j - 2): j + 1, 1]))
+        imb_base = np.nanmedian(np.abs(lv[long, 0] - lv[long, 1])) if np.isfinite(lv[long]).any() else np.nan
+        f.append(imb_now - imb_base)  # channel balance shift (one electrode losing contact)
     return f
 
 
@@ -135,7 +147,7 @@ def main():
         by.setdefault(r["sub"], []).append(r)
     data = pickle.loads((S.PROBS / f"{S.slug(CFG)}_k2.pkl").read_bytes())
     resp = json.loads((S.RES / "responders.json").read_text())[CFG]["rise_bpm"]
-    cache = S.PROBS / "stage2_rows.pkl"
+    cache = S.PROBS / ("stage2_rows_quality.pkl" if QUALITY else "stage2_rows.pkl")
     if cache.exists():
         rows = pickle.loads(cache.read_bytes())
     else:
@@ -174,7 +186,7 @@ def main():
                     te = own & (parts == "test")
                     if te.any():
                         p2[te] = mk().fit(Xc[tr], y[tr], sample_weight=w).predict_proba(Xc[te])[:, 1]
-            key = f"theta0={th0} | delay={d}s" + (f" | personal w={PERSONAL_W:g}" if PERSONAL else "")
+            key = f"theta0={th0} | delay={d}s" + (f" | personal w={PERSONAL_W:g}" if PERSONAL else "") + (" | +quality" if QUALITY else "")
             out[key] = {}
             base_n = int(((parts == "test") & (y == 0)).sum())
             print(f"\n=== stage 1 at {th0} (+{d} s to decide): {int((y == 1).sum())} true / {int((y == 0).sum())} false candidates "
@@ -208,8 +220,9 @@ PERSONAL = False
 if __name__ == "__main__":
     S.keep_awake()
     PERSONAL = "--personal" in sys.argv
+    QUALITY = "--quality" in sys.argv
     if "--w" in sys.argv:
         PERSONAL_W = float(sys.argv[sys.argv.index("--w") + 1])
-    if PERSONAL:
+    if PERSONAL or QUALITY:
         THETA0, DELAYS = (0.5,), (10,)  # the best general variant
     main()

@@ -20,7 +20,8 @@
 > - **What didn't help:** sustained-alarm rules, personal alarm thresholds, and a bigger model.
 > - **False alarms are patient-specific.** A quarter of users produce 59–77% of them. The one trait linked to them is an unstable ear-EEG signal, which points to electrode fit.
 > - **At matched false-alarm rates, the results are on par with or above every published SeizeIT2 detector** we found (§6.9).
-> - **Target not yet reached.** The goal of ≥50% of seizures at ≤1 false alarm/day is not reached overall. The best result is **39% for heart responders**, and 47% at ≤2/day.
+> - **Target not yet reached.** The goal of ≥50% of seizures at ≤1 false alarm/day is not reached overall. The best result is **39–40% for heart responders**, and 47% at ≤2/day.
+> - **Why it plateaus (§6.16).** A quarter of all seizures never raise the detector above 0.5, and only 30% ever reach 0.95. The remaining gap is a **signal** problem (two behind-the-ear electrodes + chest ECG), not an alarm-logic problem. Signal-quality features, bigger models and alarm rules no longer move the numbers.
 
 Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Results: [`epilepsy_sim/detect/results_seizeit2/`](epilepsy_sim/detect/results_seizeit2/)
 
@@ -45,6 +46,8 @@ Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Re
    - [6.12 More training data and a bigger model](#612-more-training-data-and-a-bigger-model)
    - [6.13 Two-stage detection: an alarm verifier](#613-two-stage-detection-an-alarm-verifier)
    - [6.14 A personal alarm verifier](#614-a-personal-alarm-verifier)
+   - [6.15 Ear-EEG signal-quality features in the verifier](#615-ear-eeg-signal-quality-features-in-the-verifier)
+   - [6.16 The ceiling: seizures the detector never sees](#616-the-ceiling-seizures-the-detector-never-sees)
 7. [Interim snapshots](#7-interim-snapshots)
 8. [What it means for the ear-hook](#8-what-it-means-for-the-ear-hook)
 9. [Limitations](#9-limitations)
@@ -497,6 +500,51 @@ The stage-1 model never saw the patient, so its tuning-period candidates are gen
 - **everyone:** +5 points at ≤1/day and ≤5/day, +9 at ≤20/day;
 - **responders:** 39% of seizures caught at ≤1 false alarm/day, 47% at ≤2 and 64% at ≤5.
 
+**How much weight on the user's own data?** (sweep; the ×20 above was chosen a priori)
+
+| Weight | All: ≤1/day | ≤5 | ≤20 | Responders: ≤1/day | ≤5 | ≤20 |
+|---|---|---|---|---|---|---|
+| ×5 | 18% | 29% | 43% | 36% | 63% | 76% |
+| ×20 | 19% | 30% | 45% | 39% | 64% | 77% |
+| ×50 | 19% | 30% | 46% | 40% | 64% | 78% |
+
+More weight helps a little and saturates around ×20–50. The result does not hinge on a lucky choice.
+
+### 6.15 Ear-EEG signal-quality features in the verifier
+
+**Idea.** Unstable ear-EEG amplitude is the one patient trait linked to false alarms (§6.7). So the verifier gets **signal-quality evidence** at each candidate (`stage2.py --quality`):
+- per channel, the log-variance standard deviation over the previous 5 min (amplitude instability);
+- per channel, the fraction of those windows more than 3 above the channel's 30-min median (artefact bursts);
+- the shift in inter-channel balance vs the last 30 min (one electrode losing contact).
+
+**Results** (candidates at 0.5, decision 10 s after the trigger):
+
+| Verifier | All: ≤1/day | ≤5 | ≤20 | Responders: ≤1/day | ≤5 | ≤20 |
+|---|---|---|---|---|---|---|
+| General | 15% | 25% | 38% | 33% | 56% | 75% |
+| General + quality | 14% | 26% | 39% | 32% | 54% | 72% |
+| Personal ×20 | 19% | 30% | 45% | 39% | 64% | 77% |
+| Personal ×20 + quality | 19% | 31% | 45% | 38% | 64% | 78% |
+
+**Finding: no gain** (±1–3 points, within noise). Electrode instability is a **per-patient, hardware-level** property, not something visible in individual alarms, and personalisation already absorbs most of the per-patient effect. The fix belongs in the device: better electrode fit, a contact-quality gate and a "reseat" prompt, not in the alarm logic.
+
+### 6.16 The ceiling: seizures the detector never sees
+
+**Diagnostic.** The highest smoothed stage-1 probability during each test seizure (from 15 s before onset to the end), best setup, 71 patients, 649 later seizures:
+
+| Model | Group | Never above 0.5 | Never above 0.7 | Above 0.95 | Above 0.99 |
+|---|---|---|---|---|---|
+| General | all | **25%** | 38% | 30% | 10% |
+| General | non-responders (472) | **31%** | 48% | 17% | 5% |
+| General | responders (177) | 10% | 12% | **65%** | 24% |
+| Fine-tuned | all | 35% | 48% | 26% | 8% |
+
+**What it means:**
+- **A quarter of all seizures, and nearly a third of non-responders' seizures, never raise the detector above 0.5.** No alarm verifier, threshold or post-processing can recover these. They leave almost no trace in two behind-the-ear electrodes plus a chest ECG.
+- **Only 30% of seizures ever reach 0.95**, and at ≤1 false alarm/day only such strongly visible seizures can be caught. This is why every alarm-level method plateaus at about 15–19% overall.
+- **Responders are the exception:** 65% of their seizures exceed 0.95, which is why alarm mode works for them.
+- **Conclusion: the remaining gap is a signal problem.** Closing it needs more information about the brain: more or better-placed electrodes, dry in-ear EEG contact quality, or a different modality. Better alarm logic on the same signals won't close it.
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -539,7 +587,7 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 - **Features in `data/seizeit2/` are not redistributed.** They are regenerated by the fetch step.
 - **Best-along-the-curve numbers are slightly optimistic** (§5.1). The calibrated numbers are the deployment estimate.
 - **Fine-tuned models cannot be calibrated on their own tuning data**: that data looks far too clean, and budgets of 0.5–1/day became 10–37/day later. A held-out slice of the tuning period is needed.
-- **The personal verifier's weight (×20)** was chosen a priori. A sweep over ×5 and ×50 is reported when finished.
+- **The personal verifier's weight** was swept over ×5 / ×20 / ×50 (§6.14). The results are stable, ±1–3 points.
 - **Responder status needs ECG and two seizures.** 2 of 71 patients could not be classified (no ECG).
 - **71 patients** have ≥3 seizures and enough later data for the personalised experiments. The general-model numbers use all 125.
 
@@ -558,8 +606,10 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 | ✅ | Bigger model / more data (§6.12) | No consistent gain; information-limited |
 | ✅ | Two-stage verifier (§6.13) | Small gain |
 | ✅ | Personal verifier (§6.14) | Largest strict-budget gain: 19% / 30% at ≤1 / ≤5 per day (all), 39% / 64% (responders) |
-| ⏳ | Personal verifier weight sweep (×5, ×50) | Running |
-| ★★★ | **Signal-quality gate** for the ear EEG | The only patient trait linked to false alarms |
+| ✅ | Personal verifier weight sweep (§6.14) | Stable; best ×20–50 |
+| ✅ | Signal-quality features in the verifier (§6.15) | No gain; electrode quality is a per-patient hardware issue |
+| ✅ | Sensitivity ceiling (§6.16) | 25% of seizures never exceed 0.5, so the gap is a signal problem |
+| ★★★ | **Hardware: electrode contact / more EEG channels** | The remaining gap is information, not alarm logic (§6.16) |
 | ★★★ | **Personal verifier on top of the fine-tuned detector**, with calibration on a held-out slice | Combines the two strongest levers; gives calibrated numbers |
 | ★★ | **Degrade ECG to PPG-quality beats** (jitter, dropouts) | What the ear-hook's optical heart rate would achieve |
 | ★★ | **Split by seizure type** | Do EMG/motion help convulsive seizures specifically? |
@@ -612,7 +662,9 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 14 | Bigger model, more negatives | `run --configs "(big)"` | No consistent gain; 3× compute (§6.12) |
 | 15 | Two-stage alarm verifier | `stage2.py` | **Bug caught:** the first run scored alarms per *patient* although each recording's clock starts at 0, which multiplied false alarms. A debug check (ranking by stage-1 peak lost half the seizures) exposed it. Fixed: per-recording scoring. Result: small gain (§6.13) |
 | 16 | Personal alarm verifier (×20) | `stage2.py --personal` | Largest strict-budget gain: 19% / 30% / 45% (all), 39% / 64% / 77% (responders) at ≤1 / 5 / 20 per day (§6.14) |
-| 17 | Personal verifier weight sweep (×5, ×50) | `stage2.py --personal --w …` | Running |
+| 17 | Personal verifier weight sweep (×5, ×50) | `stage2.py --personal --w …` | ×5: 18% / 29% / 43%; ×50: 19% / 30% / 46% at ≤1 / 5 / 20 per day. Saturates at ×20–50 |
+| 18 | Signal-quality features in the verifier (general and personal) | `stage2.py --quality [--personal]` | No gain, ±1–3 points (§6.15) |
+| 19 | Sensitivity ceiling | analysis of cached outputs | 25% of seizures never exceed 0.5; only 30% reach 0.95, so the detector has plateaued (§6.16) |
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.
