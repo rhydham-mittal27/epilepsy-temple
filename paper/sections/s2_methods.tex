@@ -443,6 +443,46 @@ each with or without the eight ECG features. The SeizeIT2 feature pipeline, clas
 \paragraph{A training-speed correction.} With sample weights (from class balancing) and fewer than 200,000 training rows, scikit-learn~1.9 computes the histogram bin edges by calling a weighted-percentile routine once per edge and feature. This made small-dataset fits 10--50$\times$ slower. We replaced it with a vectorised implementation of the same computation. Thresholds were identical for 200 of 200 random test features, and predictions were bit-identical. SeizeIT2 fits were never affected, because they exceed 200,000 rows and scikit-learn then subsamples without weights.
 
 % ----------------------------------------------------------------------------
+\subsection{False-alarm reduction strategies}
+\label{sec:m-fa}
+
+Five further strategies were evaluated with the same event scoring as above. The last is a combined pipeline, still running at the time of writing.
+\begin{enumerate}
+\item \textbf{Target-seizure alarm modes.} The device alarms only for \emph{target} seizures and logs the rest. The targets tested were focal-to-bilateral tonic-clonic seizures, seizures longer than 90\,s, and seizures of 30\,s or more. Non-target seizures count as neither misses nor false alarms, and alarms during them are not false; the alarm sequence itself is unchanged. The existing best model was evaluated on the 71 patients' later data. In addition, a \emph{dedicated convulsive model} was trained on all 125 patients with patient-wise 5-fold cross-validation (55 tonic-clonic seizures):
+\begin{itemize}
+\item positives: tonic-clonic windows only, with other seizures excluded from training;
+\item features: EEG + ECG + shoulder EMG + motion + context + HR-excess.
+\end{itemize}
+It was compared with the general model on the same data.
+\item \textbf{Ear + back of the head.} Bipolar channels from behind the ear to the occiput (P7--O1, P8--O2), and optionally parietal channels (P3--O1, P4--O2), were added to the ear-hook. This was evaluated on Siena (streamed features) and on CHB-MIT, where the stored 18-channel features were recombined into each montage. CHB-MIT used leave-one-subject-out, the same training windows for every montage, and 5\,s smoothing.
+\item \textbf{Seizure-cluster prior.} A bonus $w\in\{1,2\}$ was added to the detector's smoothed log-odds for $H\in\{12,24\}$\,h after the end of the previous \emph{confirmed} seizure. A seizure counts as confirmed only after it has ended (+60\,s), so the prior never uses the seizure being detected. The runs of each patient were placed in order with 60\,s gaps.
+\item \textbf{Night and resting modes.} Night mode requires clock time, but every SeizeIT2 EDF header carries the start time \code{00.00.00}, so night-mode results were discarded. \emph{Resting mode} instead uses the device's own accelerometer:
+\begin{itemize}
+\item movement per window is the larger of the two accelerometer log-SDs;
+\item its causal median is taken over the last ten completed one-minute blocks;
+\item alarms are enabled only while this level is at or below the user's own $q$-th percentile ($q\in\{20,35,50\}$), learned on the tuning period.
+\end{itemize}
+Targets were seizures starting in the alarm window, and false alarms were normalised per 24\,h of alarm-on time. The mode was checked against the dataset's asleep/awake seizure labels.
+\item \textbf{Combined pipeline.}
+\begin{itemize}
+\item Stage~1 is the best model fine-tuned after the first seizure ($k=1$).
+\item A personal verifier is trained on the patient's candidates between the first and second seizure, which the fine-tuned model never saw (weight $\times$20), plus other patients' candidates.
+\item Scoring uses the same later data as all $k=2$ tables.
+\end{itemize}
+\end{enumerate}
+
+\paragraph{False-alarm taxonomy.} All candidate alarms of the best general model (stage~1 at 0.5, evidence up to 10\,s after the trigger; 121,564 false and 2,999 true; 71 patients) were described by their changes relative to the preceding 5\,min:
+\begin{itemize}
+\item heart rate and its slope, RMSSD, beat quality;
+\item ear-EEG log-variance, line length, and gamma and delta shares;
+\item shoulder EMG, back and chest movement, HR-excess;
+\item recent alarm count.
+\end{itemize}
+The false alarms were robust-standardised and clustered with a Gaussian mixture (diagonal covariance, $k$ chosen by BIC among 3--8). Clusters were named from their median profiles. Separability of each cluster from true seizure alarms was measured by patient-wise AUC. A \emph{type-aware verifier} (seizure vs the eight false-alarm types, with types learned on training folds only) was compared with the yes/no verifier on the same candidates and folds.
+
+\paragraph{Event-based precision.} Following the SzCORE framework \cite{dan2024}, sensitivity, precision $=\mathrm{TP}/(\mathrm{TP}+\mathrm{FP})$, F1 and false positives per 24\,h were computed for every Siena montage, at threshold 0.5 and at each montage's best-F1 threshold.
+
+% ----------------------------------------------------------------------------
 \subsection{Interactive system model (Study 5)}
 \label{sec:m-live}
 

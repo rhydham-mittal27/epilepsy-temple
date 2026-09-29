@@ -817,7 +817,7 @@ If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or 
 
 ## Appendix A. Experiment log (chronological)
 
-*Status (29 Sep 2026): experiments 1–23 are complete. The raw-EEG CNN (22) ran on a 33-patient subset. Experiment 23 and the Siena validation are written up in `Electrodes_and_Siena_Validation.md`.*
+*Status (30 Sep 2026): experiments 1–27 are complete; 28 (combined pipeline) is running. Earlier status: experiments 1–23 are complete. The raw-EEG CNN (22) ran on a 33-patient subset. Experiment 23 and the Siena validation are written up in `Electrodes_and_Siena_Validation.md`.*
 
 Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
 
@@ -847,6 +847,13 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 
 | 22 | CNN on raw behind-the-ear EEG (32 Hz, 16 s context), alone and late-fused with the feature models, same subset and folds | `cnn.py fetch / train / eval / compare` | Stream stopped at 293/2,850 runs (33 patients, 101 seizures). Download was the bottleneck (0.3–0.7 MB/s per stream; captive-portal TLS failures; disk guard). CNN alone AUROC 0.715 vs features 0.830; ear-EEG features + CNN: 19% → 37% caught at ≤1/day; mixed on the best model (§6.19). **Bug caught:** flat-EEG runs overflowed float16 → NaN loss; fixed with a 1 µV scale floor, clipping and a fail-fast check |
 | 23 | Electrode stability: stable vs unstable ear-EEG contact (from tuning data), scored on later data | `analysis_electrodes.py` | Stable contact: up to 2× fewer false alarms; seizure visibility unchanged (20–21% reach 0.95 in both). Contact is a false-alarm problem, not the ceiling (§6.20) |
+| 24 | Alarm only for target seizures; dedicated convulsive model (all 125 patients, 55 tonic-clonic) | `fa_reduction.py target` | Tonic-clonic: dedicated model 87% at ≤1 FA/day, 96% at ≤5, 100% at ≤10; general model 85% / 95% / 95%. Long (> 90 s): about 40% at ≤1/day |
+| 25 | Seizure-cluster prior (confirmed seizures only) | `fa_reduction.py prior` | +2 log-odds for 12 h: −33% / −24% FA at 50 / 70% caught |
+| 26 | Night mode → resting mode | `fa_reduction.py clock / night / rest` | **All EDF start times are anonymised (00.00.00)**, so night-mode numbers were discarded. Resting mode (accelerometer): the still state tracks sleep (78% of asleep vs 44% of awake seizures), but FA per hour is unchanged; only total alarms fall |
+| 27 | False-alarm taxonomy and type-aware verifier | `analysis_fa_types.py [--verify]` | 8 types (muscle 12%, movement 12%, contact 8%, heart surge 10%, bursts 16%, subtle 42%); type-aware verifier no better than yes/no |
+| 28 | Combined pipeline: k = 1 fine-tuned detector + personal verifier trained on the stretch between the 1st and 2nd seizure | `fa_reduction.py stack` | Running |
+
+Full write-up of 24–28, plus CHB-MIT and Siena ear + back-of-head montages and SzCORE precision: [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md).
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.

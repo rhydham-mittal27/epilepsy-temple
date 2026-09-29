@@ -48,6 +48,12 @@ CONFIGS = {
     "Ear-hook, one ear (1 ch)": {"eeg": [("T4", "T6")]},
     "Full cap (18 ch)": {"eeg": CAP},
     "Full cap + ECG": {"eeg": CAP, "ecg": True},
+    # ear + back of the head: the chain continues from behind the ear (T5/T6 = P7/P8) to the occiput (O1/O2),
+    # i.e. what an ear-hook joined by a band around the back of the head could record
+    "Back of head only (2 ch)": {"eeg": [("T5", "O1"), ("T6", "O2")]},
+    "Ear + back of head (4 ch)": {"eeg": [("T3", "T5"), ("T4", "T6"), ("T5", "O1"), ("T6", "O2")]},
+    "Ear + back of head + ECG": {"eeg": [("T3", "T5"), ("T4", "T6"), ("T5", "O1"), ("T6", "O2")], "ecg": True},
+    "Ear + back + parietal (6 ch)": {"eeg": [("T3", "T5"), ("T4", "T6"), ("T5", "O1"), ("T6", "O2"), ("P3", "O1"), ("P4", "O2")]},
 }
 NEG_FRAC = 0.2  # small dataset: keep 20% of non-seizure windows for training
 
@@ -190,6 +196,55 @@ def design(z, cfg):
     return Z
 
 
+def oof(runs, data, cfg):
+    """Leave-one-patient-out outputs for one setup: [(probs, t, seizures, hours), ...]."""
+    subs = sorted({r["sub"] for r in runs})
+    rng = np.random.default_rng(0)
+    D = {r["run"]: design(data[r["run"]], cfg) for r in runs}
+    keep = {k: (data[k]["y"] == 1) | (rng.random(len(data[k]["y"])) < NEG_FRAC) for k in D}
+    recs = []
+    for s in subs:
+        tr = [r["run"] for r in runs if r["sub"] != s]
+        m = S.clf().fit(np.vstack([D[k][keep[k]] for k in tr]), np.concatenate([data[k]["y"][keep[k]] for k in tr]))
+        for r in runs:
+            if r["sub"] == s:
+                recs.append((m.predict_proba(D[r["run"]])[:, 1].astype(np.float32), data[r["run"]]["t"].astype(float),
+                             [tuple(v) for v in r["seizures"]], r["duration"] / 3600))
+    return recs
+
+
+def szcore_row(row):
+    """SzCORE event metrics (Dan et al., Epilepsia 2024) from one scored threshold. Each caught seizure
+    is one true positive (the 60 s refractory gives one alarm per event); every false alarm is a false positive."""
+    tp, fp, n = row["detected"], row["false_alarms"], row["seizures"]
+    sens = tp / n if n else 0.0
+    prec = tp / (tp + fp) if tp + fp else 0.0
+    f1 = 2 * sens * prec / (sens + prec) if sens + prec else 0.0
+    return {"sensitivity": sens, "precision": prec, "f1": f1, "fp_per_24h": row["fa_per_24h"], "tp": tp, "fp": fp,
+            "seizures": n}
+
+
+def szcore():
+    """Sensitivity, precision, F1 and FP/24h for every setup: at threshold 0.5 and at the threshold with the
+    best F1 (chosen on the same data, so optimistic)."""
+    runs = [r for r in build_index() if (FEAT / f"{r['run']}.npz").exists()]
+    data = {r["run"]: dict(np.load(FEAT / f"{r['run']}.npz")) for r in runs}
+    out = {}
+    for cname, cfg in CONFIGS.items():
+        curve = S.score_fast(oof(runs, data, cfg), S.PT_GRID)
+        rows = {t: szcore_row(v) for t, v in curve.items()}
+        a = rows[min(rows, key=lambda t: abs(float(t) - 0.5))]  # PT_GRID contains 0.50
+        bt = max(rows, key=lambda t: (rows[t]["f1"], rows[t]["sensitivity"]))
+        out[cname] = {"at_0.5": a, "best_f1": {"threshold": float(bt), **rows[bt]}}
+        b = rows[bt]
+        print(f"{cname:30s} @0.5: sens {a['sensitivity']:.0%} prec {a['precision']:.1%} F1 {a['f1']:.3f} | "
+              f"best F1 (thr {float(bt):.3f}): sens {b['sensitivity']:.0%} ({b['tp']}/{b['seizures']}), "
+              f"prec {b['precision']:.0%} ({b['tp']}/{b['tp'] + b['fp']} alarms real), F1 {b['f1']:.2f}, "
+              f"{b['fp_per_24h']:.1f} FP/day", flush=True)
+    RES.mkdir(exist_ok=True)
+    (RES / "szcore.json").write_text(json.dumps(out, indent=1, default=float))
+
+
 def run():
     runs = [r for r in build_index() if (FEAT / f"{r['run']}.npz").exists()]
     subs = sorted({r["sub"] for r in runs})
@@ -228,7 +283,7 @@ def run():
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["index", "fetch", "run"])
+    ap.add_argument("cmd", choices=["index", "fetch", "run", "szcore"])
     ap.add_argument("--workers", type=int, default=2)
     a = ap.parse_args()
     S.keep_awake()
@@ -239,4 +294,4 @@ if __name__ == "__main__":
         print(f"{len(idx)} files, {sum(len(r['seizures']) for r in idx)} seizures, "
               f"{sum(r['duration'] for r in idx) / 3600:.1f} h, {sum(r['bytes'] for r in idx) / 1e9:.1f} GB")
     else:
-        {"fetch": lambda: fetch(a.workers), "run": run}[a.cmd]()
+        {"fetch": lambda: fetch(a.workers), "run": run, "szcore": szcore}[a.cmd]()

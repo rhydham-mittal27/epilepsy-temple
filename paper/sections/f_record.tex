@@ -79,6 +79,9 @@ This led to the body-signal review and the SeizeIT2 study.
 29 & This paper & Full LaTeX record, restructured into research-article format \\
 30 & Electrode stability (SeizeIT2) & Stable contact: up to 2$\times$ fewer false alarms; seizure visibility unchanged \\
 31 & Siena adult validation (streamed) & Ear-hook 96\% vs cap 91\% caught; cap 2--3$\times$ fewer false alarms; ECG helps ear-hook only; list typos and scikit-learn slowdown fixed \\
+32 & Ear + back of the head; SzCORE precision & Siena and CHB-MIT: about half the false alarms; 6 ch $\approx$ full cap; precision 2--65\% depending on threshold \\
+33 & False-alarm strategies & Tonic-clonic mode 87\% at $\le$1 \FAd; cluster prior $-$24--33\%; resting mode fewer alarms, same rate; night mode impossible (anonymised clocks); combined pipeline running \\
+34 & False-alarm taxonomy & 8 types; type-aware verifier no gain; sensors for Prototype 1 \\
 \bottomrule
 \end{longtable}
 
@@ -112,6 +115,9 @@ SeizeIT2 & All-NaN ECG-waveform column crashed histogram binning for PPG & Colum
 SeizeIT2 & Failed queue step did not stop its batch; two copies ran & Stale copy killed; queues stop on failure \\
 SeizeIT2 CNN & Flat-EEG runs (median 0) divided by $\approx$0 overflowed float16 $\to$ NaN loss in every fold & 1 \uV{} scale floor, $\pm$50 clipping, finite-pool assert, fail-fast on non-finite loss; outputs deleted and re-run \\
 Siena & Seizure-list errors: file name given once and not matching (PN01), letter-O typo (PN06), end time off by one hour (PN00-3) & Parser carries names forward, maps to the only file, normalises O/0; hour typo corrected with a logged rule; all 47 seizures checked against recording length \\
+SeizeIT2 & EDF start times anonymised (all \code{00.00.00}); first night-mode run used time since recording start as clock time & Night-mode results discarded; accelerometer-based resting mode instead \\
+SeizeIT2 & EDF-header pass stopped at a connection reset (WinError 10054) and halted the queue & Retries with back-off, fewer parallel requests, resumable saves; queue continues past failures \\
+SeizeIT2 & Rolling median over $\sim$13 million windows in a Python loop (too slow) & Vectorised 1-min block median \\
 Tooling & scikit-learn 1.9 weighted binning called a percentile routine per bin edge: small-dataset fits 10--50$\times$ slower & Vectorised equivalent in \code{detect.py}; thresholds identical (200/200), predictions bit-identical; fit 33 s $\to$ 4 s \\
 Tooling & PyTorch index made the resolver look for all packages there & Explicit index \\
 Tooling & \code{uv sync --extra dl} removed TVB packages & Reinstall with \code{--extra tvb} \\
@@ -162,7 +168,9 @@ Command & Time \\
 \code{uv run --extra dl detect/cnn.py fetch} (raw EEG, resumable) & hours (network-bound) \\
 \code{uv run --extra dl detect/cnn.py train / eval / compare} (293 runs) & $\approx$17 + 1 + 10 min \\
 \code{uv run detect/analysis_electrodes.py} & $\approx$3 min \\
-\code{uv run detect/siena.py fetch --workers 2}; \code{run} & $\approx$46 min + 3 min \\
+\code{uv run detect/siena.py fetch --workers 2}; \code{run}; \code{szcore} & $\approx$46 min + 5 min \\
+\code{uv run detect/fa_reduction.py rest / prior / chb / target / stack} & 5 min -- 1.5 h each \\
+\code{uv run detect/analysis_fa_types.py [--verify]} & $\approx$10 / 20 min \\
 \bottomrule
 \end{tabularx}
 \end{table}

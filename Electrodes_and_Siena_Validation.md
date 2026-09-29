@@ -183,6 +183,16 @@ A large IQR means the signal amplitude jumps around (loose or shifting contact).
 
    Together with Test 1, the evidence points to **position and seizure type**, not electrode quality.
 
+### 4.2b Follow-up: ear + back of the head, and precision
+
+Extending the ear-hook towards the back of the head helps a lot. At 50% caught:
+- ear + back of head (4 ch): 18 false alarms/day, against 27 for the ear alone;
+- ear + back + parietal (6 ch): 10 false alarms/day, matching the full cap.
+
+CHB-MIT (23 children) confirms the same pattern. In SzCORE terms, the ear + back + ECG setup had the most trustworthy alarms: 65% of its alarms were real seizures, at 1.2 false alarms/day.
+
+Full tables are in [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md), §3 and §8.
+
 ### 4.3 First look: one patient (PN00)
 
 Before the full run, a patient-specific test on PN00 (55-year-old man, right temporal; 5 seizures, 3.2 h; leave-one-recording-out):

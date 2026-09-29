@@ -57,6 +57,9 @@
 | 10 | **Deep learning on the raw ear EEG does not break the ceiling at this data size.** On 33 patients, a CNN was weaker than hand-made features (AUROC 0.72 vs 0.83); averaged with them it doubled the seizures caught at ≤1 false alarm/day (19% → 37%), but added little on top of heart + context features. | `Multimodal_Detection_SeizeIT2.md` §6.19 |
 | 11 | **Electrode contact drives false alarms, not missed seizures.** SeizeIT2 patients with stable ear-EEG contact had up to 2× fewer false alarms, but their seizures were no more visible (20–21% reach 0.95 in both groups). | `Electrodes_and_Siena_Validation.md` |
 | 12 | **The ear-hook holds up in adults.** On Siena (14 adults, 47 focal seizures, never-seen patients), two ear-level channels caught **96%** of seizures vs 91% for an 18-channel cap; the cap had 2–3× fewer false alarms, and **ECG cut the ear-hook's false alarms by 27–48%** (it did not help the cap). | `Electrodes_and_Siena_Validation.md` |
+| 13 | **Tonic-clonic alarm mode reaches cleared-device level.** Alarming only for focal-to-bilateral tonic-clonic seizures (the SUDEP-risk type), a dedicated convulsive model caught **87% at ≤1 false alarm/day, 90% at 1.1/day, 96% at ≤5/day** (125 patients, 55 tonic-clonic seizures, never-seen patients). **Prototype 1 targets tonic-clonic alarms + a diary for everything else.** | `False_Alarm_Reduction.md` |
+| 14 | **Ear + back of the head halves false alarms** in adults (Siena) and children (CHB-MIT); 6 channels (ear + back + parietal) match or beat a full 18-channel cap at 50–70% sensitivity. A **seizure-cluster prior** cuts false alarms by another 24–33%. | `False_Alarm_Reduction.md` |
+| 15 | **False alarms come in 8 types**: about a third are artefacts a sensor can flag (chewing/muscle 12%, big movements 12%, electrode contact 8%); 16% are bursts from 13 noisy patients; 10% are heart surges that mimic seizures. They define Prototype 1's extra sensors (jaw EMG, head IMU, contact impedance). | `False_Alarm_Reduction.md` §7 |
 
 ---
 
@@ -89,7 +92,8 @@ flowchart LR
 | 10 | Do heart, muscle and motion signals cut false alarms on real wearable data? | `detect/seizeit2.py`, `Multimodal_Detection_SeizeIT2.md` |
 | 11 | Does a CNN on the raw ear EEG find what features miss? | `detect/cnn.py`, `Multimodal_Detection_SeizeIT2.md` §6.19 |
 | 12 | Are the datasets' electrodes the problem? Does the ear-hook hold up in adults? | `detect/analysis_electrodes.py`, `detect/siena.py`, `Electrodes_and_Siena_Validation.md` |
-| 13 | Everything, written up as a research paper | `paper/main.pdf` (LaTeX source in `paper/`) |
+| 13 | How can false alarms be cut further? What kinds of false alarms are there? | `detect/fa_reduction.py`, `detect/analysis_fa_types.py`, `False_Alarm_Reduction.md` |
+| 14 | Everything, written up as a research paper | `paper/main.pdf` (LaTeX source in `paper/`) |
 
 ---
 
@@ -105,6 +109,7 @@ epilepsy_temple/
 ├── Inference_Formulas.md            derivations + verification audit for inferring hidden variables
 ├── Multimodal_Detection_SeizeIT2.md SeizeIT2 multimodal study (125 patients), incl. the raw-EEG CNN
 ├── Electrodes_and_Siena_Validation.md  electrode-stability test + adult validation on Siena
+├── False_Alarm_Reduction.md         tonic-clonic mode, ear + back of head, cluster prior, resting mode, false-alarm types, SzCORE precision
 ├── paper/                           research paper (LaTeX source + main.pdf)
 ├── docs/images/                     README figures
 └── epilepsy_sim/                    all code (Python 3.13, uv)
@@ -128,7 +133,9 @@ epilepsy_temple/
     │   ├── analysis_seizure_types.py  caught by seizure type / duration / lobe / side
     │   ├── analysis_electrodes.py   stable vs unstable ear-EEG contact (SeizeIT2)
     │   ├── cnn.py                   1D CNN on the raw ear EEG (streamed; fetch / train / eval / compare)
-    │   ├── siena.py                 adult validation on Siena: ear-hook vs full cap, ± ECG (streamed)
+    │   ├── siena.py                 adult validation on Siena: ear-hook vs full cap, ± ECG, ear + back of head; SzCORE metrics (streamed)
+    │   ├── fa_reduction.py          false-alarm strategies: tonic-clonic mode, CHB-MIT ear + back, cluster prior, resting mode, combined pipeline
+    │   ├── analysis_fa_types.py     false-alarm taxonomy (8 types) + type-aware verifier
     │   ├── results/                 3-patient detection metrics + figure
     │   ├── results_general/         23-subject general-model metrics
     │   ├── results_seizeit2/        125-patient multimodal metrics + figure, CNN and electrode results
@@ -165,7 +172,8 @@ uv sync                                    # numpy, scipy, matplotlib, numba, mn
 | SeizeIT2 personalisation + two-stage (see `Multimodal_Detection_SeizeIT2.md` §11) | `finetune`, `personal`, `analysis_responders.py`, `stage2.py [--personal]` | ~20–45 min each |
 | Raw-EEG CNN (needs `--extra dl`) | `uv run --extra dl detect/cnn.py fetch`, then `train`, `eval`, `compare` | fetch network-bound; ~30 min for 293 runs |
 | Electrode-stability test (SeizeIT2) | `uv run detect/analysis_electrodes.py` | ~3 min |
-| Siena adult validation (streamed from PhysioNet, features only) | `uv run detect/siena.py fetch --workers 2` then `run` | ~46 min + ~3 min |
+| Siena adult validation (streamed from PhysioNet, features only) | `uv run detect/siena.py fetch --workers 2` then `run`, `szcore` | ~46 min + ~5 min |
+| False-alarm strategies (see `False_Alarm_Reduction.md` §12) | `uv run detect/fa_reduction.py rest / prior / chb / target / stack`; `analysis_fa_types.py [--verify]` | 5 min – 1.5 h each |
 | Rebuild live-lab data | `uv run viz/export_data.py` | ~2 min |
 
 > **Memory:** network simulations use ~1–2 GB. On machines with little free RAM, run one long job at a time.
@@ -367,7 +375,23 @@ Good contact halves false alarms but does **not** make seizures more visible. Th
 
 The ear-hook catches as many adult seizures as the full cap; the cap has 2–3× fewer false alarms; ECG closes much of that gap for the ear-hook (and adds nothing to the cap). Full write-up, including three typos found in the dataset's seizure lists and a scikit-learn 1.9 slowdown that was found and fixed: [`Electrodes_and_Siena_Validation.md`](Electrodes_and_Siena_Validation.md).
 
-### 6.8 Epilepsy Live Lab (`viz/epilepsy_live.html`)
+### 6.8 Cutting false alarms: five strategies and a false-alarm taxonomy (`fa_reduction.py`, `analysis_fa_types.py`)
+
+**Alarm only for tonic-clonic seizures** (all 125 SeizeIT2 patients, 55 tonic-clonic seizures, never-seen patients):
+
+| Model → target | Caught at ≤0.5 / 1 / 2 / 5 / 10 FA/day | FA/day to catch 90% / 100% |
+|---|---|---|
+| General model → all 883 seizures | 14 / 17 / 22 / 28 / 35% | – |
+| General model → tonic-clonic | 78 / 85 / 87 / 95 / 95% | 3.1 / 22.6 |
+| **Dedicated convulsive model → tonic-clonic** | **84 / 87 / 93 / 96 / 100%** | **1.1 / 9.0** |
+
+**Ear + back of the head** (FA/day at 50% caught): CHB-MIT ear 26 → ear + back 14 → 6 ch 10 (full cap 14); Siena ear 27 → ear + back 18 → 6 ch 10 (full cap 10).
+
+**Seizure-cluster prior** (lower the bar for 12 h after a confirmed seizure): −24% to −33% false alarms. **Resting mode** (alarms only after 10 min lying still, per accelerometer): same false-alarm rate per hour, but about 60% fewer alarms per day (rest-time seizures only). SeizeIT2 anonymises clock times (all `00.00.00`), so clock-based night mode could not be tested.
+
+**Eight kinds of false alarm**: muscle/chewing 12%, big movements 12%, electrode contact 8%, heart surge without movement 10%, bursts from 13 noisy patients 16%, subtle 42%. A type-aware verifier gave no gain with SeizeIT2's sensors; the types define Prototype 1's extra sensors (jaw EMG, head IMU, contact impedance). Full write-up: [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md).
+
+### 6.9 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
 A single-screen, offline dashboard:
 
@@ -434,7 +458,9 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | ✅ | ~~PPG-quality heart rate, seizure-type split~~ (simulated in-ear PPG ≈ chest ECG; tonic-clonic 100% at ≤5 false alarms/day) |
 | ✅ | ~~CNN on the raw ear EEG~~ (33-patient subset: weaker alone, helps strict budgets when fused; §6.6) |
 | ✅ | ~~Are the electrodes the problem? Adult validation~~ (contact drives false alarms, not misses; Siena confirms ear-hook ≈ cap in catches, ECG helps; §6.7) |
-| ★★★ | **Hardware Prototype 1**: bilateral ear-hook with dry electrodes placed high around the ear (towards T7/T8, P7/P8), contact-quality sensing, in-ear PPG, IMU, phone recording |
+| ✅ | ~~Cut false alarms further~~ (tonic-clonic mode 87% at ≤1 FA/day; ear + back of head halves false alarms; cluster prior −24–33%; 8 false-alarm types; §6.8) |
+| ⏳ | Combined pipeline: fine-tuned detector + personal verifier (running) |
+| ★★★ | **Hardware Prototype 1 (tonic-clonic alarm + diary)**: bilateral ear-hook + band around the back of the head, dry electrodes (T7/T8, P7/P8, O1/O2), jaw EMG, head IMU, contact-impedance sensing, in-ear PPG/SpO₂, phone app with seizure diary and cancellation |
 | ★★ | TUSZ (675 patients, requires registration) for a larger general model and the CNN |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |
@@ -454,6 +480,7 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | [`Seizure_Physiological_Signals.md`](Seizure_Physiological_Signals.md) | Heart rate (↑ in 82% of patients), HRV (pre-ictal in 41%), apnea (36.5% of focal seizures, often **before** EEG), SpO₂, blood pressure, sweat, temperature, EMG/motion, blood markers; which are measurable from the ear; multimodal ear-hook design and benchmarks |
 | [`Multimodal_Detection_SeizeIT2.md`](Multimodal_Detection_SeizeIT2.md) | SeizeIT2 multimodal detector: streaming 126 GB through RAM, features for ear-EEG / ECG / EMG / motion, patient-wise CV, matched-sensitivity results, snapshots, limitations |
 | [`Electrodes_and_Siena_Validation.md`](Electrodes_and_Siena_Validation.md) | Is electrode quality the limit? Stable vs unstable contact on SeizeIT2; adult validation on Siena (ear-hook vs full cap, ± ECG); dataset typos; scikit-learn binning slowdown and fix |
+| [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md) | Tonic-clonic and long-seizure alarm modes, dedicated convulsive model, ear + back of head (Siena, CHB-MIT), seizure-cluster prior, resting mode, anonymised clocks, false-alarm taxonomy, type-aware verifier, SzCORE precision, Prototype 1 conclusions |
 | [`paper/main.pdf`](paper/main.pdf) | The whole project as a research paper (IMRaD, LaTeX source in `paper/`) |
 | [`Inference_Formulas.md`](Inference_Formulas.md) | Measured vs inferred; Bayes, least squares, Kalman, ABC; derivations for K⁺, Cl⁻, E/I, fNIRS; verification audit |
 | [`epilepsy_sim/SIMULATION.md`](epilepsy_sim/SIMULATION.md) | Full model documentation: equations, parameters with sources, validation, results, 14-step calibration log |

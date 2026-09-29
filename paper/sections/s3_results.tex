@@ -535,6 +535,92 @@ Full cap + ECG & 89\% / \textbf{113} & 14 s & 14 / 23 / 34 / 56 & 13 / 28 / 57 /
 \end{table}
 
 % ----------------------------------------------------------------------------
+\subsection{False-alarm reduction}
+
+\paragraph{Tonic-clonic alarm mode.} Restricting alarms to tonic-clonic seizures changed the operating point by orders of magnitude (Table~\ref{tab:tc}).
+\begin{itemize}
+\item \textbf{General model:} it caught 85\% of the 55 tonic-clonic seizures at $\le$1 \FAd{} and 95\% at $\le$5, against 17\% and 28\% of all 883 seizures.
+\item \textbf{Dedicated convulsive model:} it improved every strict budget, catching 87\% at $\le$1, 93\% at $\le$2, 96\% at $\le$5 and 100\% at $\le$10 \FAd. It needed 1.1 \FAd{} to catch 90\%, against 3.1 for the general model.
+\item \textbf{Later-data analysis:} on the 71 patients' later data (22 tonic-clonic seizures), the general and fine-tuned models caught 91\% at $\le$1 \FAd, and the fine-tuned model 86\% at $\le$0.5.
+\item \textbf{Long seizures ($>$90\,s):} 39--42\% were caught at $\le$1 \FAd.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Alarm target vs performance (SeizeIT2, all 125 patients, patient-wise 5-fold; 55 tonic-clonic seizures).}
+\label{tab:tc}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Model $\to$ target & Caught at $\le$0.5/1/2/5/10 \FAd & FA/day to catch 90\% / 100\% \\
+\midrule
+General $\to$ all 883 seizures & 14 / 17 / 22 / 28 / 35\% & -- / -- \\
+General $\to$ tonic-clonic & 78 / 85 / 87 / 95 / 95\% & 3.1 / 22.6 \\
+Dedicated convulsive $\to$ tonic-clonic & \textbf{84 / 87 / 93 / 96 / 100\%} & \textbf{1.1 / 9.0} \\
+Dedicated convulsive $\to$ all seizures & 12 / 16 / 19 / 25 / 30\% & -- / -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Ear + back of the head.} Adding occipital channels reduced false alarms in both datasets (Table~\ref{tab:earback}).
+\begin{itemize}
+\item \textbf{Ear + back (4 channels):} at 50\% sensitivity, CHB-MIT went from 26.1 to 14.3 \FAd{} and Siena from 27 to 18.
+\item \textbf{Six channels:} they matched or exceeded the full cap at 50--70\% sensitivity. On CHB-MIT they gave 9.9 vs 14.1 \FAd{} at 50\% and 69 vs 104 at 70\%. The cap remained better only at the strictest budgets (CHB-MIT $\le$1 \FAd: 26\% vs 18\%).
+\item \textbf{Behind the ear alone:} ``back of head only'' (P7--O1, P8--O2) outperformed the ear-hook in both datasets.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Ear vs ear + back of the head: FA/day at 50\% / 70\% sensitivity, and seizures caught at $\le$5 \FAd.}
+\label{tab:earback}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& \multicolumn{2}{c}{CHB-MIT (23 children, 185 sz)} & \multicolumn{2}{c}{Siena (14 adults, 47 sz)} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Setup & FA/day 50/70\% & $\le$5 \FAd & FA/day 50/70\% & $\le$5 \FAd \\
+\midrule
+Ear-hook (T7--P7, T8--P8) & 26.1 / 113.1 & 26\% & 27 / 60 & 32\% \\
+Back of head (P7--O1, P8--O2) & 12.6 / 101.2 & 30\% & 15 / 39 & 19\% \\
+Ear + back (4 ch) & 14.3 / 89.9 & 34\% & 18 / 47 & 34\% \\
+Ear + back + parietal (6 ch) & \textbf{9.9 / 69.4} & 39\% & \textbf{10} / 32 & \textbf{38\%} \\
+Full cap (18 ch) & 14.1 / 104.4 & \textbf{42\%} & 10 / \textbf{23} & 34\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Seizure-cluster prior.} On the 649 later seizures, the prior reduced false alarms at 50\% and 70\% sensitivity. The best variant (+2 log-odds for 12\,h) lowered them from 58.7 to 39.3 and from 170.6 to 129.9 \FAd{} ($-33\%$ and $-24\%$). It also raised seizures caught at $\le$20 and $\le$50 \FAd{} from 36\% and 47\% to 41\% and 55\%. Twelve-hour windows outperformed 24-hour windows.
+
+\paragraph{Resting mode.} The accelerometer-defined still state was enriched for sleep: at $q=50$ it contained 78\% of seizures labelled asleep and 44\% of those labelled awake. False alarms per hour of alarm-on time were, however, not lower than with 24\,h alarms (general model: 51.9 vs 58.7 \FAd{} at 50\% sensitivity; fine-tuned: 46.6 vs 44.6). Seizures at rest were slightly harder to catch. With alarms active 40\% of the time, the absolute number of alarms per calendar day fell by about 60\%, but only rest-time seizures were covered.
+
+\paragraph{False-alarm taxonomy.} BIC selected eight clusters (Table~\ref{tab:fatypes}). About one third of false alarms carried artefact signatures that a dedicated sensor could flag: muscle or chewing, large movements, and electrode contact. One sixth came in bursts from 13 patients, and one tenth were heart-rate surges without movement, the most seizure-like group. True seizure alarms combined a heart-rate rise with rises in EEG line length and power, without a muscle or movement signature. Each type separated from true seizure alarms with AUC 0.93--0.99. Because false candidates outnumbered true ones 40 to 1, this still left more false than true alarms at high sensitivity. The type-aware verifier was not better than the yes/no verifier: 15\% of seizures were caught at $\le$1 \FAd{} with both, and 22\% vs 25\% at $\le$5.
+
+\begin{table}[htbp]
+\centering\small
+\caption{False-alarm types (SeizeIT2, best general model, 121,564 false candidate alarms, 71 patients).}
+\label{tab:fatypes}
+\begin{tabularx}{\linewidth}{@{}l L L L@{}}
+\toprule
+Share & Type and signature & Likely cause & Suggested fix \\
+\midrule
+12.2\% & Muscle / high-frequency EEG + movement (gamma share, line length, EMG up) & Chewing, talking, jaw clenching & Jaw (temporalis) EMG \\
+12.0\% & Large-movement artefact (EEG power, EMG, delta share up) & Turning, getting up, touching the head & Head IMU gate \\
+7.8\% & EEG power jump without body change; ECG beat quality down & Electrode contact & Contact-impedance sensing, reseat prompt \\
+9.7\% & Heart-rate surge beyond movement (median 102 bpm) & Arousal, stress, waking & EEG agreement, personal learning \\
+16.1\% & Bursts of repeated alarms (99\% from 13 patients) & Noisy patients or recordings & Personal verifier, contact check \\
+42.3\% & Subtle changes (three clusters) & Model noise near threshold & Verifier, priors \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Event-based precision.} At threshold 0.5, every Siena montage caught 85--98\% of seizures, but only 2--6\% of its alarms were real. At the best-F1 thresholds, F1 was 0.32--0.40:
+\begin{itemize}
+\item ear + back + ECG reached 65\% precision (13 of 20 alarms real) at 28\% sensitivity and 1.2 FP/day;
+\item the six-channel setup had the best F1 (0.40; 64\% sensitivity, 29\% precision).
+\end{itemize}
+Precision scales with the seizure rate $R$ as $\mathrm{Sens}\cdot R/(\mathrm{Sens}\cdot R+\mathrm{FP/day})$. Moving from the hospital cohort ($R\approx8$/day) to a typical outpatient rate (one seizure per week), the 65\% precision of ear + back + ECG falls to about 3\%.
+
+% ----------------------------------------------------------------------------
 \subsection{Interactive system model}
 
 In the Live Lab, the \Kp-DC detector alarmed in epileptic tissue at $t=11$\,s, 1\,s after trigger onset, and stayed silent in healthy tissue. The line-length detector failed on the virtual EEG, as described in Appendix~\ref{app:livelab}. With a walking episode switched on, EEG-only detection raised one false alarm per scenario. Multimodal confirmation removed it at a cost of 4--8\,s of latency, but missed the seizure without a heart-rate response (Table~\ref{tab:live}). This anticipated, qualitatively, the trade-off later measured on SeizeIT2.
