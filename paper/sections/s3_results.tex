@@ -452,7 +452,34 @@ Awake / asleep & 28\% / 22\% & 41\% / 36\% \\
 \item \textbf{Calibrated general model:} 11/22/37\% at 0.7/4.1/18.7 \FAd{}, vs 14/25/38\% at 1.0/4.3/20.2 with ECG.
 \end{itemize}
 
-\paragraph{Raw-EEG CNN.} Data acquisition was ongoing at the time of writing, and results will be reported in a revision.
+\paragraph{Raw-EEG CNN.} Table~\ref{tab:cnn} compares the models on the 33-patient subset.
+\begin{itemize}
+\item \textbf{CNN alone:} weaker than the hand-crafted ear-EEG features, with window AUROC 0.715 vs 0.830 and 2--3$\times$ the false alarms at 50--70\% sensitivity. Training loss fell to 0.13--0.20, while the held-out AUROC of the first fold was 0.67, which indicates overfitting with about 26 training patients per fold.
+\item \textbf{Fused with the ear-EEG features:} the CNN helped at strict budgets. False alarms at 50\% sensitivity fell from 15 to 7 per day, and the share caught at $\le$1 \FAd{} rose from 19\% to 37\% (about 18 seizures). The fusion was worse at 60--70\% sensitivity.
+\item \textbf{Fused with the best multimodal model:} the effect was mixed. The share caught at $\le$5 \FAd{} rose from 50\% to 55\%, but false alarms at 70\% sensitivity rose from 20 to 58 per day.
+\end{itemize}
+This subset is considerably easier than the full cohort: ear-EEG features give 15 vs 103.7 \FAd{} at 50\% sensitivity. The table must therefore be read only internally.
+
+A first training run diverged to a NaN loss. Three runs had flat EEG channels (median amplitude 0), so the unfloored per-recording scale produced values of about $3\times10^6$, which overflowed the float16 training pool. The scale floor, clipping and a non-finite-loss check fixed this, and the run was repeated.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Raw-EEG CNN vs hand-crafted features on the same subset (293 runs, 33 patients, 101 seizures, 3,027 h) and the same patient folds. Fusion = unweighted mean of the two probabilities. Left block: FA/day at matched sensitivity; right block: seizures caught within budgets.}
+\label{tab:cnn}
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{@{}lccccc|cccc@{}}
+\toprule
+Setup & AUROC & 50\% & 60\% & 70\% & 80\% & $\le$1/d & $\le$5/d & $\le$20/d & $\le$200/d \\
+\midrule
+CNN (raw ear EEG) & 0.715 & 28 & 66 & 215 & 576 & -- & 36\% & 47\% & 69\% \\
+Ear-EEG features & 0.830 & 15 & \textbf{20} & \textbf{66} & 152 & 19\% & 35\% & \textbf{60\%} & 81\% \\
+Ear-EEG features + CNN & \textbf{0.842} & \textbf{7} & 26 & 78 & \textbf{126} & \textbf{37\%} & \textbf{46\%} & 59\% & \textbf{82\%} \\
+\midrule
+Best feature model & \textbf{0.877} & \textbf{4} & 9 & \textbf{20} & 142 & \textbf{39\%} & 50\% & \textbf{68\%} & 80\% \\
+Best feature model + CNN & 0.821 & \textbf{4} & \textbf{7} & 58 & \textbf{113} & \textbf{39\%} & \textbf{55\%} & 60\% & \textbf{83\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ----------------------------------------------------------------------------
 \subsection{Interactive system model}

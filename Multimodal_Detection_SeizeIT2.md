@@ -634,6 +634,67 @@ On a sample recording the simulated PPG heart rate differs from ECG by **2.7 bpm
 
 **Caveat.** This is a feature-level simulation, not real PPG. Real in-ear PPG during seizures, with jaw clenching and head movement, may lose more data than modelled.
 
+### 6.19 Deep learning on the raw ear EEG (CNN), on a 33-patient subset
+
+**Why.** Every model so far sees 14 hand-made numbers per EEG channel. A CNN reads the raw waveform, so it could find patterns those numbers miss.
+
+**Data.** The raw-EEG stream was stopped at **293 of 2,850 runs** (disk space and slow campus Wi-Fi):
+- **33 patients** (30 complete, 3 partial: sub-031, sub-032, sub-097);
+- **101 seizures**, **3,027 h**.
+
+Each run is band-passed at 0.5–14 Hz, downsampled to 32 Hz and stored as int16 (`cnn.py fetch`).
+
+**Model** (`cnn.py train`):
+- **Architecture:** 1D CNN with 4 conv–BN–ReLU blocks (16–64 channels), global mean + max pooling, 39k parameters.
+- **Input:** 16 s of 2-channel EEG ending at each 2 s decision point.
+- **Training data:** all seizure windows + 1.5% of the others (85,653 windows, 4,195 seizure).
+- **Training:** 6 epochs, AdamW + one-cycle learning rate, amplitude augmentation (×0.8–1.25), positive-class weighting.
+- **Evaluation:** patient-wise 5-fold CV on this subset.
+
+About 17 min on CPU.
+
+**Fair comparison** (`cnn.py compare`). The two feature models are retrained on **exactly the same runs, patients and folds**:
+- ear-EEG features;
+- the best general model (EEG + ECG + context + HR-excess).
+
+A **late fusion** averages the feature and CNN probabilities with equal fixed weights. Because nothing is fitted, no test labels leak in.
+
+| Setup (33 patients, 101 seizures) | Window AUROC | FA/day at 50% caught | 60% | 70% | 80% | Caught ≤1/day | ≤5/day | ≤20/day | ≤50/day | ≤200/day |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **CNN, raw ear EEG** | 0.715 | 28 | 66 | 215 | 576 | – | 36% | 47% | 56% | 69% |
+| Ear-EEG features | 0.830 | 15 | **20** | **66** | 152 | 19% | 35% | **60%** | **66%** | 81% |
+| **Ear-EEG features + CNN (mean)** | **0.842** | **7** | 26 | 78 | **126** | **37%** | **46%** | 59% | 64% | **82%** |
+| Best feature model (EEG+ECG+context+HR-excess) | **0.877** | **4** | 9 | **20** | 142 | **39%** | 50% | **68%** | **77%** | 80% |
+| Best feature model + CNN (mean) | 0.821 | **4** | **7** | 58 | **113** | **39%** | **55%** | 60% | 67% | **83%** |
+
+**Findings:**
+1. **On its own, the CNN is weaker than the hand-made features** on the same patients: window AUROC 0.715 vs 0.830, and about 2–3× the false alarms at 50–70% caught. With about 26 training patients per fold, it overfits: training loss fell to 0.13–0.20 while fold-0 held-out AUROC was only 0.67.
+2. **It carries some complementary information.** Averaged with the ear-EEG features, it helps at the strict end:
+   - FA/day at 50% caught falls from 15 to 7;
+   - caught at ≤1/day rises from 19% to 37%, and at ≤5/day from 35% to 46%;
+   - it is worse in the middle of the curve (60–70% caught).
+3. **On top of the best multimodal model, the gain is mixed:**
+   - ≤5/day: 50% → 55%;
+   - 60% caught: 9 → 7 FA/day;
+   - 70% caught: 20 → 58 FA/day (much worse);
+   - ≤20/day: 68% → 60% (worse).
+
+   The heart and context features already cover most of what the CNN adds.
+4. **This subset is much easier than the full dataset.** Ear-EEG features give 15 FA/day at 50% caught here vs 103.7 on all 125 patients. Numbers in this table must **not** be compared with the full-dataset tables, only with each other.
+5. **Small sample.** One seizure is about 1 percentage point. Differences of a few points (e.g. 50% vs 55%) are within noise; the 19% → 37% jump at ≤1/day is about 18 seizures.
+
+**Bug caught.** The first training run had **NaN loss from epoch 1** in every fold, and all 160 output files were NaN.
+- **Cause:** 3 runs (sub-019 run-06, sub-021 run-05, sub-032 run-06) have flat EEG (median |amplitude| = 0). The per-recording scale (median + 0.001) turned them into values of about 3×10⁶, which overflow float16 to infinity. One infinite batch poisons the weights.
+- **Fix:**
+  - scale floored at 1 µV;
+  - normalised EEG clipped to ±50× the median amplitude;
+  - an assert that the training pool is finite;
+  - training stops immediately on a non-finite loss.
+
+  The NaN outputs were deleted and the job re-run.
+
+**For the device.** Raw-waveform deep learning is **not** a shortcut past the signal ceiling (§6.16) at this data size. It may earn a place later as an extra input to the personal verifier, or when trained on all 125 patients. That needs the full 47.6 GB raw stream, about 12 GB of disk.
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -702,7 +763,8 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 | ★★★ | **Personal verifier on top of the fine-tuned detector**, with calibration on a held-out slice | Combines the two strongest levers; gives calibrated numbers |
 | ✅ | PPG-quality heart signals (§6.18) | Little loss overall; responders −5–6 points at strict budgets |
 | ✅ | Split by seizure type, duration, lobe and side (§6.17) | Tonic-clonic 100%; seizures <30 s nearly invisible; temporal 2× better |
-| ⏳ | **CNN on the raw ear EEG** (`detect/cnn.py`), alone and stacked into the best feature model | In progress: raw EEG streaming (47.6 GB at ~1.7 MB/s on Wi-Fi, ~7 h), then ~1–2 h of CPU training |
+| ✅ | CNN on the raw ear EEG, 33-patient subset (§6.19) | Weaker than features alone (AUROC 0.72 vs 0.83); fused with ear-EEG features it helps at strict budgets (19% → 37% at ≤1/day); mixed on top of the best model |
+| ★ | CNN on all 125 patients | Needs the full raw stream (~12 GB of disk); tests whether more patients fix the overfitting |
 | ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Slow pre-ictal autonomic change |
 
 ## 11. Reproduce
@@ -723,6 +785,10 @@ uv run detect/analysis_responders.py        # responders vs non-responders for e
 uv run detect/analysis_seizure_types.py     # caught by seizure type / duration / lobe / electrode side (~3 min)
 uv run detect/stage2.py                     # two-stage: general alarm verifier (~15 min; candidate cache reused)
 uv run detect/stage2.py --personal --w 20   # two-stage: personal alarm verifier (~20 min)
+uv run --extra dl detect/cnn.py fetch --workers 6   # raw EEG at 32 Hz -> data/seizeit2/raw32/ (resumable; stops below 1.5 GB free)
+uv run --extra dl detect/cnn.py train        # 1D CNN, 5-fold on the fetched runs (~17 min for 293 runs)
+uv run --extra dl detect/cnn.py eval         # CNN alone
+uv run --extra dl detect/cnn.py compare      # CNN vs features on the same runs/folds + late fusion (~10 min)
 ```
 
 Every long command asks Windows not to idle-sleep while it runs (`keep_awake()`). No system setting is changed.
@@ -733,7 +799,7 @@ If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or 
 
 ## Appendix A. Experiment log (chronological)
 
-*Status (29 Sep 2026): experiments 1–21 are complete, including the PPG responder split. Experiment 22 (raw-EEG CNN) is running.*
+*Status (29 Sep 2026): experiments 1–22 are complete. The raw-EEG CNN (22) ran on a 33-patient subset.*
 
 Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
 
@@ -761,7 +827,7 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 20 | Seizure type / duration / lobe / side split | `analysis_seizure_types.py` | Tonic-clonic 100% at ≤5/day; <30 s seizures 4%; temporal 43% vs 19% (§6.17) |
 | 21 | PPG-quality heart signals | `run` + `personal --configs "EEG + PPG(sim) + context + HR-excess"` | ≈ ECG overall; responders 28% / 54% / 69% vs 33% / 60% / 75% at ≤1 / 5 / 20 per day (§6.18). **Crash caught:** the all-NaN ECG-waveform column broke histogram binning; fixed by dropping the column. **Queue mistake caught:** a failed step didn't stop its queue, so two copies ran; the stale one was stopped |
 
-| 22 | CNN on raw behind-the-ear EEG (32 Hz, 16 s context, same patient folds), alone and stacked | `cnn.py fetch / train / eval` | **In progress.** Raw EEG streaming, ~7 h at current Wi-Fi speed. The first attempt ran at 2 workers and competed with a CPU job; restarted with 6 workers (resumable). Profiling showed the download (0.3–0.7 MB/s per stream today), not filtering (0.4 s/run), is the bottleneck |
+| 22 | CNN on raw behind-the-ear EEG (32 Hz, 16 s context), alone and late-fused with the feature models, same subset and folds | `cnn.py fetch / train / eval / compare` | Stream stopped at 293/2,850 runs (33 patients, 101 seizures). Download was the bottleneck (0.3–0.7 MB/s per stream; captive-portal TLS failures; disk guard). CNN alone AUROC 0.715 vs features 0.830; ear-EEG features + CNN: 19% → 37% caught at ≤1/day; mixed on the best model (§6.19). **Bug caught:** flat-EEG runs overflowed float16 → NaN loss; fixed with a 1 µV scale floor, clipping and a fail-fast check |
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.

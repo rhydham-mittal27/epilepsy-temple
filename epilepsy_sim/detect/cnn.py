@@ -35,6 +35,8 @@ FS = 32  # Hz after downsampling
 CTX_S = 16  # s of EEG the CNN sees for each decision
 SCALE = 10.0  # int16 units per uV (0.1 uV resolution, +-3276 uV range)
 NEG_FRAC = 0.015
+MIN_FREE_GB = 1.5  # fetch refuses to write when free disk space drops below this
+CLIP = 50.0  # normalised EEG is clipped to +-50 x the recording's median |amplitude|
 EPOCHS = 6
 BATCH = 256
 
@@ -45,6 +47,9 @@ def fetch_one(r):
     out = RAW / f"{r['run']}.npy"
     if out.exists():
         return r["run"], "cached"
+    import shutil
+    if shutil.disk_usage(RAW).free < MIN_FREE_GB * 1e9:  # never fill the drive
+        raise RuntimeError(f"disk nearly full (<{MIN_FREE_GB} GB free); stopped")
     buf = S.get(f"{S.S3}/{r['files']['eeg']}")
     sig = S.read_edf(buf)
     del buf
@@ -87,8 +92,10 @@ def windows_of(run):
     x = np.load(RAW / f"{run}.npy").astype(np.float32) / SCALE
     z = np.load(S.FEAT / f"{run}.npz")
     t, y = z["t"].astype(np.int64), z["y"]
-    scale = np.median(np.abs(x), axis=1, keepdims=True) + 1e-3  # per-recording, per-channel
-    return x / scale, t, y
+    # per-recording, per-channel robust scale. Floor at 1 uV: some runs have flat (all-zero) channels, and
+    # dividing by ~0 gave values ~3e6 that overflowed float16 -> inf -> NaN loss. Clip huge artefacts too.
+    scale = np.maximum(np.median(np.abs(x), axis=1, keepdims=True), 1.0)
+    return np.clip(x / scale, -CLIP, CLIP), t, y
 
 
 def cut(x, t_end):
@@ -139,6 +146,7 @@ def train(folds=5):
             fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
     Xp, yp, fp = np.concatenate(Xs), np.concatenate(ys).astype(np.float32), np.concatenate(fs_)
     del Xs
+    assert np.isfinite(Xp).all(), "non-finite values in the CNN training pool"
     print(f"pool: {len(yp)} windows ({int(yp.sum())} seizure), {Xp.nbytes / 1e9:.2f} GB", flush=True)
     log = {}
     for k in range(folds):
@@ -163,6 +171,8 @@ def train(folds=5):
                 xb = torch.from_numpy(Xp[ii].astype(np.float32))
                 xb = xb * torch.empty(len(ii), 1, 1).uniform_(0.8, 1.25)  # amplitude augmentation
                 loss = lossf(net(xb), torch.from_numpy(yp[ii]))
+                if not torch.isfinite(loss):
+                    raise FloatingPointError(f"non-finite loss in fold {k} epoch {ep + 1} batch {b // BATCH}")
                 opt.zero_grad()
                 loss.backward()
                 opt.step()
@@ -201,14 +211,74 @@ def evaluate():
     (S.RES / "cnn_eval.json").write_text(json.dumps({"fa_at_sens": fa, "sens_at_budget": se}, indent=1))
 
 
+CMP_CONFIGS = ["EEG only (ear)", "EEG + ECG + context + HR-excess"]
+
+
+def feature_oof(runs, fold, cname, folds=5):
+    """Out-of-fold outputs of a feature model trained on exactly these runs and folds (as run())."""
+    groups = S.CONFIGS[cname]
+    rng = S.pool_rng(cname)
+    Xs, ys, fs_ = [], [], []
+    for r in tqdm(runs, desc=f"{cname}: loading", unit="run", leave=False):
+        X, y, _ = S.load(r["run"])
+        keep = (y == 1) | (rng.random(len(y)) < S.neg_frac(cname))
+        Xs.append(S.design(X, groups)[keep])
+        ys.append(y[keep])
+        fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
+    Xp, yp, fp = np.vstack(Xs), np.concatenate(ys), np.concatenate(fs_)
+    out = {}
+    for k in tqdm(range(folds), desc=f"{cname}: folds", unit="fold"):
+        m = S.model_for(cname).fit(Xp[fp != k], yp[fp != k])
+        for r in runs:
+            if fold[r["sub"]] == k:
+                X, _, _ = S.load(r["run"])
+                out[r["run"]] = m.predict_proba(S.design(X, groups))[:, 1].astype(np.float32)
+    return out
+
+
+def compare(folds=5):
+    """CNN vs hand-made features on the SAME runs, patients and folds (the CNN's subset), plus a
+    late fusion (mean of the two probabilities: no learned weights, so no label leakage)."""
+    from sklearn.metrics import roc_auc_score
+
+    runs = [r for r in json.loads((S.FEAT / "index.json").read_text()) if (OUT / f"{r['run']}.npy").exists()]
+    subs, fold = S.subject_folds(runs, folds)
+    probs = {"CNN (raw ear EEG)": {r["run"]: np.load(OUT / f"{r['run']}.npy").astype(np.float32) for r in runs}}
+    for c in CMP_CONFIGS:
+        probs[c] = feature_oof(runs, fold, c, folds)
+        probs[f"{c} + CNN (mean)"] = {k: (v + probs["CNN (raw ear EEG)"][k]) / 2 for k, v in probs[c].items()}
+    meta = {"runs": len(runs), "patients": len(subs), "seizures": sum(len(r["seizures"]) for r in runs),
+            "hours": round(sum(r["duration"] for r in runs) / 3600, 1)}
+    res = {"subset": meta, "results": {}}
+    print(f"subset: {meta}")
+    for name, p in probs.items():
+        recs, yy, pp = [], [], []
+        for r in runs:
+            z = np.load(S.FEAT / f"{r['run']}.npz")
+            recs.append((p[r["run"]], z["t"], [tuple(v) for v in r["seizures"]], r["duration"] / 3600))
+            yy.append(z["y"])
+            pp.append(p[r["run"]])
+        curve = S.score_fast(recs, S.PT_GRID)
+        yy, pp = np.concatenate(yy), np.concatenate(pp)
+        row = {"window_auroc": float(roc_auc_score(yy, pp)),
+               "fa_at_sens": {str(t): S.fa_at_sensitivity(curve, t / 100) for t in (50, 60, 70, 80)},
+               "sens_at_budget": {str(b): S.sens_at_fa(curve, b) for b in (1, 5, 20, 50, 100, 200)}}
+        res["results"][name] = row
+        fa = " / ".join("--" if v is None else f"{v:.0f}" for v in row["fa_at_sens"].values())
+        se = " / ".join("--" if v is None else f"{v:.0%}" for v in row["sens_at_budget"].values())
+        print(f"{name:45s} AUROC {row['window_auroc']:.3f} | FA/day @50/60/70/80%: {fa} | caught @<=1/5/20/50/100/200: {se}")
+    (S.RES / "cnn_subset.json").write_text(json.dumps(res, indent=1))
+    S.notify("SeizeIT2 CNN comparison DONE", f"{meta['patients']} patients; see cnn_subset.json")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("cmd", choices=["fetch", "train", "eval"])
+    ap.add_argument("cmd", choices=["fetch", "train", "eval", "compare"])
     ap.add_argument("--workers", type=int, default=2)
     a = ap.parse_args()
     S.keep_awake()
     try:
-        {"fetch": lambda: fetch(a.workers), "train": train, "eval": evaluate}[a.cmd]()
+        {"fetch": lambda: fetch(a.workers), "train": train, "eval": evaluate, "compare": compare}[a.cmd]()
     except KeyboardInterrupt:
         raise
     except Exception as e:

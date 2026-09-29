@@ -75,7 +75,7 @@ This led to the body-signal review and the SeizeIT2 study.
 25 & Context, HR-excess, responders, benchmarks & Best general model; responders; on par with or above published SeizeIT2 results \\
 26 & Big model; two-stage; personal verifier; weight sweep; quality features & Per-recording scoring bug fixed; personal verifier best (19\%/39\% at $\le$1 \FAd) \\
 27 & Ceiling; seizure types; PPG & Signal-limited; tonic-clonic 100\%; PPG $\approx$ ECG; PPG crash fixed; duplicate queue stopped \\
-28 & Raw-EEG CNN & In progress (slow Wi-Fi; captive-portal TLS failures; disk guard) \\
+28 & Raw-EEG CNN & Stream stopped at 293/2,850 runs (slow Wi-Fi; captive-portal TLS failures; disk). 33 patients: CNN AUROC 0.715 vs features 0.830; fusion with ear-EEG features 19\%$\to$37\% at $\le$1 \FAd; NaN-loss bug (flat EEG, float16 overflow) fixed \\
 29 & This paper & Full LaTeX record, restructured into research-article format \\
 \bottomrule
 \end{longtable}
@@ -108,6 +108,7 @@ SeizeIT2 & ``impd'' read as interictal discharges & \code{events.json}: impedanc
 SeizeIT2 & Stage-2 alarms grouped per patient although each recording's clock restarts at 0 & Scoring per recording; ``accept all'' then reproduced stage 1 (49\% at 79 \FAd{} on the debug subset) \\
 SeizeIT2 & All-NaN ECG-waveform column crashed histogram binning for PPG & Column dropped for PPG \\
 SeizeIT2 & Failed queue step did not stop its batch; two copies ran & Stale copy killed; queues stop on failure \\
+SeizeIT2 CNN & Flat-EEG runs (median 0) divided by $\approx$0 overflowed float16 $\to$ NaN loss in every fold & 1 \uV{} scale floor, $\pm$50 clipping, finite-pool assert, fail-fast on non-finite loss; outputs deleted and re-run \\
 Tooling & PyTorch index made the resolver look for all packages there & Explicit index \\
 Tooling & \code{uv sync --extra dl} removed TVB packages & Reinstall with \code{--extra tvb} \\
 \bottomrule
@@ -154,7 +155,8 @@ Command & Time \\
 \code{uv run detect/seizeit2.py finetune --k 2}; \code{personal --configs ...} & $\approx$35--45 min \\
 \code{uv run detect/analysis_responders.py}; \code{analysis_seizure_types.py} & $\approx$3 min each \\
 \code{uv run detect/stage2.py [--personal --w 20] [--quality]} & $\approx$15--25 min \\
-\code{uv run --extra dl detect/cnn.py fetch / train / eval} & hours \\
+\code{uv run --extra dl detect/cnn.py fetch} (raw EEG, resumable) & hours (network-bound) \\
+\code{uv run --extra dl detect/cnn.py train / eval / compare} (293 runs) & $\approx$17 + 1 + 10 min \\
 \bottomrule
 \end{tabularx}
 \end{table}

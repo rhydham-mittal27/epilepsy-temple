@@ -400,7 +400,17 @@ The 60\,s refractory period applies only to accepted alarms. Stage~2 was trained
 \item ECG-waveform features removed.
 \end{itemize}
 
-\paragraph{Raw-EEG deep learning (ongoing).} To test whether raw waveforms carry information that the hand-crafted features miss, the EEG was streamed again (47.6\,GB). It was band-passed at 0.5--14\,Hz, downsampled to 32\,Hz and stored as int16 (0.1\,\uV{} resolution). A 1D CNN \cite{paszke2019} with four conv--BN--ReLU blocks (16--64 channels), global mean and max pooling and 39k parameters is trained on 16\,s of 2-channel EEG ending at each 2\,s decision point. It uses the same folds, amplitude augmentation and positive-class weighting. Its out-of-fold output will be evaluated alone and stacked into the best feature model.
+\paragraph{Raw-EEG deep learning.} To test whether raw waveforms carry information that the hand-crafted features miss, the ear EEG was streamed again. It was band-passed at 0.5--14\,Hz, downsampled to 32\,Hz and stored as int16 (0.1\,\uV{} resolution). Limited disk space and slow network access stopped the stream at 293 of 2,850 runs: 33 patients (three incomplete), 101 seizures and 3,027\,h.
+
+Each recording and channel was divided by its median absolute amplitude, with the scale floored at 1\,\uV, and clipped to $\pm$50 times that value. A 1D CNN \cite{paszke2019} had four conv--BN--ReLU blocks (16--64 channels), global mean and max pooling, and 39k parameters. Its input was 16\,s of 2-channel EEG ending at each 2\,s decision point. Training details:
+\begin{itemize}
+\item data: all seizure windows plus 1.5\% of the others (85,653 windows, 4,195 seizure);
+\item optimisation: 6 epochs, AdamW with a one-cycle learning-rate schedule;
+\item regularisation: amplitude augmentation ($\times$0.8--1.25) and positive-class weighting;
+\item evaluation: patient-wise 5-fold cross-validation on the subset.
+\end{itemize}
+
+For a like-for-like comparison, the ear-EEG feature model and the best general feature model were retrained on exactly the same runs, patients and folds. Each was also combined with the CNN by \emph{late fusion}: the unweighted mean of the two probabilities. The fusion has no fitted parameters, so no test labels leak into it. The window-level AUROC is reported in addition to the event metrics.
 
 % ----------------------------------------------------------------------------
 \subsection{Interactive system model (Study 5)}
