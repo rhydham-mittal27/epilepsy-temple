@@ -69,7 +69,36 @@ CONFIGS = {
     "Body only (ECG+EMG+motion)": ["ecg", "emg", "mov"],
     "EEG + ECG": ["eeg", "ecg"],
     "EEG + ECG + EMG + motion": ["eeg", "ecg", "emg", "mov"],
+    # + long context: 15 s / 1 min / 5 min trends of key features (see context())
+    "EEG + context": ["eeg", "ctx"],
+    "EEG + ECG + context": ["eeg", "ecg", "ctx"],
+    # + heart rate that the movement can't explain (see hr_vs_motion())
+    "EEG + ECG + HR-excess": ["eeg", "ecg", "hrx"],
+    "EEG + ECG + context + HR-excess": ["eeg", "ecg", "ctx", "hrx"],
+    # same inputs, more training data + a bigger model (see BIG)
+    "EEG + ECG + context + HR-excess (big)": ["eeg", "ecg", "ctx", "hrx"],
 }
+BIG = {"EEG + ECG + context + HR-excess (big)": {"neg_frac": 0.08, "max_iter": 400, "learning_rate": 0.05, "max_leaf_nodes": 63}}
+HRX_NAMES = ["hr_excess", "hr_excess_1min", "activity_15s", "hr_rise_unexplained_30s"]
+HRX_MEMORY = 1800  # s: memory of the running heart-rate-vs-movement fit
+CTX_KEYS = {  # features whose recent history is summarised
+    "eeg": ["ch1_ll", "ch2_ll", "ch1_logvar", "ch2_logvar", "ch1_rel_d", "ch2_rel_d", "ch1_rel_t", "ch2_rel_t"],
+    "ecg": ["hr_10s", "rmssd_30s", "sdnn_30s", "beat_quality"],
+    "emg": ["emg_logrms"],
+    "mov": ["back_acc_logstd", "chest_acc_logstd"],
+}
+CTX_TAU = (15, 60, 300)  # s: EMA time constants of the trend features
+SLOW_N = 900  # windows (30 min): slow baseline for the heart, to catch drifts the 10-min baseline absorbs
+
+
+def keep_awake():
+    """Ask Windows not to idle-sleep while this process runs (released automatically on exit).
+    No system setting is changed; closing the lid / pressing power still sleeps the machine."""
+    try:
+        import ctypes
+        ctypes.windll.kernel32.SetThreadExecutionState(0x80000000 | 0x00000001)  # ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+    except Exception:
+        pass
 
 
 def notify(title, msg, tags="white_check_mark"):
@@ -378,10 +407,35 @@ def fetch(workers=3):
 
 
 # ------------------------------------------------------------------ evaluation
-def normalise(X):
-    """Causal per-recording baseline: z-score against an EMA of the PREVIOUS ~10 min (NaN-safe)."""
+CTX_TWIN = {"EEG + context": "EEG only (ear)", "EEG + ECG + context": "EEG + ECG",
+            "EEG + ECG + HR-excess": "EEG + ECG", "EEG + ECG + context + HR-excess": "EEG + ECG",
+            "EEG + ECG + context + HR-excess (big)": "EEG + ECG"}  # same seed: the 3% pool is a subset of the 8% pool
+
+
+def neg_frac(cname):
+    return BIG.get(cname, {}).get("neg_frac", NEG_FRAC)
+
+
+def model_for(cname):
+    """detect.clf() (150 trees, 31 leaves), or the bigger variant for BIG setups."""
+    b = BIG.get(cname)
+    if not b:
+        return clf()
+    from sklearn.ensemble import HistGradientBoostingClassifier
+    return HistGradientBoostingClassifier(max_iter=b["max_iter"], learning_rate=b["learning_rate"],
+                                          max_leaf_nodes=b["max_leaf_nodes"], class_weight="balanced", random_state=0)
+
+
+def pool_rng(cname):
+    """Training-pool sampler, seeded per setup; a context setup reuses its twin's seed so both
+    train on exactly the same windows and differ only in the features."""
+    return np.random.default_rng(zlib.crc32(CTX_TWIN.get(cname, cname).encode()))
+
+
+def normalise(X, n=EMA_N):
+    """Causal per-recording baseline: z-score against an EMA of the PREVIOUS ~n windows (default 10 min; NaN-safe)."""
     x = np.nan_to_num(X.astype(np.float32), nan=0.0)
-    a = 1.0 / EMA_N
+    a = 1.0 / n
     n0 = min(30, len(x))
     m0, v0 = x[:n0].mean(0), x[:n0].var(0) + 1e-6
     m = lfilter([a], [1, a - 1], x, axis=0, zi=((1 - a) * m0)[None, :])[0]
@@ -393,11 +447,82 @@ def normalise(X):
     return z
 
 
+def context(Zk):
+    """Causal multi-timescale history of baseline-normalised features: exponential moving averages
+    over 15 s, 1 min and 5 min, the fast-minus-slow differences (is a change building up or
+    fading?), and the 1-min running maximum (a brief burst). NaN where the sensor is missing."""
+    valid = ~np.isnan(Zk)
+    x = np.where(valid, Zk, 0).astype(np.float32)
+    ema = []
+    for tau in CTX_TAU:
+        a = STEP / tau
+        ema.append(lfilter([a], [1, a - 1], x, axis=0).astype(np.float32))
+    w = int(60 / STEP)
+    pad = np.vstack([np.full((w - 1, x.shape[1]), -np.inf, np.float32), x])
+    runmax = np.lib.stride_tricks.sliding_window_view(pad, w, axis=0).max(-1)
+    feats = ema + [ema[0] - ema[2], ema[1] - ema[2], runmax]
+    out = np.hstack(feats)
+    out[np.tile(~valid, len(feats))] = np.nan
+    return out
+
+
+def _ema(x, tau, x0=None):
+    """Causal exponential moving average over time constant tau (s), started at x0."""
+    a = STEP / tau
+    x0 = x[0] if x0 is None else x0
+    return lfilter([a], [1, a - 1], x, zi=[(1 - a) * x0])[0]
+
+
+def hr_vs_motion(X):
+    """Heart rate that the current movement can't explain. Per recording, a causal running linear fit
+    HR ~ a + b * activity (30-min memory, past windows only) gives the heart rate expected from the
+    current movement. Exercise tachycardia follows movement; seizure tachycardia is abrupt and out
+    of proportion. NaN where ECG or motion is missing."""
+    hr = X[:, NAMES.index("hr_10s")].astype(np.float64)
+    mv = X[:, [NAMES.index("back_acc_logstd"), NAMES.index("chest_acc_logstd")]].astype(np.float64)
+    act = np.where(np.isnan(mv).all(1), np.nan, np.nanmax(np.where(np.isnan(mv), -np.inf, mv), 1))
+    valid = ~np.isnan(hr) & ~np.isnan(act)
+    n = len(hr)
+    out = np.full((n, len(HRX_NAMES)), np.nan, np.float32)
+    if valid.sum() < 30:
+        return out
+    idx = np.where(valid, np.arange(n), 0)
+    np.maximum.accumulate(idx, out=idx)  # forward-fill gaps with the last valid value
+    first = int(np.argmax(valid))
+    h, x = hr[idx], act[idx]
+    h[:first], x[:first] = hr[first], act[first]
+    A = _ema(x, 15)  # current activity (15 s)
+    n0 = min(first + 150, n)  # start the fit from the first 5 min (only look-ahead: warm-up at file start)
+    ex, ey = _ema(A, HRX_MEMORY, A[first:n0].mean()), _ema(h, HRX_MEMORY, h[first:n0].mean())
+    exx = _ema(A * A, HRX_MEMORY, (A[first:n0] ** 2).mean())
+    exy = _ema(A * h, HRX_MEMORY, (A[first:n0] * h[first:n0]).mean())
+    sh = lambda v: np.r_[v[0], v[:-1]]  # use only PAST statistics
+    ex, ey, exx, exy = sh(ex), sh(ey), sh(exx), sh(exy)
+    b = np.clip((exy - ex * ey) / np.maximum(exx - ex * ex, 0.05), 0, 30)  # bpm per unit log-activity; HR rises with movement
+    excess = h - (ey + b * (A - ex))
+    lag = int(30 / STEP)
+    rise = np.r_[np.full(lag, np.nan), (h[lag:] - h[:-lag]) - b[lag:] * (A[lag:] - A[:-lag])]
+    out[:] = np.stack([excess, _ema(excess, 60), A, rise], 1)
+    out[~valid] = np.nan
+    return out
+
+
 def design(X, groups):
     """Model input: baseline-normalised features of the chosen modalities, plus absolute heart rate
-    / beat quality (absolute tachycardia matters, not only the change)."""
-    cols = [i for g in groups for i in (NAMES.index(n) for n in GROUPS[g])]
+    / beat quality (absolute tachycardia matters, not only the change). With "ctx": + the recent
+    history of key features (context()) and heart features against a slow 30-min baseline."""
+    base = [g for g in groups if g not in ("ctx", "hrx")]
+    cols = [i for g in base for i in (NAMES.index(n) for n in GROUPS[g])]
     Z = normalise(X[:, cols])
+    if "ctx" in groups:
+        kc = [NAMES.index(n) for g in base for n in CTX_KEYS[g]]
+        parts = [Z, context(normalise(X[:, kc]))]
+        if "ecg" in base:
+            hc = [NAMES.index(n) for n in CTX_KEYS["ecg"]]
+            parts.append(normalise(X[:, hc], SLOW_N))
+        Z = np.hstack(parts)
+    if "hrx" in groups:
+        Z = np.hstack([Z, hr_vs_motion(X)])
     if "ecg" in groups:
         Z = np.hstack([Z, X[:, [NAMES.index("hr_10s"), NAMES.index("hr_30s"), NAMES.index("beat_quality")]]])
     return Z
@@ -452,11 +577,11 @@ def run(only=None, folds=5, snapshot=False):
         if cname in out["general"] and not only:
             tqdm.write(f"{cname}: already in metrics.json, skipping")
             continue
-        rng = np.random.default_rng(zlib.crc32(cname.encode()))
+        rng = pool_rng(cname)
         Xs, ys, fs_ = [], [], []
         for r in tqdm(runs, desc=f"{cname}: loading", unit="run", leave=False):
             X, y, _ = load(r["run"])
-            keep = (y == 1) | (rng.random(len(y)) < NEG_FRAC)
+            keep = (y == 1) | (rng.random(len(y)) < neg_frac(cname))
             Xs.append(design(X, groups)[keep])
             ys.append(y[keep])
             fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
@@ -464,7 +589,7 @@ def run(only=None, folds=5, snapshot=False):
         del Xs, ys, fs_
         scored, per = [], {}
         for k in tqdm(range(folds), desc=f"{cname}: {folds}-fold (unseen patients)", unit="fold"):
-            m = clf().fit(Xp[fp != k], yp[fp != k])
+            m = model_for(cname).fit(Xp[fp != k], yp[fp != k])
             for s in subs:
                 if fold[s] != k:
                     continue
@@ -523,7 +648,7 @@ def figure(out):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(1, 3, figsize=(20, 6.5))
-    cols = dict(zip(CONFIGS, ["tab:blue", "tab:red", "tab:orange", "tab:purple", "tab:green"]))
+    cols = dict(zip(CONFIGS, ["tab:blue", "tab:red", "tab:orange", "tab:purple", "tab:green", "tab:cyan", "black", "tab:brown", "tab:pink"]))
     for c, d in out["general"].items():
         ax[0].plot([v["fa_per_24h"] for v in d.values()], [100 * v["sensitivity"] for v in d.values()],
                    "o-", ms=3, color=cols.get(c), label=c)
@@ -561,6 +686,14 @@ POST = {  # alarm rule: (smoothing windows, consecutive smoothed windows above t
     "sustained 20 s": (5, 10),
 }
 FT_THR = np.round(np.r_[np.arange(0.1, 0.95, 0.05), 0.95, 0.97, 0.98, 0.99, 0.995], 3)
+
+
+def select_configs(configs, default):
+    """Exact setup names select exactly those; other words select every setup containing them."""
+    if not configs:
+        return list(default)
+    exact = [c for c in CONFIGS if c in configs]
+    return exact or [c for c in CONFIGS if any(o.lower() in c.lower() for o in configs)]
 
 
 def run_no(r):
@@ -657,24 +790,24 @@ def finetune(configs=None, ks=(1, 2), folds=5):
     subs, fold = subject_folds(runs, folds)
     by = {s: [r for r in runs if r["sub"] == s] for s in subs}
     t0 = time.time()
-    names = FT_CONFIGS if not configs else [c for c in CONFIGS if any(o.lower() in c.lower() for o in configs)]
+    names = select_configs(configs, FT_CONFIGS)
     for cname in names:
         groups = CONFIGS[cname]
         todo = [k for k in ks if f"{cname} | k={k}" not in out]
         if not todo:
             tqdm.write(f"{cname}: fine-tuning already in finetune.json, skipping")
             continue
-        rng = np.random.default_rng(zlib.crc32(cname.encode()))  # same training pool as run()
+        rng = pool_rng(cname)  # same training pool as run()
         Xs, ys, fs_ = [], [], []
         for r in tqdm(runs, desc=f"{cname}: loading pool", unit="run", leave=False):
             X, y, _ = load(r["run"])
-            keep = (y == 1) | (rng.random(len(y)) < NEG_FRAC)
+            keep = (y == 1) | (rng.random(len(y)) < neg_frac(cname))
             Xs.append(design(X, groups)[keep])
             ys.append(y[keep])
             fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
         Xp, yp, fp = np.vstack(Xs), np.concatenate(ys), np.concatenate(fs_)
         del Xs, ys, fs_
-        gen = {f: clf().fit(Xp[fp != f], yp[fp != f]) for f in tqdm(range(folds), desc=f"{cname}: general models", unit="fold")}
+        gen = {f: model_for(cname).fit(Xp[fp != f], yp[fp != f]) for f in tqdm(range(folds), desc=f"{cname}: general models", unit="fold")}
         for k in todo:
             recs = {"general": [], "finetuned": []}
             elig = [s for s in subs if split_patient(by[s], k)]
@@ -689,7 +822,7 @@ def finetune(configs=None, ks=(1, 2), folds=5):
                 Xt, yt = np.vstack(Xt), np.concatenate(yt)
                 tr = fp != fold[s]  # exactly the general model's training data ...
                 w = np.r_[np.ones(tr.sum()), np.full(len(yt), PATIENT_W)]  # ... plus the user's own, upweighted
-                fin = clf().fit(np.vstack([Xp[tr], Xt]), np.r_[yp[tr], yt], sample_weight=w)
+                fin = model_for(cname).fit(np.vstack([Xp[tr], Xt]), np.r_[yp[tr], yt], sample_weight=w)
                 for r, cut in test:
                     X, _, t = load(r["run"])
                     sel = np.ones(len(t), bool) if cut is None else (t - WIN > cut)
@@ -781,17 +914,17 @@ def collect_probs(cname, k, folds=5):
     runs = [r for r in json.loads((FEAT / "index.json").read_text()) if (FEAT / f"{r['run']}.npz").exists()]
     subs, fold = subject_folds(runs, folds)
     by = {s: [r for r in runs if r["sub"] == s] for s in subs}
-    rng = np.random.default_rng(zlib.crc32(cname.encode()))
+    rng = pool_rng(cname)
     Xs, ys, fs_ = [], [], []
     for r in tqdm(runs, desc=f"{cname}: loading pool", unit="run", leave=False):
         X, y, _ = load(r["run"])
-        keep = (y == 1) | (rng.random(len(y)) < NEG_FRAC)
+        keep = (y == 1) | (rng.random(len(y)) < neg_frac(cname))
         Xs.append(design(X, groups)[keep])
         ys.append(y[keep])
         fs_.append(np.full(keep.sum(), fold[r["sub"]], np.int8))
     Xp, yp, fp = np.vstack(Xs), np.concatenate(ys), np.concatenate(fs_)
     del Xs, ys, fs_
-    gen = {f: clf().fit(Xp[fp != f], yp[fp != f]) for f in tqdm(range(folds), desc=f"{cname}: general models", unit="fold")}
+    gen = {f: model_for(cname).fit(Xp[fp != f], yp[fp != f]) for f in tqdm(range(folds), desc=f"{cname}: general models", unit="fold")}
     data = {}
     for s in tqdm([s for s in subs if split_patient(by[s], k)], desc=f"{cname} | k={k}: models + outputs", unit="patient"):
         tune, test = split_patient(by[s], k)
@@ -811,7 +944,7 @@ def collect_probs(cname, k, folds=5):
         yt = np.concatenate([y for _, y, *_ in parts["tune"]])
         tr = fp != fold[s]
         w = np.r_[np.ones(tr.sum()), np.full(len(yt), PATIENT_W)]
-        fin = clf().fit(np.vstack([Xp[tr], Xt]), np.r_[yp[tr], yt], sample_weight=w)
+        fin = model_for(cname).fit(np.vstack([Xp[tr], Xt]), np.r_[yp[tr], yt], sample_weight=w)
         data[s] = {which: {name: [(m.predict_proba(z)[:, 1].astype(np.float32), t, szs, h) for z, _, t, szs, h in parts[which]]
                            for name, m in (("general", gen[fold[s]]), ("finetuned", fin))}
                    for which in ("tune", "test")}
@@ -825,7 +958,7 @@ def personal(configs=None, k=2):
     stay within the budget. Shared: the same rule on everyone's tuning data pooled."""
     path = RES / "personal_threshold.json"
     out = json.loads(path.read_text()) if path.exists() else {}
-    names = FT_CONFIGS if not configs else [c for c in CONFIGS if any(o.lower() in c.lower() for o in configs)]
+    names = select_configs(configs, FT_CONFIGS)
     for cname in names:
         key = f"{cname} | k={k}"
         data = collect_probs(cname, k)
@@ -970,6 +1103,7 @@ if __name__ == "__main__":
     ap.add_argument("--k", type=int, nargs="+", default=[1, 2],
                     help="finetune: number of the user's own seizures used for tuning (default: 1 2)")
     a = ap.parse_args()
+    keep_awake()
     try:
         main(a)
     except KeyboardInterrupt:

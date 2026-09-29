@@ -22,3 +22,6 @@ dist/
 
 # --- interim SeizeIT2 snapshot results (superseded by results_seizeit2/) ---
 epilepsy_sim/detect/results_seizeit2_partial/
+
+# --- job logs ---
+epilepsy_sim/detect/logs/

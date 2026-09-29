@@ -2,13 +2,25 @@
 
 ### Does adding body signals (heart, muscle, motion) to a behind-the-ear EEG cut false alarms?
 
-> **Short answer: yes, the heart does.** On all 125 SeizeIT2 patients, adding a chest ECG to 2-channel behind-the-ear EEG cut false alarms by **18–31%** at the same share of seizures caught, and by **34%** at the default setting. It helped in **115 of 125 patients**. The cost was about 1 second of delay.
+> **Short answer.** Yes. **The heart matters most, then personalisation.** Every step below was measured on real wearable data from 125 patients (883 seizures, 11,626 h). Each patient is scored by models that never saw them, on data recorded *after* the first days used for tuning.
 >
-> Adding shoulder EMG and motion on top of ECG gave **no consistent further gain**. Most of these seizures are focal and don't involve large movements.
+> | Step (71 patients with ≥3 seizures; later data only) | Caught at ≤1 false alarm/day | ≤5/day | ≤20/day |
+> |---|---|---|---|
+> | Behind-the-ear EEG only (general model) | 4% | 11% | 23% |
+> | + chest ECG | 12% | 19% | 31% |
+> | + 15 s / 1 min / 5 min context + "heart rate not explained by movement" | 14% | 25% | 36% |
+> | + fine-tuning on the user's first 2 seizures | 15% | 27% | 41% |
+> | Two-stage: general model + **personal alarm verifier** | **19%** | **30%** | **45%** |
+> | **… for heart "responders"** (HR rose >50 bpm in one of their first 2 seizures; 23 of 69) | **39%** | **64%** | **77%** |
 >
-> **Personal fine-tuning adds to that.** Retraining with each patient's first 2 seizures and adding ECG together cut false alarms by **52–62%** versus ear-EEG alone, on that patient's later data (71 patients, 649 test seizures). Requiring a sustained 10–20 s alarm did **not** help.
->
-> **Still far from usable:** at ≤1 false alarm per day, the best setup catches only 14% of seizures.
+> **Key findings:**
+> - **The heart is the add-on that pays.** ECG cut false alarms by 18–44% at matched sensitivity and helped 115 of 125 patients.
+> - **The accelerometer pays too**, not as a detector but by explaining away exercise heart rate.
+> - **Minute-scale context** and **personalisation** each add a further gain.
+> - **What didn't help:** sustained-alarm rules, personal alarm thresholds, and a bigger model.
+> - **False alarms are patient-specific.** A quarter of users produce 59–77% of them. The one trait linked to them is an unstable ear-EEG signal, which points to electrode fit.
+> - **At matched false-alarm rates, the results are on par with or above every published SeizeIT2 detector** we found (§6.9).
+> - **Target not yet reached.** The goal of ≥50% of seizures at ≤1 false alarm/day is not reached overall. The best result is **39% for heart responders**, and 47% at ≤2/day.
 
 Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Results: [`epilepsy_sim/detect/results_seizeit2/`](epilepsy_sim/detect/results_seizeit2/)
 
@@ -21,15 +33,25 @@ Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Re
 3. [Streaming 126 GB without downloading it](#3-streaming-126-gb-without-downloading-it)
 4. [Signals and features](#4-signals-and-features)
 5. [Models and evaluation](#5-models-and-evaluation)
+   - [5.1 How to read the numbers](#51-how-to-read-the-numbers-important)
 6. [Results](#6-results)
    - [6.5 Personal fine-tuning and sustained-alarm rules](#65-personal-fine-tuning-and-sustained-alarm-rules)
    - [6.6 Personal alarm threshold](#66-personal-alarm-threshold)
+   - [6.7 Why do the false alarms happen?](#67-why-do-the-false-alarms-happen)
+   - [6.8 Long context: 15 s / 1 min / 5 min trends](#68-long-context-15-s--1-min--5-min-trends)
+   - [6.9 How do we compare with published results on SeizeIT2?](#69-how-do-we-compare-with-published-results-on-seizeit2)
+   - [6.10 Heart "responders"](#610-heart-responders-the-patients-the-device-can-serve-today)
+   - [6.11 Heart rate not explained by movement](#611-heart-rate-not-explained-by-movement-hr-excess)
+   - [6.12 More training data and a bigger model](#612-more-training-data-and-a-bigger-model)
+   - [6.13 Two-stage detection: an alarm verifier](#613-two-stage-detection-an-alarm-verifier)
+   - [6.14 A personal alarm verifier](#614-a-personal-alarm-verifier)
 7. [Interim snapshots](#7-interim-snapshots)
 8. [What it means for the ear-hook](#8-what-it-means-for-the-ear-hook)
 9. [Limitations](#9-limitations)
 10. [Next steps](#10-next-steps)
 11. [Reproduce](#11-reproduce)
 12. [References](#12-references)
+- [Appendix A. Experiment log](#appendix-a-experiment-log-chronological)
 
 ---
 
@@ -108,6 +130,15 @@ Missing sensors stay missing: the gradient-boosted trees route missing values se
 **How the setups are compared.** The fair comparison is false alarms at **matched sensitivity**: the fewest false alarms at any threshold that catches at least X% of seizures.
 
 This is not interpolated from a curve. Sensitivity is *not* monotonic in the threshold: at low thresholds, a false alarm just before a seizure starts the 60 s refractory period and blocks the real alarm. An early version of the summary interpolated anyway and produced nonsense (EEG-only apparently 1,300 FA/day at 60%), so it was replaced with this minimum-over-thresholds rule.
+
+### 5.1 How to read the numbers (important)
+
+Two kinds of numbers appear in this document.
+
+1. **Calibrated (fully honest).** The alarm threshold is fixed *in advance* on each patient's tuning data (or the pooled tuning data), then scored on later data (§6.6, and job 3 in the experiment log). This is what a device would experience. For the best general model, budgets of 1 / 5 / 20 false alarms/day on tuning data gave **1.0 / 4.3 / 20.2 per day** later, catching **14% / 25% / 38%** of seizures.
+2. **Best achievable along the curve** ("caught at ≤X false alarms/day", "false alarms at 50% caught"). The threshold is swept over the *test* data, and the best point within the budget is reported. This compares setups fairly, since all get the same treatment. But it is **slightly optimistic** as a deployment estimate, because the threshold is chosen with hindsight.
+
+For the one-stage general model the two agree closely: 14% / 25% at ≤1 / ≤5 per day both ways. The two-stage and responder tables are of the second kind.
 
 ## 6. Results
 
@@ -236,6 +267,236 @@ A vectorised event scorer was checked to give identical results to the reference
 3. **The general model's alarm rate is predictable.** With EEG + ECG and a shared threshold, budgets of 1 / 5 / 20 per day on tuning data gave **1.4 / 5.2 / 20.2** per day on later data. An app could honestly tell a user what false-alarm rate to expect after a few days of wear.
 4. **Never calibrate the fine-tuned model on its own training data.** Its tuning-data false alarms look far too clean, so budgets of 0.5–1/day became **10–18/day** later. Calibration for a personalised model needs held-out data, e.g. the last hours of the tuning period.
 
+### 6.7 Why do the false alarms happen?
+
+Everything below comes from the cached model outputs of §6.5–6.6 (71 patients, each patient's later data, **general** model, shared threshold). Nothing was retrained.
+
+**1. Not annotated artefacts.** SeizeIT2 marks "impd" epochs, when staff checked electrode impedance (an artefact source). They explain **under 1%** of false alarms: 2–5× more than chance, but they cover only 0.19% of the time.
+
+**2. Not hidden seizures.** Only 7–10% of false alarms fall 1–30 min before or after a real seizure, which matches the 8.9% of time those windows cover. They are not unmarked seizure clusters or post-seizure effects.
+
+**3. A minority of patients produce most of them.** At a budget of 5/day, with the general model:
+
+| | Ear EEG | Ear EEG + ECG |
+|---|---|---|
+| Worst 10% of patients produce | 47% of false alarms | 32% |
+| Worst 25% produce | 77% | 59% |
+| Typical patient (median) | 1.4/day | 4.0/day |
+| Patients with zero | 16 / 71 | 5 / 71 |
+
+**4. What makes those patients different: an unstable ear-EEG signal.** Of 22 traits tested against each patient's false-alarm rate, only one survives correction for multiple testing:
+
+| Trait | Spearman ρ | Worst 25% | Others |
+|---|---|---|---|
+| **EEG amplitude instability** (interquartile range of log-variance over the recording) | **0.49** (p = 1×10⁻⁵) | 2.10 | 1.18 |
+| EEG artefact bursts (weak) | 0.25 (p = 0.03) | 4.6% of windows | 3.3% |
+
+*Values are for the EEG-only model at a budget of 20/day. With EEG + ECG the link is weaker (ρ = 0.29).*
+
+No relationship was found with:
+- missing sensors;
+- seizure type (motor, temporal, sleep);
+- number of seizures;
+- electrode side;
+- sex;
+- recording fragmentation;
+- ECG quality.
+
+Age is not in the dataset.
+
+**Interpretation:** the noisiest users are those whose behind-the-ear electrodes don't hold a stable signal (contact, sweat, cable or pillow movement). That is a **fit and hardware** problem, not a patient type.
+
+**5. What the signals show at the moment of a false alarm** (medians; 3,655 false alarms vs 267 true detections, EEG + ECG at a budget of 20/day):
+
+| Signal | Normal | **False alarm** | **True seizure** |
+|---|---|---|---|
+| Heart rate | 73 bpm | **103** | 110 |
+| Heart-rate rise over 30 s | 0 | **+20** | +22 |
+| Movement (back accelerometer, log-std) | −7.7 | **−5.6** | −6.1 |
+| EEG log-variance | 4.6 | **6.8** | 6.9 |
+| Shoulder EMG | 1.9 | **3.3** | 3.0 |
+
+**The remaining EEG + ECG false alarms are physiological look-alikes: sudden tachycardia + movement + an EEG power burst**, the same signature as many real seizures. Examples are getting up, arousals and bursts of activity.
+
+The EEG-only false alarms look different: muscle and movement in the EEG (gamma share 0.06 → 0.13) with a calm heart (80 bpm). That is why ECG removes so many of them.
+
+On its own, a "heart rate not explained by movement" feature barely separates false alarms from seizures (AUC 0.62 vs 0.61 for raw heart rate). **Inside the full model, however, it cut false alarms substantially (§6.11).** A weak single-feature pre-check is not a reliable predictor of a feature's value in combination.
+
+**6. Noisy users can be spotted early.** Each patient's false-alarm rate in the **tuning period** predicts their later rate (Spearman ρ = 0.56–0.83). The worst-quartile patients are flagged from tuning data alone in **73–81%** of cases.
+
+**What it suggests for the ear-hook:**
+- **Electrode fit and a signal-quality gate:** detect unstable contact, down-weight the EEG and prompt the user to reseat. Integrated artefact + seizure detection is known to cut wearable-EEG false alarms ([Scientific Reports 2024](https://www.nature.com/articles/s41598-024-52551-0)).
+- **Early noisy-user flag** after a few days, leading to log-only mode, a stricter threshold or a fit check.
+- **Let the wearer cancel alarms:** a phase-3 wearable-ECG study cancelled all its false alarms with a quick behavioural test on the phone ([PubMed](https://pubmed.ncbi.nlm.nih.gov/41027311/)).
+- **Heart-rate detection works best in "autonomic responders":** the validated HRV method is applied only to patients whose ictal heart-rate change exceeds 50 bpm ([Jeppesen 2019](https://onlinelibrary.wiley.com/doi/abs/10.1111/epi.16343)).
+
+### 6.8 Long context: 15 s / 1 min / 5 min trends
+
+**What was added** (`EEG + context`, `EEG + ECG + context`). On top of the 4-second snapshot features, the model gets the **recent history** of key signals:
+- EEG line length, power, and delta and theta share;
+- heart rate, RMSSD, SDNN and beat quality.
+
+The history is summarised as:
+- causal moving averages over **15 s, 1 min and 5 min**;
+- fast-minus-slow differences (is a change building up or fading?);
+- the **1-min running maximum**;
+- heart features against a slow **30-min baseline**.
+
+Everything is computed from the stored features; each context setup trains on exactly the same windows as its no-context twin.
+
+**All 125 patients, general model, false alarms per 24 h at matched sensitivity:**
+
+| Setup | 50% caught | 60% | 70% | 80% | Caught at ≤5 FA/day | ≤50 | ≤200 | Delay |
+|---|---|---|---|---|---|---|---|---|
+| Ear EEG only | 103.7 | 161.7 | 294.4 | not reached | 14% | 23% | 62% | 6 s |
+| EEG + context | 72.2 | 148.2 | 287.7 | 770.6 | 21% | 48% | 65% | 8 s |
+| EEG + ECG | 85.5 | 122.8 | 204.0 | 459.2 | 21% | 35% | 66% | 7 s |
+| **EEG + ECG + context** | **59.5** | **98.5** | **194.6** | **401.8** | **25%** | **48%** | **72%** | 8 s |
+
+**Findings:**
+- **Minute-scale history adds a real gain on top of ECG.** It gives a further −30% false alarms at 50% caught and −20% at 60%, fading to −5% to −12% at 70–80%.
+- **Against ear EEG alone, EEG + ECG + context cuts false alarms by 34–43%.**
+- **The strict-budget end improves most:** 25% of seizures caught at ≤5 false alarms/day (vs 21% and 14%), and 48% at ≤50/day (vs 35%).
+- **Even EEG alone benefits** (14% → 21% at ≤5/day). The cost is about 1 s of extra delay.
+- The ≤20/day column is flat (33% vs 35%); with 22 tested thresholds the budget columns are step-like.
+
+![SeizeIT2](epilepsy_sim/detect/results_seizeit2/seizeit2.png)
+
+### 6.9 How do we compare with published results on SeizeIT2?
+
+Every published detector on this dataset has false-alarm rates in the tens to hundreds per day. Our numbers are not unusual. At matched false-alarm rates they are **on par with or better than** everything published that we could find. We found no published result on SeizeIT2 near 1 false alarm/day.
+
+| Published on SeizeIT2 | Test set | Seizures caught | False alarms / 24 h | Ours at a similar false-alarm rate (general model, 125 patients, CV) |
+|---|---|---|---|---|
+| Dataset paper, **SVM**, behind-the-ear EEG (Bhagubai et al. 2025, Table 2) | 29 held-out patients, 182 seizures | 71.1% | **264** (11.0/h) | EEG only: 62% at ≤200; **EEG + ECG + context: 72% at ≤200** |
+| Dataset paper, **ChronoNet** (deep learning) | same | 84.2% | 2,412 (100.5/h) | EEG + ECG + context: 80% at 402 |
+| ECG anomaly detection, **Matrix Profile**, FAR-optimised (Reintjes et al. 2025, *Sensors*) | all patients | 19.6% | <48 (<2/h) | ECG only: **29% at ≤20** |
+| same, **TimeVQVAE-AD**, FAR-optimised | all patients | 36.9% | 206 (8.58/h) | ECG only: **60% at ≤200** |
+| same, TimeVQVAE-AD, sensitivity-optimised | all patients | 82.8% | 627 (26.1/h) | EEG + ECG + context: 80% at 402 |
+| same, Matrix Profile, **responders only** (ictal HR change >50 bpm) | responders | 70.7% | ~46 (1.9/h) | EEG + ECG fine-tuned, responders: **81% at ≤50** (§6.10) |
+
+**Caveats.** The protocols differ: different test sets, scoring rules (any-overlap vs our onset window), and post-processing. Treat these comparisons as order-of-magnitude, not exact rankings.
+
+The much better **69% at 0.49 FA/day** (Vandecasteele et al. 2020) used the earlier **SeizeIT1** hospital dataset, a **3-channel** behind-the-ear setup, patient-specific models, and training **only on seizures clearly visible on the behind-the-ear EEG**. The SeizeIT2 paper itself calls its own wearable results "sub par" compared with those hospital-equipment studies, and attributes this to wearable noise and less reliable measurements.
+
+**Two lessons from the literature that match our own findings (§6.5–6.7):**
+1. Heart-based detection works far better in **autonomic responders**: 70.7% vs 38.0% at the same ~1.9 FA/h.
+2. **Personalisation** (patient-specific thresholds or adaptive retraining) is repeatedly named as the key next step.
+
+### 6.10 Heart "responders": the patients the device can serve today
+
+**Definition, usable by a device.** A patient is an **autonomic responder** if their heart rate rose by **more than 50 bpm** in at least one of their **first two seizures** (the tuning seizures). Rise = maximum 10-s heart rate from onset to 60 s after the seizure end, minus the median over the 5 min before onset. The 50 bpm cut-off is the one used in the literature ([Jeppesen 2019](https://onlinelibrary.wiley.com/doi/abs/10.1111/epi.16343); Reintjes 2025).
+
+Scoring uses each patient's later data (k = 2 split, cached outputs; `detect/analysis_responders.py`). 23 of 69 patients with ECG are responders.
+
+**Seizures caught within a daily false-alarm budget:**
+
+| Model | Group | ≤1/day | ≤5/day | ≤20/day | ≤50/day |
+|---|---|---|---|---|---|
+| EEG + ECG, general | responders (23 pts, 177 sz) | 25% | 46% | 68% | 79% |
+| EEG + ECG, general | non-responders (46 pts, 452 sz) | 6% | 10% | 18% | 27% |
+| **EEG + ECG, fine-tuned** | **responders** | **30%** | **50%** | **72%** | **81%** |
+| EEG + ECG, fine-tuned | non-responders | 7% | 15% | 24% | 35% |
+| EEG only, fine-tuned | responders | 18% | 29% | 39% | 60% |
+| EEG only, fine-tuned | non-responders | 4% | 12% | 23% | 35% |
+
+**Findings:**
+- **For responders (about 1 in 3 patients), the detector approaches a usable operating point:** half of their seizures caught at ≤5 false alarms/day, and about 72% at ≤20/day.
+- **For non-responders, ECG adds little and the 2-channel ear EEG alone is weak.**
+- Responder status is known after the user's first two seizures, so the device can switch strategy per user:
+  - **responders:** alarm mode;
+  - **non-responders:** log-only seizure diary, or a push for better EEG contact.
+- Even the EEG-only model does better on responders (29% vs 12% at ≤5/day). Their seizures tend to be more intense overall.
+
+### 6.11 Heart rate not explained by movement ("HR-excess")
+
+**What was added** (`+ HR-excess`). For each recording, a **causal running linear fit** of heart rate against activity (30-min memory, past windows only) predicts the heart rate that the current movement explains. Four features come from it:
+- **HR excess:** heart rate minus that prediction;
+- its 1-min average;
+- the 15-s activity level;
+- the **30-s heart-rate rise not explained by the change in activity**.
+
+The rationale: exercise tachycardia follows movement, while seizure tachycardia is abrupt and out of proportion. The features need ECG plus motion, and are missing (NaN) otherwise.
+
+**All 125 patients, general model, false alarms per 24 h at matched sensitivity:**
+
+| Setup | 50% caught | 60% | 70% | 80% | Caught at ≤5/day | ≤50 | ≤200 |
+|---|---|---|---|---|---|---|---|
+| Ear EEG only | 103.7 | 161.7 | 294.4 | not reached | 14% | 23% | 62% |
+| EEG + ECG | 85.5 | 122.8 | 204.0 | 459.2 | 21% | 35% | 66% |
+| EEG + ECG + context | 59.5 | 98.5 | 194.6 | 401.8 | 25% | 48% | 72% |
+| EEG + ECG + HR-excess | 49.2 | 111.7 | 177.7 | 385.8 | 20% | 50% | 72% |
+| **EEG + ECG + context + HR-excess** | **39.6** | **92.5** | **154.9** | **368.0** | **28%** | **50%** | **73%** |
+
+**Findings:**
+- **HR-excess helps even though the single-feature pre-check did not predict it.** Added to EEG + ECG, it cut false alarms by −42% at 50% caught and −13% at 70%.
+- **It stacks with context.** The combination is the best general model so far: **−62% / −43% / −47% false alarms at 50 / 60 / 70% caught, vs ear EEG alone**. It catches 28% of seizures at ≤5 false alarms/day, twice ear EEG alone.
+- For the ear-hook, this means the **IMU is worth having**. It isn't a seizure detector on its own; its value is in **explaining away exercise heart rate**.
+
+### 6.12 More training data and a bigger model
+
+**Question.** Is the model too small, or does it see too few examples of normal life to learn the rare look-alike events?
+
+**Test** (`EEG + ECG + context + HR-excess (big)`): the same inputs, but
+- 8% of non-seizure windows instead of 3% (same random seed, so the 3% pool is a subset);
+- 400 trees instead of 150, learning rate 0.05 instead of 0.1;
+- 63 leaves instead of 31.
+
+Compute cost: about 3× (38 min vs 14 min for all 125 patients).
+
+| Setup (general, 125 patients) | 50% caught | 60% | 70% | 80% | ≤5/day | ≤20/day | ≤50/day |
+|---|---|---|---|---|---|---|---|
+| EEG + ECG + context + HR-excess | **39.6** | 92.5 | **154.9** | **368.0** | **28%** | 34% | 50% |
+| same, big | 48.2 | **82.8** | 165.0 | 500.6 | 25% | **41%** | **54%** |
+
+**Finding: no consistent gain**, better at some operating points and worse at others. **Model capacity and training-set size are not the bottleneck; the information in the signals is.** Further progress needs new information (better signals, longer history, personalisation), not a bigger model.
+
+### 6.13 Two-stage detection: an alarm verifier
+
+**Idea** (`detect/stage2.py`). Stage 1 is the best general model (EEG + ECG + context + HR-excess). It raises **candidates** at a loose threshold (0.5 or 0.7). A second model then **verifies** each candidate with event-level evidence, available 0 or 10 s after the trigger (causal):
+- the probability's shape (peak, mean, time above 0.8 and 0.95);
+- the patient's recent "noisiness" (candidates in the last 10 min and hour, mean probability over 5 min);
+- the change vs the 5 min before in heart rate, HR-excess, activity, EEG power, line length, gamma and delta share, shoulder EMG and beat quality.
+
+The 60 s refractory applies only to **accepted** alarms, so a rejected false candidate never blocks a later true one. A published two-stage wearable-EEG detector with a gradient-boosting second stage raised sensitivity from 61% to 75% while cutting false alarms ([doi:10.1109/TBME.2026.3660806](https://doi.org/10.1109/tbme.2026.3660806)).
+
+**Protocol.** Same 71 patients and k = 2 split. Stage-1 outputs are out-of-fold. The verifier uses patient-wise 5-fold CV and is scored on each held-out patient's later data.
+
+**Results** (best variant: candidates at 0.5, decision 10 s after the trigger):
+
+| Caught at … | ≤1/day | ≤5/day | ≤20/day | ≤50/day |
+|---|---|---|---|---|
+| One stage (general), all 71 | 14% | 25% | 36% | 47% |
+| **Two stage**, all 71 | **15%** | 25% | **38%** | **54%** |
+| One stage, responders | 31% | 55% | 74% | 81% |
+| **Two stage**, responders | **33%** | **56%** | **75%** | **84%** |
+
+**Finding.** A real but small gain, mainly at looser budgets (+7 points at ≤50/day), and almost none at ≤1–5/day.
+
+**Bug found and fixed.** The first stage-2 run looked disastrous (5% at ≤5/day). A debug check showed that even ranking candidates by stage 1's *own* peak probability lost half the seizures, which pointed to the scoring rather than the model. Cause: alarms were grouped **per patient**, but each recording's clock starts at 0. An alarm at 5,000 s in one recording was therefore also counted in every other recording of that patient. The fix scores per recording. After it, "accept every candidate" reproduces stage 1 (49% at 79 false alarms/day on the debug subset), as it must.
+
+### 6.14 A personal alarm verifier
+
+**Idea.** §6.7 showed that false alarms are **patient-specific**: a minority of users produce most of them, each with their own look-alike events. So the verifier of §6.13 is personalised. For each patient, it is trained on:
+- the other patients' candidates;
+- **plus this patient's own tuning-period candidates, weighted ×20** ("this is what *your* false alarms, and your first seizures, look like").
+
+The stage-1 model never saw the patient, so its tuning-period candidates are genuinely out-of-sample. That avoids the over-optimism problem of §6.6. The verifier is scored on the patient's later data only (`uv run detect/stage2.py --personal --w 20`).
+
+**Results** (candidates at 0.5, decision 10 s after the trigger):
+
+| Caught at … | ≤1/day | ≤2/day | ≤5/day | ≤20/day | ≤50/day |
+|---|---|---|---|---|---|
+| One stage (general), all 71 | 14% | – | 25% | 36% | 47% |
+| Two stage, general verifier, all | 15% | 18% | 25% | 38% | 54% |
+| **Two stage, personal verifier, all** | **19%** | **22%** | **30%** | **45%** | **60%** |
+| **Personal verifier, responders (23)** | **39%** | **47%** | **64%** | **77%** | **85%** |
+| Personal verifier, non-responders (46) | 11% | 14% | 17% | 32% | 51% |
+
+**Finding.** Personalising the *alarm-verification* step gives the largest gain at the strict end of anything tried so far:
+- **everyone:** +5 points at ≤1/day and ≤5/day, +9 at ≤20/day;
+- **responders:** 39% of seizures caught at ≤1 false alarm/day, 47% at ≤2 and 64% at ≤5.
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -248,35 +509,61 @@ The analysis was run twice while the data was still streaming. The effect of ECG
 
 ## 8. What it means for the ear-hook
 
-1. **Heart rate is the add-on that pays.** Adding ECG to 2-channel ear-EEG cut false alarms by 18–31% at the same sensitivity and helped 92% of patients. The ear-hook can measure heart rate with **in-ear PPG** instead of a chest ECG. Beat timing from PPG is noisier than ECG, so this should be re-tested with PPG.
-2. **The body alone rivals the 2-channel ear EEG under strict false-alarm budgets.** At 20 or fewer false alarms a day, ECG alone (29%) and the body sensors (28%) beat EEG alone (23%). For focal seizures, the heart carries about as much seizure information as a behind-the-ear electrode pair.
-3. **EMG and motion are not worth it for focal seizures overall.** On top of ECG they were mixed: slightly better in some columns, worse in others. They are expected to matter for **convulsive** seizures (tonic-clonic, hyperkinetic), which are a minority here. That should be tested on its own. For the ear-hook, the built-in IMU is still useful for **artefact rejection** (walking, chewing), which this experiment doesn't isolate.
-4. **Delay:** fusion costs about 1 s (median 6 s → 7 s after EEG onset). That is acceptable for a warning device.
-5. **Personalise after about 2 seizures.** Fine-tuning on 2 of the user's own seizures plus ECG cut false alarms by 52–62% (§6.5). The app should learn from each confirmed seizure and false alarm.
-6. **The ceiling is sensitivity, not only false alarms.** No setup catches much more than about 80% of seizures. Some focal seizures show almost nothing at the mastoid and have no heart-rate change. The live lab's "no HR response" scenario shows exactly this case.
+1. **Heart rate is the add-on that pays.**
+   - Adding ECG to 2-channel ear EEG cut false alarms by 18–44% at the same sensitivity and helped 92% of patients.
+   - The ear-hook would use **in-ear PPG** instead of a chest ECG. PPG beat timing is noisier, so this must be re-tested with PPG-quality heartbeats.
+2. **The IMU earns its place by explaining heart rate, not by detecting seizures.**
+   - As direct features, EMG and motion gave no consistent gain for these mostly focal seizures (§6.1).
+   - Used to compute "heart rate not explained by movement" (§6.11), the accelerometer cut false alarms by up to 42% on top of EEG + ECG.
+3. **Look at minutes, not seconds.** 15 s / 1 min / 5 min trends of the EEG and heart features gave a further 20–30% fewer false alarms (§6.8). The device should keep a rolling few-minute history.
+4. **Personalise in two places:**
+   - retrain the detector after about **2 confirmed seizures** (§6.5; one is not enough for EEG-only);
+   - learn **this user's false alarms** in the alarm verifier (§6.14). That gave the largest gain at the strict end of the curve.
+5. **Two user modes, decided after the first two seizures:**
+   - **heart responders** (about 1 in 3): **alarm mode**, with 39% caught at ≤1 false alarm/day, 47% at ≤2 and 64% at ≤5;
+   - **non-responders:** **log-only seizure diary** for the doctor, plus a push for better electrode contact.
+6. **Electrode fit is a hardware priority.** Unstable ear-EEG amplitude is the only patient trait linked to false alarms (§6.7). The device needs a signal-quality gate and a "reseat the ear-hook" prompt.
+7. **Let the user cancel.** A quick "are you OK?" response on the phone cancels false alarms before they reach a caregiver; a phase-3 ECG study cancelled all of its false alarms this way.
+8. **Delay:** about 7–10 s after EEG onset (up to 10 s more with the verifier). That is acceptable for a warning device.
+9. **The ceiling is sensitivity.** Some focal seizures show almost nothing at the mastoid and no heart-rate change. The live lab's "no HR response" scenario shows exactly this case.
 
 The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-off on simulated body signals: requiring body confirmation removes movement false alarms but costs a few seconds and misses seizures with no body sign.
 
 ## 9. Limitations
 
-- **General models only.** Absolute false-alarm rates (hundreds per day) come from models tested on never-seen patients, deciding every 2 s. Published systems reach ~0.25–1 FA/day with patient-specific tuning, longer decision windows and post-processing. The **relative** reductions are the point of this experiment.
+- **Absolute false-alarm rates are high for general models** (tens to hundreds per day), but in line with every published result on SeizeIT2 (§6.9). Hospital-equipment studies with patient-specific models, and only seizures visible on the ear EEG, report ~0.5 FA/day. The **relative** reductions, and the personalised results, are the point of this study.
 - **Chest ECG, not ear PPG.** The ear-hook would measure heart rate optically at the ear, so the benefit may be smaller or larger with PPG.
 - **Hospital recordings.** EMU patients move less than people in daily life. Real-world motion artefacts may make motion sensors more valuable than seen here.
 - **Hand-crafted features + gradient boosting.** A sequence model over minutes of heart rate (pre-ictal HRV change was reported in 41% of patients) might extract more.
 - **The threshold grid is coarse** at the high end (0.90, 0.95, 0.97, 0.98, 0.99), which makes the budget table step-like.
 - **Features in `data/seizeit2/` are not redistributed.** They are regenerated by the fetch step.
+- **Best-along-the-curve numbers are slightly optimistic** (§5.1). The calibrated numbers are the deployment estimate.
+- **Fine-tuned models cannot be calibrated on their own tuning data**: that data looks far too clean, and budgets of 0.5–1/day became 10–37/day later. A held-out slice of the tuning period is needed.
+- **The personal verifier's weight (×20)** was chosen a priori. A sweep over ×5 and ×50 is reported when finished.
+- **Responder status needs ECG and two seizures.** 2 of 71 patients could not be classified (no ECG).
+- **71 patients** have ≥3 seizures and enough later data for the personalised experiments. The general-model numbers use all 125.
 
 ## 10. Next steps
 
-| Priority | Step | Why |
+| Status | Step | Result / why |
 |---|---|---|
-| ✅ | ~~Personal fine-tuning~~ (§6.5: −42% alone, −62% with ECG, needs ≥2 seizures) | – |
-| ✅ | ~~Sustained-alarm post-processing~~ (§6.5: does not help) | – |
-| ✅ | ~~Personal alarm threshold~~ (§6.6: no meaningful gain; normalisation already calibrates) | – |
-| ★★★ | **Longer context:** features over 5–10 min of HR/HRV and EEG trends | Autonomic change builds over minutes; 4 s windows can't see it |
-| ★★ | **Split by seizure type** (non-motor vs motor vs tonic-clonic) | Tells whether EMG/motion earn their place for convulsive seizures |
-| ★★ | **Degrade ECG to PPG-like beat timing** (jitter, dropouts) | Estimates what the ear-hook's optical heart rate would achieve |
-| ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Captures slow pre-ictal autonomic change |
+| ✅ | Personal fine-tuning (§6.5) | −42% false alarms alone, −62% with ECG; needs ≥2 seizures |
+| ✅ | Sustained-alarm post-processing (§6.5) | Does not help |
+| ✅ | Personal alarm threshold (§6.6) | No meaningful gain; the baseline normalisation already calibrates |
+| ✅ | Why false alarms happen (§6.7) | Patient-specific; linked to unstable ear-EEG signal; real look-alike events |
+| ✅ | Long context (§6.8) | −20% to −30% more at 50–60% caught |
+| ✅ | Published benchmarks (§6.9) | On par with or above all published SeizeIT2 detectors |
+| ✅ | Heart responders (§6.10) | About 1/3 of patients; much better detection |
+| ✅ | HR not explained by movement (§6.11) | −42% at 50% caught on top of EEG + ECG |
+| ✅ | Bigger model / more data (§6.12) | No consistent gain; information-limited |
+| ✅ | Two-stage verifier (§6.13) | Small gain |
+| ✅ | Personal verifier (§6.14) | Largest strict-budget gain: 19% / 30% at ≤1 / ≤5 per day (all), 39% / 64% (responders) |
+| ⏳ | Personal verifier weight sweep (×5, ×50) | Running |
+| ★★★ | **Signal-quality gate** for the ear EEG | The only patient trait linked to false alarms |
+| ★★★ | **Personal verifier on top of the fine-tuned detector**, with calibration on a held-out slice | Combines the two strongest levers; gives calibrated numbers |
+| ★★ | **Degrade ECG to PPG-quality beats** (jitter, dropouts) | What the ear-hook's optical heart rate would achieve |
+| ★★ | **Split by seizure type** | Do EMG/motion help convulsive seizures specifically? |
+| ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Slow pre-ictal autonomic change |
 
 ## 11. Reproduce
 
@@ -290,13 +577,56 @@ uv run detect/seizeit2.py run --snapshot     # interim results on fully streamed
 uv run detect/seizeit2.py report             # recompute tables + figure from saved metrics (no retraining)
 uv run detect/seizeit2.py finetune --k 2     # personal fine-tuning on 2 own seizures (~35 min); then --k 1 (~45 min)
 uv run detect/seizeit2.py personal          # shared vs personal alarm threshold (~35 min; model outputs cached)
+uv run detect/seizeit2.py run --configs context HR-excess              # context / HR-excess setups, general models (~15 min each)
+uv run detect/seizeit2.py personal --configs "EEG + ECG + context + HR-excess"   # best setup: fine-tune + cache outputs (~40 min)
+uv run detect/analysis_responders.py        # responders vs non-responders for every cached model (~3 min)
+uv run detect/stage2.py                     # two-stage: general alarm verifier (~15 min; candidate cache reused)
+uv run detect/stage2.py --personal --w 20   # two-stage: personal alarm verifier (~20 min)
 ```
+
+Every long command asks Windows not to idle-sleep while it runs (`keep_awake()`). No system setting is changed.
 
 If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or run finishes, or crashes.
 
+---
+
+## Appendix A. Experiment log (chronological)
+
+Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
+
+| # | Experiment | Command / script | Outcome |
+|---|---|---|---|
+| 1 | Stream 126 GB into RAM; extract ear-EEG, ECG, EMG and motion features | `seizeit2.py fetch` | 2,850 runs, 1.8 GB of features, no EDF on disk |
+| 2 | Snapshot 1 (48 patients) | `run --snapshot` | ECG −7% to −20%. First summary table **wrong**: FA/day was interpolated along a non-monotonic sensitivity curve. Fixed: min over thresholds reaching the target (§5) |
+| 3 | Snapshot 2 (78 patients) | `run --snapshot` | ECG −21% to −44% |
+| 4 | All 125 patients, 5 setups | `run` | ECG −18% to −31%; helps 115/125; EMG/motion no consistent gain (§6.1–6.4) |
+| 5 | Personal fine-tuning, k = 1 and 2; sustained-alarm rules | `finetune` | k = 2: −42%, with ECG −62%. k = 1 unreliable for EEG. Sustained rules don't help (§6.5). Fast scorer verified identical to the reference |
+| 6 | Personal alarm threshold | `personal` | No meaningful gain; shared threshold honest (1 / 5 / 20 → 1.4 / 5.2 / 20.2 per day); in-sample calibration of fine-tuned models ~10× optimistic (§6.6) |
+| 7 | "impd" check | analysis script | **Mistake caught:** "impd" was first assumed to mean epileptic discharges. The dataset's `events.json` says **impedance check**. Such epochs explain <1% of false alarms (§6.7) |
+| 8 | Where false alarms come from | analysis scripts | Not hidden seizures; concentrated in few patients; linked to unstable ear-EEG amplitude (ρ = 0.49); physiological look-alikes; predictable from tuning data (§6.7) |
+| 9 | Long context features | `run --configs context` | EEG + ECG + context: −30% more at 50% caught (§6.8) |
+| 10 | Literature benchmarks on SeizeIT2 | web research | On par with or above published results (§6.9) |
+| 11 | Heart responders | `analysis_responders.py` | Responders 30% / 50% / 72% at ≤1 / 5 / 20 per day (fine-tuned EEG + ECG) (§6.10) |
+| 12 | HR not explained by movement | `run --configs HR-excess` | Pre-check AUC 0.62 predicted little, but the model gained −42% at 50% caught. With context: best general model (§6.11) |
+| 13 | Fine-tune + cache the best setup | `personal --configs "EEG + ECG + context + HR-excess"` | Responders 33% / 60% / 75% at ≤1 / 5 / 20 per day; calibrated general 14% / 25% / 38% at 1.0 / 4.3 / 20.2 per day |
+| 14 | Bigger model, more negatives | `run --configs "(big)"` | No consistent gain; 3× compute (§6.12) |
+| 15 | Two-stage alarm verifier | `stage2.py` | **Bug caught:** the first run scored alarms per *patient* although each recording's clock starts at 0, which multiplied false alarms. A debug check (ranking by stage-1 peak lost half the seizures) exposed it. Fixed: per-recording scoring. Result: small gain (§6.13) |
+| 16 | Personal alarm verifier (×20) | `stage2.py --personal` | Largest strict-budget gain: 19% / 30% / 45% (all), 39% / 64% / 77% (responders) at ≤1 / 5 / 20 per day (§6.14) |
+| 17 | Personal verifier weight sweep (×5, ×50) | `stage2.py --personal --w …` | Running |
+
+**Operational notes:**
+- Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.
+- One job was paused for ~5 h because the laptop entered Modern Standby overnight. The scripts now request "stay awake" from Windows while running.
+
 ## 12. References
+
+- Reintjes C, Hagenbeck JF, Ballo M, et al. (2025). ECG-based detection of epileptic seizures in real-world wearable settings: insights from the SeizeIT2 dataset. *Sensors* 25(24):7687, doi:10.3390/s25247687.
+- Vandecasteele K, et al. (2020). Visual seizure annotation and automated seizure detection using behind-the-ear electroencephalographic channels. *Epilepsia* 61:766–775.
 
 - Bhagubai M, Chatzichristos C, Swinnen L, et al. (2025). SeizeIT2 dataset paper, *Scientific Data* ([link](https://www.nature.com/articles/s41597-025-05580-x)). Dataset: OpenNeuro ds005873 v1.1.0, doi:10.18112/openneuro.ds005873.v1.1.0 (CC0).
 - Jeppesen J et al. (2024). EEG + ECG wearable seizure detection, *Epileptic Disorders*: 84.8% sensitivity at 0.25 FA/day ([link](https://onlinelibrary.wiley.com/doi/10.1002/epd2.20196)).
 - Pan J, Tompkins WJ (1985). *A real-time QRS detection algorithm.* IEEE Trans Biomed Eng 32:230.
+- Two-stage wearable-EEG detection with a gradient-boosting second stage: IEEE TBME (2026), [doi:10.1109/TBME.2026.3660806](https://doi.org/10.1109/tbme.2026.3660806).
+- Minimizing artifact-induced false alarms for seizure detection in wearable EEG devices with gradient-boosted tree classifiers. *Scientific Reports* (2024), [link](https://www.nature.com/articles/s41598-024-52551-0).
+- Jeppesen J, et al. (2019). Seizure detection based on heart rate variability using a wearable ECG device. *Epilepsia*, [link](https://onlinelibrary.wiley.com/doi/abs/10.1111/epi.16343).
 - Project background: [`Seizure_Physiological_Signals.md`](Seizure_Physiological_Signals.md) (heart rate ↑ in 82% of patients; ictal tachycardia +53% in focal seizures).

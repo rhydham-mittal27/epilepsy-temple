@@ -110,7 +110,10 @@ epilepsy_temple/
     │   ├── general.py               general model on all CHB-MIT subjects + per-person fine-tuning
     │   ├── notify_watch.sh          optional: ring your phone (ntfy) when a long run finishes
     │   ├── notify_final.sh          optional: ring your phone when general.py finishes / crashes / stops
-    │   ├── seizeit2.py              multimodal detector on SeizeIT2: ear-EEG + ECG + EMG + motion (streamed)
+    │   ├── seizeit2.py              multimodal detector on SeizeIT2: ear-EEG + ECG + EMG + motion (streamed);
+    │   │                            fine-tuning, personal thresholds, context + HR-excess features
+    │   ├── stage2.py                two-stage detection: general / personal alarm verifier
+    │   ├── analysis_responders.py   heart responders vs non-responders
     │   ├── results/                 3-patient detection metrics + figure
     │   ├── results_general/         23-subject general-model metrics
     │   └── results_seizeit2/        125-patient multimodal metrics + figure
@@ -143,6 +146,7 @@ uv sync                                    # numpy, scipy, matplotlib, numba, mn
 | Temple vs full-cap detection | `uv run detect/detect.py --configs 4` (then 2, 3, 1, 0) | ~2–40 min each |
 | General model, all subjects (streaming, ~1 GB disk) | `uv run detect/general.py fetch` then `run` (add `--configs "Full cap"` to re-run one setup; progress bars show time left) | ~1 h + 2–3 h |
 | Multimodal detector, SeizeIT2 (125 patients; streamed from OpenNeuro into RAM, only 1.8 GB of features stored) | `uv run detect/seizeit2.py fetch` then `run` (`run --snapshot` gives interim results while fetch runs; `report` redraws tables) | ~2–4 h (126 GB streamed) + ~1 h |
+| SeizeIT2 personalisation + two-stage (see `Multimodal_Detection_SeizeIT2.md` §11) | `finetune`, `personal`, `analysis_responders.py`, `stage2.py [--personal]` | ~20–45 min each |
 | Rebuild live-lab data | `uv run viz/export_data.py` | ~2 min |
 
 > **Memory:** network simulations use ~1–2 GB. On machines with little free RAM, run one long job at a time.
@@ -291,6 +295,26 @@ Takeaways:
 
    One seizure is not enough for EEG-only tuning. Requiring a sustained 10–20 s alarm does not help. A **personal alarm threshold** also gives no meaningful gain, because the per-person baseline normalisation already calibrates everyone. A useful side result: the shared threshold's false-alarm rate is **predictable** (budget 1 / 5 / 20 per day on tuning data gave 1.4 / 5.2 / 20.2 later). At ≤1 false alarm/day the best setup still catches only 11–14% of seizures, so absolute rates remain far from usable.
 
+   **Why the false alarms happen** (details in the SeizeIT2 write-up, §6.7):
+   - they are not annotated artefacts (<1%) and not hidden seizures;
+   - the worst 25% of patients produce 59–77% of them;
+   - the one patient trait linked to them is an **unstable ear-EEG signal** (ρ = 0.49), which points to electrode fit;
+   - at the moment of a false alarm, EEG + ECG sees a **real seizure look-alike**: sudden tachycardia + movement + an EEG burst;
+   - noisy users are identifiable from their first days of wear (ρ = 0.56–0.83).
+
+   **The whole ladder** (71 patients, each scored on data recorded after their tuning period; details and caveats in the SeizeIT2 write-up):
+
+   | Step | Caught at ≤1 false alarm/day | ≤5/day | ≤20/day |
+   |---|---|---|---|
+   | Ear EEG only | 4% | 11% | 23% |
+   | + ECG | 12% | 19% | 31% |
+   | + minute-scale context + "HR not explained by movement" | 14% | 25% | 36% |
+   | + fine-tuning on 2 own seizures | 15% | 27% | 41% |
+   | two-stage with a **personal alarm verifier** | **19%** | **30%** | **45%** |
+   | … for **heart responders** (≈1 in 3 users) | **39%** | **64%** | **77%** |
+
+   **Long context helps.** Adding 15 s / 1 min / 5 min trends of EEG and heart features (**EEG + ECG + context**) cuts false alarms by **34–43%** vs ear EEG alone at matched sensitivity, and catches **25%** of seizures at ≤5 false alarms/day (vs 14%). Adding a **"heart rate not explained by movement"** feature (a running fit of heart rate vs accelerometer activity) pushes this to **−62% / −43% / −47%** false alarms at 50 / 60 / 70% caught, and **28%** caught at ≤5/day. The accelerometer earns its place by explaining away exercise heart rate.
+
 ### 6.7 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
 A single-screen, offline dashboard:
@@ -354,7 +378,8 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | ✅ | ~~Multimodal detection on SeizeIT2: measure the false-alarm reduction~~ (done, §6.6: ECG −18–31%) |
 | ✅ | ~~Personal fine-tuning + sustained-alarm rules on SeizeIT2~~ (done: −62% with ECG; sustained rules don't help) |
 | ✅ | ~~Personal alarm thresholds~~ (no meaningful gain) |
-| ★★★ | 5–10 min context features (HR/HRV and EEG trends), aiming for ≤1 false alarm/day |
+| ✅ | ~~Context features, HR-excess, bigger model, two-stage + personal alarm verifier~~ (done: best 19% of seizures at ≤1 false alarm/day, 39% for heart responders) |
+| ★★★ | Ear-EEG signal-quality gate; personal verifier on the fine-tuned detector with held-out calibration; PPG-quality heart rate |
 | ★★ | SeizeIT2 split by seizure type; degrade ECG to PPG-like beat timing (what the ear-hook would see) |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
 | ★★ | Recalibrate the model for self-sustained, rhythmic seizures (pump-current scale 0.25–0.5) |
