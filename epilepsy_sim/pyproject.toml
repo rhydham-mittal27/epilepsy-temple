@@ -20,3 +20,15 @@ tvb = [
     "tvb-data>=3.0.0",
     "tvb-library>=2.10.0",
 ]
+# deep-learning experiment (detect/cnn.py): CPU-only PyTorch
+dl = [
+    "torch>=2.5",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

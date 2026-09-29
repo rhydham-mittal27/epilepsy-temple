@@ -48,6 +48,8 @@ Code: [`epilepsy_sim/detect/seizeit2.py`](epilepsy_sim/detect/seizeit2.py) · Re
    - [6.14 A personal alarm verifier](#614-a-personal-alarm-verifier)
    - [6.15 Ear-EEG signal-quality features in the verifier](#615-ear-eeg-signal-quality-features-in-the-verifier)
    - [6.16 The ceiling: seizures the detector never sees](#616-the-ceiling-seizures-the-detector-never-sees)
+   - [6.17 Which seizures are caught?](#617-which-seizures-are-caught-type-duration-lobe-and-electrode-side)
+   - [6.18 What would the ear-hook's optical heart rate (PPG) give?](#618-what-would-the-ear-hooks-optical-heart-rate-ppg-give)
 7. [Interim snapshots](#7-interim-snapshots)
 8. [What it means for the ear-hook](#8-what-it-means-for-the-ear-hook)
 9. [Limitations](#9-limitations)
@@ -545,6 +547,79 @@ More weight helps a little and saturates around ×20–50. The result does not h
 - **Responders are the exception:** 65% of their seizures exceed 0.95, which is why alarm mode works for them.
 - **Conclusion: the remaining gap is a signal problem.** Closing it needs more information about the brain: more or better-placed electrodes, dry in-ear EEG contact quality, or a different modality. Better alarm logic on the same signals won't close it.
 
+### 6.17 Which seizures are caught? Type, duration, lobe and electrode side
+
+**Method** (`detect/analysis_seizure_types.py`):
+- The dataset's own annotations give each seizure's **type**, **vigilance**, **lateralization** and **localization**. Each patient's `eeg.json` gives the **montage side**.
+- Every later seizure of the 71 patients is scored at the **shared thresholds calibrated in advance** on tuning data for 5 and 20 false alarms/day (honest operating points, §5.1).
+- **Never above 0.5** means the detector's smoothed probability stayed ≤0.5 throughout the seizure, i.e. invisible.
+
+**Best setup (EEG + ECG + context + HR-excess), general model, 649 later seizures:**
+
+| Group | n | Caught at 5 FA/day | at 20 FA/day | Never above 0.5 |
+|---|---|---|---|---|
+| **Focal to bilateral tonic-clonic** | 22 | **100%** | **100%** | 0% |
+| Focal motor (automatisms, hyperkinetic, tonic, clonic) | 283 | 30% | 44% | 24% |
+| Focal aware, non-motor | 76 | 17% | 29% | 18% |
+| Focal impaired awareness, non-motor | 136 | 14% | 26% | 38% |
+| Other / unclassified | 132 | 17% | 32% | 23% |
+| **Shorter than 30 s** | 349 | **4%** | 13% | **40%** |
+| 30–90 s | 174 | 40% | 59% | 12% |
+| **Longer than 90 s** | 126 | **62%** | **78%** | 2% |
+| **Temporal lobe** | 153 | **43%** | 54% | 16% |
+| Extratemporal / unknown | 496 | 19% | 33% | 28% |
+| Electrodes on **both** sides (generalized montage) | 73 | **42%** | 55% | 23% |
+| Electrodes on the **same** side as onset | 251 | 33% | 51% | 20% |
+| Electrodes on the **opposite** side | 29 | 66% | 76% | 17% |
+| Onset side unknown / bilateral | 296 | 9% | 19% | 31% |
+| Awake | 279 | 28% | 41% | 27% |
+| Asleep | 309 | 22% | 36% | 26% |
+
+**Findings:**
+1. **The most dangerous seizures are caught: 100% of focal-to-bilateral tonic-clonic seizures at ≤5 false alarms/day** (95% even with ear EEG alone). These carry the SUDEP risk and are what an alarm device must not miss.
+2. **Duration dominates.**
+   - Seizures shorter than 30 s are **more than half of all seizures** and almost invisible: 4% caught, 40% never above 0.5.
+   - Seizures longer than 90 s are caught 62–78% of the time.
+   - Much of §6.16's ceiling is short focal seizures.
+3. **Temporal-lobe seizures are detected about twice as well** as extratemporal ones (43% vs 19%), as expected for electrodes behind the ear, over the temporal lobe.
+4. **Both-ear electrodes do well** (42% / 55%), which supports the ear-hook's both-ears design. The opposite-side group is too small (29 seizures) to interpret.
+5. **Motor seizures are caught about twice as often as non-motor ones**, helped by ECG and HR-excess. EEG alone catches 12% / 31% of motor seizures vs 30% / 44% with the full setup.
+6. Awake vs asleep makes little difference.
+
+**For the device:**
+- **Alarm** for long, motor and especially tonic-clonic seizures.
+- **Log** (seizure diary) for short focal ones, which a 2-channel ear EEG cannot reliably see.
+
+### 6.18 What would the ear-hook's optical heart rate (PPG) give?
+
+**Why.** SeizeIT2 measures the heart with a **chest ECG**. The ear-hook would use **in-ear PPG**, which is noisier. It has no ECG waveform, beat timing jitters, and data is lost during movement.
+
+**Simulation** (`degrade_to_ppg()` in `seizeit2.py`, setup `EEG + PPG(sim) + context + HR-excess`). The chest-ECG features are degraded with literature-based errors:
+
+| Aspect | Model | Source |
+|---|---|---|
+| Heart rate at rest | slowly varying (30 s) error, bias **+0.78 bpm**, SD **2.54 bpm** | In-ear PPG vs ECG, 97 patients, 2,048 h ([Frontiers in Digital Health 2022](https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2022.909519/full)) |
+| Heart rate during movement | **±15%** relative error | Accuracy drops sharply with motion; errors up to ~30% reported ([in-ear PPG review, PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC10384007/)) |
+| Data loss | **10%** of resting and **50%** of moving windows dropped (quality filtering) | Motion artefacts dominate PPG loss |
+| Beat-to-beat variability | RMSSD **±30%**, SDNN **±9%** relative error | PPG pulse-rate variability vs ECG HRV: relative MAE RMSSD 34%, SDNN 9% ([Sci Rep 2021](https://www.nature.com/articles/s41598-021-87489-0)) |
+| ECG waveform features | removed | PPG has no ECG waveform |
+| Beat quality | lowered (−0.1 at rest, −0.3 moving) | – |
+
+On a sample recording the simulated PPG heart rate differs from ECG by **2.7 bpm** on average (bias +0.9), with 16% of windows lost.
+
+**Results (all 125 patients, general model):**
+
+| Setup | 50% caught | 60% | 70% | 80% | Caught at ≤5/day | ≤20/day | ≤50/day |
+|---|---|---|---|---|---|---|---|
+| EEG + **ECG** + context + HR-excess | 39.6 | 92.5 | 154.9 | 368.0 | 28% | 34% | 50% |
+| EEG + **PPG (sim)** + context + HR-excess | 44.8 | **83.5** | 175.2 | 376.5 | 26% | 35% | **53%** |
+
+**Finding: PPG-quality heart signals lose almost nothing.** The two setups are within noise of each other, better at some operating points and worse at others. The detector relies on **heart-rate changes** (tachycardia and its timing relative to movement), which PPG measures well. It relies much less on fine beat-to-beat variability, which PPG measures poorly.
+
+**For the device:** an in-ear PPG sensor should deliver essentially the full benefit measured with chest ECG. A chest strap is not needed.
+
+**Caveat.** This is a feature-level simulation, not real PPG. Real in-ear PPG during seizures, with jaw clenching and head movement, may lose more data than modelled.
+
 ## 7. Interim snapshots
 
 The analysis was run twice while the data was still streaming. The effect of ECG grew as more patients were added:
@@ -611,8 +686,8 @@ The live lab (`epilepsy_sim/viz/epilepsy_live.html`) illustrates the same trade-
 | ✅ | Sensitivity ceiling (§6.16) | 25% of seizures never exceed 0.5, so the gap is a signal problem |
 | ★★★ | **Hardware: electrode contact / more EEG channels** | The remaining gap is information, not alarm logic (§6.16) |
 | ★★★ | **Personal verifier on top of the fine-tuned detector**, with calibration on a held-out slice | Combines the two strongest levers; gives calibrated numbers |
-| ★★ | **Degrade ECG to PPG-quality beats** (jitter, dropouts) | What the ear-hook's optical heart rate would achieve |
-| ★★ | **Split by seizure type** | Do EMG/motion help convulsive seizures specifically? |
+| ✅ | PPG-quality heart signals (§6.18) | Lose almost nothing vs chest ECG |
+| ✅ | Split by seizure type, duration, lobe and side (§6.17) | Tonic-clonic 100%; seizures <30 s nearly invisible; temporal 2× better |
 | ★ | **Sequence model** over 5–10 min of HR/HRV + EEG | Slow pre-ictal autonomic change |
 
 ## 11. Reproduce
@@ -630,6 +705,7 @@ uv run detect/seizeit2.py personal          # shared vs personal alarm threshold
 uv run detect/seizeit2.py run --configs context HR-excess              # context / HR-excess setups, general models (~15 min each)
 uv run detect/seizeit2.py personal --configs "EEG + ECG + context + HR-excess"   # best setup: fine-tune + cache outputs (~40 min)
 uv run detect/analysis_responders.py        # responders vs non-responders for every cached model (~3 min)
+uv run detect/analysis_seizure_types.py     # caught by seizure type / duration / lobe / electrode side (~3 min)
 uv run detect/stage2.py                     # two-stage: general alarm verifier (~15 min; candidate cache reused)
 uv run detect/stage2.py --personal --w 20   # two-stage: personal alarm verifier (~20 min)
 ```
@@ -665,6 +741,8 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 17 | Personal verifier weight sweep (×5, ×50) | `stage2.py --personal --w …` | ×5: 18% / 29% / 43%; ×50: 19% / 30% / 46% at ≤1 / 5 / 20 per day. Saturates at ×20–50 |
 | 18 | Signal-quality features in the verifier (general and personal) | `stage2.py --quality [--personal]` | No gain, ±1–3 points (§6.15) |
 | 19 | Sensitivity ceiling | analysis of cached outputs | 25% of seizures never exceed 0.5; only 30% reach 0.95, so the detector has plateaued (§6.16) |
+| 20 | Seizure type / duration / lobe / side split | `analysis_seizure_types.py` | Tonic-clonic 100% at ≤5/day; <30 s seizures 4%; temporal 43% vs 19% (§6.17) |
+| 21 | PPG-quality heart signals | `run --configs "EEG + PPG(sim) + context + HR-excess"` | ≈ ECG (§6.18). **Crash caught:** the all-NaN ECG-waveform column broke histogram binning; fixed by dropping the column. **Queue mistake caught:** a failed step didn't stop its queue, so two copies ran; the stale one was stopped |
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.

@@ -2876,6 +2876,294 @@
      68.0
     ]
    }
+  },
+  "EEG + PPG(sim) + context + HR-excess": {
+   "0.05": {
+    "sensitivity": 0.7927519818799547,
+    "detected": 700,
+    "seizures": 883,
+    "fa_per_24h": 1125.4656704025288,
+    "false_alarms": 545206,
+    "hours": 11626.248888888898,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     -3.0,
+     18.0
+    ]
+   },
+   "0.10": {
+    "sensitivity": 0.8267270668176671,
+    "detected": 730,
+    "seizures": 883,
+    "fa_per_24h": 843.6832974885176,
+    "false_alarms": 408703,
+    "hours": 11626.248888888898,
+    "latency_median_s": 5.0,
+    "latency_iqr_s": [
+     -2.0,
+     16.0
+    ]
+   },
+   "0.15": {
+    "sensitivity": 0.8221970554926388,
+    "detected": 726,
+    "seizures": 883,
+    "fa_per_24h": 660.838424622291,
+    "false_alarms": 320128,
+    "hours": 11626.248888888898,
+    "latency_median_s": 5.0,
+    "latency_iqr_s": [
+     -1.0,
+     16.0
+    ]
+   },
+   "0.20": {
+    "sensitivity": 0.8165345413363534,
+    "detected": 721,
+    "seizures": 883,
+    "fa_per_24h": 536.2231670404055,
+    "false_alarms": 259761,
+    "hours": 11626.248888888898,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     0.0,
+     15.0
+    ]
+   },
+   "0.25": {
+    "sensitivity": 0.8097395243488109,
+    "detected": 715,
+    "seizures": 883,
+    "fa_per_24h": 445.7183094499569,
+    "false_alarms": 215918,
+    "hours": 11626.248888888898,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     -0.5,
+     15.5
+    ]
+   },
+   "0.30": {
+    "sensitivity": 0.8040770101925255,
+    "detected": 710,
+    "seizures": 883,
+    "fa_per_24h": 376.5272911182585,
+    "false_alarms": 182400,
+    "hours": 11626.248888888898,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     -1.0,
+     15.0
+    ]
+   },
+   "0.35": {
+    "sensitivity": 0.7836919592298981,
+    "detected": 692,
+    "seizures": 883,
+    "fa_per_24h": 320.69432158494965,
+    "false_alarms": 155353,
+    "hours": 11626.248888888898,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     0.0,
+     16.0
+    ]
+   },
+   "0.40": {
+    "sensitivity": 0.766704416761042,
+    "detected": 677,
+    "seizures": 883,
+    "fa_per_24h": 275.11470213379204,
+    "false_alarms": 133273,
+    "hours": 11626.248888888898,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     1.0,
+     16.0
+    ]
+   },
+   "0.45": {
+    "sensitivity": 0.7497168742921857,
+    "detected": 662,
+    "seizures": 883,
+    "fa_per_24h": 237.2761865296381,
+    "false_alarms": 114943,
+    "hours": 11626.248888888898,
+    "latency_median_s": 8.0,
+    "latency_iqr_s": [
+     2.0,
+     17.0
+    ]
+   },
+   "0.50": {
+    "sensitivity": 0.7304643261608154,
+    "detected": 645,
+    "seizures": 883,
+    "fa_per_24h": 204.3403700285865,
+    "false_alarms": 98988,
+    "hours": 11626.248888888898,
+    "latency_median_s": 8.0,
+    "latency_iqr_s": [
+     2.0,
+     16.0
+    ]
+   },
+   "0.55": {
+    "sensitivity": 0.7180067950169875,
+    "detected": 634,
+    "seizures": 883,
+    "fa_per_24h": 175.18634079359106,
+    "false_alarms": 84865,
+    "hours": 11626.248888888898,
+    "latency_median_s": 8.0,
+    "latency_iqr_s": [
+     3.0,
+     17.0
+    ]
+   },
+   "0.60": {
+    "sensitivity": 0.6976217440543602,
+    "detected": 616,
+    "seizures": 883,
+    "fa_per_24h": 149.16591039586274,
+    "false_alarms": 72260,
+    "hours": 11626.248888888898,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     3.0,
+     19.0
+    ]
+   },
+   "0.65": {
+    "sensitivity": 0.6704416761041903,
+    "detected": 592,
+    "seizures": 883,
+    "fa_per_24h": 125.46368256351708,
+    "false_alarms": 60778,
+    "hours": 11626.248888888898,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     4.0,
+     19.0
+    ]
+   },
+   "0.70": {
+    "sensitivity": 0.6421291053227633,
+    "detected": 567,
+    "seizures": 883,
+    "fa_per_24h": 103.9661211067981,
+    "false_alarms": 50364,
+    "hours": 11626.248888888898,
+    "latency_median_s": 10.0,
+    "latency_iqr_s": [
+     5.0,
+     21.0
+    ]
+   },
+   "0.75": {
+    "sensitivity": 0.6058890147225368,
+    "detected": 535,
+    "seizures": 883,
+    "fa_per_24h": 83.53992842250442,
+    "false_alarms": 40469,
+    "hours": 11626.248888888898,
+    "latency_median_s": 11.0,
+    "latency_iqr_s": [
+     6.0,
+     22.0
+    ]
+   },
+   "0.80": {
+    "sensitivity": 0.5571913929784824,
+    "detected": 492,
+    "seizures": 883,
+    "fa_per_24h": 63.88165323983349,
+    "false_alarms": 30946,
+    "hours": 11626.248888888898,
+    "latency_median_s": 13.0,
+    "latency_iqr_s": [
+     7.0,
+     25.0
+    ]
+   },
+   "0.85": {
+    "sensitivity": 0.5300113250283126,
+    "detected": 468,
+    "seizures": 883,
+    "fa_per_24h": 44.77041606235083,
+    "false_alarms": 21688,
+    "hours": 11626.248888888898,
+    "latency_median_s": 16.0,
+    "latency_iqr_s": [
+     8.0,
+     29.0
+    ]
+   },
+   "0.90": {
+    "sensitivity": 0.45979614949037373,
+    "detected": 406,
+    "seizures": 883,
+    "fa_per_24h": 26.650040177284634,
+    "false_alarms": 12910,
+    "hours": 11626.248888888898,
+    "latency_median_s": 19.0,
+    "latency_iqr_s": [
+     9.0,
+     31.75
+    ]
+   },
+   "0.95": {
+    "sensitivity": 0.35447338618346547,
+    "detected": 313,
+    "seizures": 883,
+    "fa_per_24h": 9.629933185672567,
+    "false_alarms": 4665,
+    "hours": 11626.248888888898,
+    "latency_median_s": 25.0,
+    "latency_iqr_s": [
+     13.0,
+     38.0
+    ]
+   },
+   "0.97": {
+    "sensitivity": 0.25934314835787087,
+    "detected": 229,
+    "seizures": 883,
+    "fa_per_24h": 4.089367125577139,
+    "false_alarms": 1981,
+    "hours": 11626.248888888898,
+    "latency_median_s": 30.0,
+    "latency_iqr_s": [
+     17.0,
+     47.0
+    ]
+   },
+   "0.98": {
+    "sensitivity": 0.19592298980747452,
+    "detected": 173,
+    "seizures": 883,
+    "fa_per_24h": 1.8248362135336653,
+    "false_alarms": 884,
+    "hours": 11626.248888888898,
+    "latency_median_s": 33.0,
+    "latency_iqr_s": [
+     20.0,
+     50.0
+    ]
+   },
+   "0.99": {
+    "sensitivity": 0.10192525481313704,
+    "detected": 90,
+    "seizures": 883,
+    "fa_per_24h": 0.34473715798656346,
+    "false_alarms": 167,
+    "hours": 11626.248888888898,
+    "latency_median_s": 40.5,
+    "latency_iqr_s": [
+     26.5,
+     59.0
+    ]
+   }
   }
  },
  "per_subject": {
@@ -19001,6 +19289,1615 @@
      76.5
     ]
    }
+  },
+  "EEG + PPG(sim) + context + HR-excess": {
+   "sub-002": {
+    "sensitivity": 0.8666666666666667,
+    "detected": 13,
+    "seizures": 15,
+    "fa_per_24h": 154.86429489639022,
+    "false_alarms": 640,
+    "hours": 99.18361111111113,
+    "latency_median_s": -2.0,
+    "latency_iqr_s": [
+     -3.0,
+     7.0
+    ]
+   },
+   "sub-006": {
+    "sensitivity": 0.0,
+    "detected": 0,
+    "seizures": 1,
+    "fa_per_24h": 129.2560474669101,
+    "false_alarms": 590,
+    "hours": 109.55,
+    "latency_median_s": null,
+    "latency_iqr_s": null
+   },
+   "sub-007": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 187.54716674916622,
+    "false_alarms": 535,
+    "hours": 68.46277777777777,
+    "latency_median_s": 11.5,
+    "latency_iqr_s": [
+     10.25,
+     12.75
+    ]
+   },
+   "sub-011": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 192.07764991359977,
+    "false_alarms": 907,
+    "hours": 113.32916666666667,
+    "latency_median_s": 12.5,
+    "latency_iqr_s": [
+     5.75,
+     22.25
+    ]
+   },
+   "sub-019": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 191.66832988073037,
+    "false_alarms": 967,
+    "hours": 121.08416666666665,
+    "latency_median_s": 13.0,
+    "latency_iqr_s": [
+     13.0,
+     13.0
+    ]
+   },
+   "sub-039": {
+    "sensitivity": 0.7733333333333333,
+    "detected": 58,
+    "seizures": 75,
+    "fa_per_24h": 192.26761887772534,
+    "false_alarms": 736,
+    "hours": 91.87194444444444,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     5.0,
+     8.0
+    ]
+   },
+   "sub-043": {
+    "sensitivity": 1.0,
+    "detected": 5,
+    "seizures": 5,
+    "fa_per_24h": 270.7039603113506,
+    "false_alarms": 989,
+    "hours": 87.68249999999999,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     7.0,
+     20.0
+    ]
+   },
+   "sub-045": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 197.82130841548923,
+    "false_alarms": 801,
+    "hours": 97.17861111111111,
+    "latency_median_s": 6.5,
+    "latency_iqr_s": [
+     2.25,
+     10.75
+    ]
+   },
+   "sub-064": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 212.1036843733606,
+    "false_alarms": 365,
+    "hours": 41.300555555555555,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     3.0,
+     10.5
+    ]
+   },
+   "sub-069": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 158.12732456247545,
+    "false_alarms": 1273,
+    "hours": 193.2113888888889,
+    "latency_median_s": 12.0,
+    "latency_iqr_s": [
+     12.0,
+     12.0
+    ]
+   },
+   "sub-070": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 130.4046134003442,
+    "false_alarms": 770,
+    "hours": 141.71277777777777,
+    "latency_median_s": 12.0,
+    "latency_iqr_s": [
+     12.0,
+     12.0
+    ]
+   },
+   "sub-074": {
+    "sensitivity": 0.7777777777777778,
+    "detected": 7,
+    "seizures": 9,
+    "fa_per_24h": 149.393471469099,
+    "false_alarms": 963,
+    "hours": 154.70555555555555,
+    "latency_median_s": 17.0,
+    "latency_iqr_s": [
+     14.5,
+     32.5
+    ]
+   },
+   "sub-076": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 232.4373135027887,
+    "false_alarms": 861,
+    "hours": 88.90138888888887,
+    "latency_median_s": 16.0,
+    "latency_iqr_s": [
+     14.0,
+     29.0
+    ]
+   },
+   "sub-080": {
+    "sensitivity": 0.625,
+    "detected": 5,
+    "seizures": 8,
+    "fa_per_24h": 188.89619858007748,
+    "false_alarms": 1213,
+    "hours": 154.11638888888888,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     -2.0,
+     10.0
+    ]
+   },
+   "sub-081": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 388.66310634431704,
+    "false_alarms": 1624,
+    "hours": 100.28222222222225,
+    "latency_median_s": 10.0,
+    "latency_iqr_s": [
+     4.0,
+     12.25
+    ]
+   },
+   "sub-082": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 600.1041452984709,
+    "false_alarms": 2641,
+    "hours": 105.62166666666667,
+    "latency_median_s": 32.5,
+    "latency_iqr_s": [
+     18.0,
+     66.75
+    ]
+   },
+   "sub-095": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 222.72780479499437,
+    "false_alarms": 969,
+    "hours": 104.41444444444441,
+    "latency_median_s": 8.0,
+    "latency_iqr_s": [
+     8.0,
+     8.0
+    ]
+   },
+   "sub-100": {
+    "sensitivity": 0.5,
+    "detected": 1,
+    "seizures": 2,
+    "fa_per_24h": 201.49323493843312,
+    "false_alarms": 943,
+    "hours": 112.32138888888889,
+    "latency_median_s": 2.0,
+    "latency_iqr_s": [
+     2.0,
+     2.0
+    ]
+   },
+   "sub-102": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 210.18053547066023,
+    "false_alarms": 1011,
+    "hours": 115.44361111111112,
+    "latency_median_s": 8.0,
+    "latency_iqr_s": [
+     4.5,
+     10.5
+    ]
+   },
+   "sub-106": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 248.24179424638123,
+    "false_alarms": 1026,
+    "hours": 99.19361111111111,
+    "latency_median_s": 23.0,
+    "latency_iqr_s": [
+     18.0,
+     28.0
+    ]
+   },
+   "sub-109": {
+    "sensitivity": 0.972972972972973,
+    "detected": 36,
+    "seizures": 37,
+    "fa_per_24h": 177.43733742770172,
+    "false_alarms": 844,
+    "hours": 114.1586111111111,
+    "latency_median_s": 5.0,
+    "latency_iqr_s": [
+     -6.0,
+     8.25
+    ]
+   },
+   "sub-116": {
+    "sensitivity": 1.0,
+    "detected": 7,
+    "seizures": 7,
+    "fa_per_24h": 204.48993213928134,
+    "false_alarms": 851,
+    "hours": 99.87777777777778,
+    "latency_median_s": 13.0,
+    "latency_iqr_s": [
+     10.0,
+     19.5
+    ]
+   },
+   "sub-117": {
+    "sensitivity": 0.7272727272727273,
+    "detected": 8,
+    "seizures": 11,
+    "fa_per_24h": 153.8509102583921,
+    "false_alarms": 599,
+    "hours": 93.44111111111111,
+    "latency_median_s": -4.0,
+    "latency_iqr_s": [
+     -5.25,
+     -2.0
+    ]
+   },
+   "sub-122": {
+    "sensitivity": 0.75,
+    "detected": 3,
+    "seizures": 4,
+    "fa_per_24h": 291.03416034995155,
+    "false_alarms": 807,
+    "hours": 66.5488888888889,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     2.0,
+     8.0
+    ]
+   },
+   "sub-124": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 257.11934430045136,
+    "false_alarms": 716,
+    "hours": 66.83277777777778,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     7.0,
+     7.0
+    ]
+   },
+   "sub-013": {
+    "sensitivity": 0.0,
+    "detected": 0,
+    "seizures": 2,
+    "fa_per_24h": 326.23508387617454,
+    "false_alarms": 262,
+    "hours": 19.274444444444445,
+    "latency_median_s": null,
+    "latency_iqr_s": null
+   },
+   "sub-018": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 181.83986001327457,
+    "false_alarms": 872,
+    "hours": 115.09027777777779,
+    "latency_median_s": -5.0,
+    "latency_iqr_s": [
+     -5.0,
+     -5.0
+    ]
+   },
+   "sub-020": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 101.448384494218,
+    "false_alarms": 489,
+    "hours": 115.68444444444444,
+    "latency_median_s": 19.0,
+    "latency_iqr_s": [
+     19.0,
+     19.0
+    ]
+   },
+   "sub-021": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 130.33779350657096,
+    "false_alarms": 607,
+    "hours": 111.77111111111111,
+    "latency_median_s": 5.0,
+    "latency_iqr_s": [
+     3.75,
+     6.5
+    ]
+   },
+   "sub-022": {
+    "sensitivity": 1.0,
+    "detected": 7,
+    "seizures": 7,
+    "fa_per_24h": 140.44825264704082,
+    "false_alarms": 664,
+    "hours": 113.46527777777777,
+    "latency_median_s": 35.0,
+    "latency_iqr_s": [
+     0.5,
+     41.5
+    ]
+   },
+   "sub-024": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 195.83168703346624,
+    "false_alarms": 958,
+    "hours": 117.40694444444443,
+    "latency_median_s": 30.5,
+    "latency_iqr_s": [
+     28.75,
+     32.25
+    ]
+   },
+   "sub-026": {
+    "sensitivity": 0.75,
+    "detected": 3,
+    "seizures": 4,
+    "fa_per_24h": 169.11602735397256,
+    "false_alarms": 638,
+    "hours": 90.54138888888889,
+    "latency_median_s": 23.0,
+    "latency_iqr_s": [
+     14.5,
+     34.0
+    ]
+   },
+   "sub-027": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 213.69311272635235,
+    "false_alarms": 899,
+    "hours": 100.9672222222222,
+    "latency_median_s": -8.0,
+    "latency_iqr_s": [
+     -8.0,
+     -8.0
+    ]
+   },
+   "sub-031": {
+    "sensitivity": 0.6666666666666666,
+    "detected": 2,
+    "seizures": 3,
+    "fa_per_24h": 207.74821410083854,
+    "false_alarms": 929,
+    "hours": 107.32222222222225,
+    "latency_median_s": 2.5,
+    "latency_iqr_s": [
+     -2.25,
+     7.25
+    ]
+   },
+   "sub-034": {
+    "sensitivity": 0.9333333333333333,
+    "detected": 28,
+    "seizures": 30,
+    "fa_per_24h": 211.51475409836067,
+    "false_alarms": 840,
+    "hours": 95.3125,
+    "latency_median_s": -0.5,
+    "latency_iqr_s": [
+     -5.0,
+     3.25
+    ]
+   },
+   "sub-041": {
+    "sensitivity": 0.5,
+    "detected": 1,
+    "seizures": 2,
+    "fa_per_24h": 272.23045964837956,
+    "false_alarms": 238,
+    "hours": 20.982222222222223,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     7.0,
+     7.0
+    ]
+   },
+   "sub-042": {
+    "sensitivity": 0.7272727272727273,
+    "detected": 8,
+    "seizures": 11,
+    "fa_per_24h": 185.03037667071695,
+    "false_alarms": 564,
+    "hours": 73.15555555555554,
+    "latency_median_s": 9.5,
+    "latency_iqr_s": [
+     4.5,
+     12.25
+    ]
+   },
+   "sub-048": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 220.82660064019464,
+    "false_alarms": 832,
+    "hours": 90.42388888888888,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     9.0,
+     9.0
+    ]
+   },
+   "sub-063": {
+    "sensitivity": 0.5,
+    "detected": 1,
+    "seizures": 2,
+    "fa_per_24h": 254.58250972977618,
+    "false_alarms": 720,
+    "hours": 67.87583333333333,
+    "latency_median_s": -15.0,
+    "latency_iqr_s": [
+     -15.0,
+     -15.0
+    ]
+   },
+   "sub-073": {
+    "sensitivity": 0.96,
+    "detected": 72,
+    "seizures": 75,
+    "fa_per_24h": 199.21111953340073,
+    "false_alarms": 2330,
+    "hours": 280.70722222222224,
+    "latency_median_s": 15.0,
+    "latency_iqr_s": [
+     2.5,
+     22.25
+    ]
+   },
+   "sub-077": {
+    "sensitivity": 0.8888888888888888,
+    "detected": 8,
+    "seizures": 9,
+    "fa_per_24h": 250.4618797084004,
+    "false_alarms": 643,
+    "hours": 61.61416666666667,
+    "latency_median_s": 10.5,
+    "latency_iqr_s": [
+     7.0,
+     12.5
+    ]
+   },
+   "sub-086": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 215.4767761179159,
+    "false_alarms": 801,
+    "hours": 89.2161111111111,
+    "latency_median_s": 18.0,
+    "latency_iqr_s": [
+     11.5,
+     28.25
+    ]
+   },
+   "sub-089": {
+    "sensitivity": 1.0,
+    "detected": 5,
+    "seizures": 5,
+    "fa_per_24h": 156.14556548739944,
+    "false_alarms": 667,
+    "hours": 102.51972222222223,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     7.0,
+     14.0
+    ]
+   },
+   "sub-094": {
+    "sensitivity": 0.6666666666666666,
+    "detected": 2,
+    "seizures": 3,
+    "fa_per_24h": 191.44170454834043,
+    "false_alarms": 349,
+    "hours": 43.752222222222215,
+    "latency_median_s": 140.0,
+    "latency_iqr_s": [
+     82.0,
+     198.0
+    ]
+   },
+   "sub-098": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 196.09406367883133,
+    "false_alarms": 944,
+    "hours": 115.5363888888889,
+    "latency_median_s": -5.0,
+    "latency_iqr_s": [
+     -5.0,
+     -5.0
+    ]
+   },
+   "sub-099": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 171.1036594255722,
+    "false_alarms": 815,
+    "hours": 114.31666666666669,
+    "latency_median_s": 16.5,
+    "latency_iqr_s": [
+     8.5,
+     22.25
+    ]
+   },
+   "sub-101": {
+    "sensitivity": 0.14285714285714285,
+    "detected": 1,
+    "seizures": 7,
+    "fa_per_24h": 230.77751840545878,
+    "false_alarms": 714,
+    "hours": 74.25333333333333,
+    "latency_median_s": 24.0,
+    "latency_iqr_s": [
+     24.0,
+     24.0
+    ]
+   },
+   "sub-103": {
+    "sensitivity": 0.2,
+    "detected": 3,
+    "seizures": 15,
+    "fa_per_24h": 210.81337487792405,
+    "false_alarms": 787,
+    "hours": 89.59583333333332,
+    "latency_median_s": 13.0,
+    "latency_iqr_s": [
+     10.0,
+     26.0
+    ]
+   },
+   "sub-105": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 207.69330922242312,
+    "false_alarms": 997,
+    "hours": 115.20833333333334,
+    "latency_median_s": -7.0,
+    "latency_iqr_s": [
+     -7.0,
+     -7.0
+    ]
+   },
+   "sub-108": {
+    "sensitivity": 0.0,
+    "detected": 0,
+    "seizures": 2,
+    "fa_per_24h": 233.48227424749166,
+    "false_alarms": 202,
+    "hours": 20.76388888888889,
+    "latency_median_s": null,
+    "latency_iqr_s": null
+   },
+   "sub-005": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 241.35848018883053,
+    "false_alarms": 1219,
+    "hours": 121.2138888888889,
+    "latency_median_s": 48.0,
+    "latency_iqr_s": [
+     42.5,
+     53.5
+    ]
+   },
+   "sub-008": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 178.32426709503122,
+    "false_alarms": 848,
+    "hours": 114.12916666666666,
+    "latency_median_s": 4.5,
+    "latency_iqr_s": [
+     3.75,
+     5.25
+    ]
+   },
+   "sub-014": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 174.42131465929916,
+    "false_alarms": 369,
+    "hours": 50.773611111111116,
+    "latency_median_s": -2.0,
+    "latency_iqr_s": [
+     -7.5,
+     3.5
+    ]
+   },
+   "sub-023": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 227.93422416325353,
+    "false_alarms": 952,
+    "hours": 100.23944444444444,
+    "latency_median_s": 15.0,
+    "latency_iqr_s": [
+     15.0,
+     15.0
+    ]
+   },
+   "sub-036": {
+    "sensitivity": 0.0,
+    "detected": 0,
+    "seizures": 3,
+    "fa_per_24h": 214.93725468516777,
+    "false_alarms": 180,
+    "hours": 20.09888888888889,
+    "latency_median_s": null,
+    "latency_iqr_s": null
+   },
+   "sub-037": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 207.8533962586599,
+    "false_alarms": 183,
+    "hours": 21.130277777777778,
+    "latency_median_s": 12.5,
+    "latency_iqr_s": [
+     2.75,
+     22.25
+    ]
+   },
+   "sub-046": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 167.13367678727386,
+    "false_alarms": 680,
+    "hours": 97.64638888888886,
+    "latency_median_s": 12.5,
+    "latency_iqr_s": [
+     6.5,
+     15.25
+    ]
+   },
+   "sub-047": {
+    "sensitivity": 0.234375,
+    "detected": 15,
+    "seizures": 64,
+    "fa_per_24h": 265.161030693999,
+    "false_alarms": 755,
+    "hours": 68.33583333333334,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     6.5,
+     9.0
+    ]
+   },
+   "sub-049": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 199.8531137819083,
+    "false_alarms": 674,
+    "hours": 80.93944444444443,
+    "latency_median_s": 8.0,
+    "latency_iqr_s": [
+     8.0,
+     8.0
+    ]
+   },
+   "sub-052": {
+    "sensitivity": 0.6666666666666666,
+    "detected": 6,
+    "seizures": 9,
+    "fa_per_24h": 227.49967086274472,
+    "false_alarms": 780,
+    "hours": 82.28583333333333,
+    "latency_median_s": 23.5,
+    "latency_iqr_s": [
+     12.5,
+     29.25
+    ]
+   },
+   "sub-058": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 242.98383616188897,
+    "false_alarms": 202,
+    "hours": 19.951944444444443,
+    "latency_median_s": 34.0,
+    "latency_iqr_s": [
+     34.0,
+     34.0
+    ]
+   },
+   "sub-060": {
+    "sensitivity": 0.64,
+    "detected": 16,
+    "seizures": 25,
+    "fa_per_24h": 213.91163811630665,
+    "false_alarms": 432,
+    "hours": 48.46861111111111,
+    "latency_median_s": 22.0,
+    "latency_iqr_s": [
+     15.5,
+     33.5
+    ]
+   },
+   "sub-068": {
+    "sensitivity": 0.6666666666666666,
+    "detected": 2,
+    "seizures": 3,
+    "fa_per_24h": 225.62406455731974,
+    "false_alarms": 499,
+    "hours": 53.07944444444445,
+    "latency_median_s": 35.0,
+    "latency_iqr_s": [
+     30.5,
+     39.5
+    ]
+   },
+   "sub-075": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 181.10614737926986,
+    "false_alarms": 1684,
+    "hours": 223.16194444444452,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     5.5,
+     8.5
+    ]
+   },
+   "sub-083": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 233.60063203634212,
+    "false_alarms": 616,
+    "hours": 63.28749999999999,
+    "latency_median_s": 4.0,
+    "latency_iqr_s": [
+     4.0,
+     4.0
+    ]
+   },
+   "sub-084": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 223.18132876359175,
+    "false_alarms": 511,
+    "hours": 54.95083333333333,
+    "latency_median_s": 5.5,
+    "latency_iqr_s": [
+     3.0,
+     7.5
+    ]
+   },
+   "sub-088": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 141.12763022486916,
+    "false_alarms": 373,
+    "hours": 63.43194444444445,
+    "latency_median_s": 12.0,
+    "latency_iqr_s": [
+     12.0,
+     12.0
+    ]
+   },
+   "sub-091": {
+    "sensitivity": 1.0,
+    "detected": 5,
+    "seizures": 5,
+    "fa_per_24h": 90.66107030430221,
+    "false_alarms": 4,
+    "hours": 1.0588888888888888,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     9.0,
+     10.0
+    ]
+   },
+   "sub-092": {
+    "sensitivity": 0.8333333333333334,
+    "detected": 5,
+    "seizures": 6,
+    "fa_per_24h": 200.91670421528562,
+    "false_alarms": 898,
+    "hours": 107.26833333333336,
+    "latency_median_s": 22.0,
+    "latency_iqr_s": [
+     -6.0,
+     27.0
+    ]
+   },
+   "sub-096": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 251.9763001974985,
+    "false_alarms": 886,
+    "hours": 84.38888888888884,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     7.0,
+     7.0
+    ]
+   },
+   "sub-114": {
+    "sensitivity": 0.5,
+    "detected": 2,
+    "seizures": 4,
+    "fa_per_24h": 161.6350536956457,
+    "false_alarms": 813,
+    "hours": 120.71638888888889,
+    "latency_median_s": 32.5,
+    "latency_iqr_s": [
+     30.25,
+     34.75
+    ]
+   },
+   "sub-115": {
+    "sensitivity": 1.0,
+    "detected": 7,
+    "seizures": 7,
+    "fa_per_24h": 195.2265528633369,
+    "false_alarms": 2255,
+    "hours": 277.2163888888888,
+    "latency_median_s": 11.0,
+    "latency_iqr_s": [
+     7.0,
+     30.5
+    ]
+   },
+   "sub-119": {
+    "sensitivity": 0.6428571428571429,
+    "detected": 9,
+    "seizures": 14,
+    "fa_per_24h": 227.60537656565714,
+    "false_alarms": 1777,
+    "hours": 187.37694444444446,
+    "latency_median_s": 3.0,
+    "latency_iqr_s": [
+     0.0,
+     34.0
+    ]
+   },
+   "sub-120": {
+    "sensitivity": 0.3,
+    "detected": 3,
+    "seizures": 10,
+    "fa_per_24h": 364.43556443556446,
+    "false_alarms": 38,
+    "hours": 2.5025,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     -1.5,
+     11.0
+    ]
+   },
+   "sub-121": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 249.97455034477588,
+    "false_alarms": 1080,
+    "hours": 103.69055555555555,
+    "latency_median_s": 11.5,
+    "latency_iqr_s": [
+     8.75,
+     17.75
+    ]
+   },
+   "sub-001": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 122.27721611034224,
+    "false_alarms": 543,
+    "hours": 106.5775,
+    "latency_median_s": 12.0,
+    "latency_iqr_s": [
+     7.75,
+     15.75
+    ]
+   },
+   "sub-003": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 175.43656088646517,
+    "false_alarms": 840,
+    "hours": 114.91333333333333,
+    "latency_median_s": 26.0,
+    "latency_iqr_s": [
+     26.0,
+     26.0
+    ]
+   },
+   "sub-004": {
+    "sensitivity": 0.75,
+    "detected": 3,
+    "seizures": 4,
+    "fa_per_24h": 198.48648648648648,
+    "false_alarms": 153,
+    "hours": 18.5,
+    "latency_median_s": 18.0,
+    "latency_iqr_s": [
+     6.5,
+     25.0
+    ]
+   },
+   "sub-010": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 134.22865538444796,
+    "false_alarms": 571,
+    "hours": 102.09444444444443,
+    "latency_median_s": 53.0,
+    "latency_iqr_s": [
+     53.0,
+     53.0
+    ]
+   },
+   "sub-016": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 249.07062766641005,
+    "false_alarms": 498,
+    "hours": 47.98638888888889,
+    "latency_median_s": 12.5,
+    "latency_iqr_s": [
+     9.25,
+     15.75
+    ]
+   },
+   "sub-025": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 204.2049599143025,
+    "false_alarms": 834,
+    "hours": 98.01916666666665,
+    "latency_median_s": 12.0,
+    "latency_iqr_s": [
+     5.0,
+     22.0
+    ]
+   },
+   "sub-029": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 191.9543780444339,
+    "false_alarms": 935,
+    "hours": 116.90277777777777,
+    "latency_median_s": 3.5,
+    "latency_iqr_s": [
+     2.25,
+     8.25
+    ]
+   },
+   "sub-030": {
+    "sensitivity": 0.5714285714285714,
+    "detected": 4,
+    "seizures": 7,
+    "fa_per_24h": 152.0910820249283,
+    "false_alarms": 744,
+    "hours": 117.40333333333334,
+    "latency_median_s": -6.5,
+    "latency_iqr_s": [
+     -9.0,
+     -4.25
+    ]
+   },
+   "sub-032": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 223.67273011164025,
+    "false_alarms": 829,
+    "hours": 88.95138888888889,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     9.0,
+     9.0
+    ]
+   },
+   "sub-035": {
+    "sensitivity": 0.4,
+    "detected": 22,
+    "seizures": 55,
+    "fa_per_24h": 168.3039281981927,
+    "false_alarms": 507,
+    "hours": 72.29777777777777,
+    "latency_median_s": 7.0,
+    "latency_iqr_s": [
+     4.25,
+     8.75
+    ]
+   },
+   "sub-038": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 232.68661124448437,
+    "false_alarms": 921,
+    "hours": 94.99472222222222,
+    "latency_median_s": -4.0,
+    "latency_iqr_s": [
+     -4.0,
+     -4.0
+    ]
+   },
+   "sub-050": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 213.36293007769143,
+    "false_alarms": 623,
+    "hours": 70.07777777777778,
+    "latency_median_s": 17.0,
+    "latency_iqr_s": [
+     7.0,
+     20.0
+    ]
+   },
+   "sub-054": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 228.19349039539244,
+    "false_alarms": 714,
+    "hours": 75.09416666666667,
+    "latency_median_s": 3.0,
+    "latency_iqr_s": [
+     3.0,
+     3.0
+    ]
+   },
+   "sub-059": {
+    "sensitivity": 0.25,
+    "detected": 2,
+    "seizures": 8,
+    "fa_per_24h": 228.40858910876517,
+    "false_alarms": 449,
+    "hours": 47.17861111111111,
+    "latency_median_s": 11.0,
+    "latency_iqr_s": [
+     10.0,
+     12.0
+    ]
+   },
+   "sub-062": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 190.03350774969874,
+    "false_alarms": 533,
+    "hours": 67.31444444444445,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     -2.5,
+     9.0
+    ]
+   },
+   "sub-065": {
+    "sensitivity": 0.5,
+    "detected": 1,
+    "seizures": 2,
+    "fa_per_24h": 178.0202954528986,
+    "false_alarms": 654,
+    "hours": 88.16972222222222,
+    "latency_median_s": 10.0,
+    "latency_iqr_s": [
+     10.0,
+     10.0
+    ]
+   },
+   "sub-067": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 205.46727587443667,
+    "false_alarms": 305,
+    "hours": 35.626111111111115,
+    "latency_median_s": 3.5,
+    "latency_iqr_s": [
+     2.5,
+     4.25
+    ]
+   },
+   "sub-071": {
+    "sensitivity": 1.0,
+    "detected": 6,
+    "seizures": 6,
+    "fa_per_24h": 146.4724149435809,
+    "false_alarms": 1189,
+    "hours": 194.82166666666663,
+    "latency_median_s": 20.5,
+    "latency_iqr_s": [
+     14.5,
+     22.75
+    ]
+   },
+   "sub-072": {
+    "sensitivity": 1.0,
+    "detected": 20,
+    "seizures": 20,
+    "fa_per_24h": 203.45398794628693,
+    "false_alarms": 1069,
+    "hours": 126.10222222222225,
+    "latency_median_s": 13.0,
+    "latency_iqr_s": [
+     6.75,
+     30.0
+    ]
+   },
+   "sub-078": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 197.38390556318785,
+    "false_alarms": 3266,
+    "hours": 397.1144444444443,
+    "latency_median_s": 0.0,
+    "latency_iqr_s": [
+     0.0,
+     0.0
+    ]
+   },
+   "sub-097": {
+    "sensitivity": 0.8461538461538461,
+    "detected": 11,
+    "seizures": 13,
+    "fa_per_24h": 316.3553613897808,
+    "false_alarms": 1284,
+    "hours": 97.40944444444445,
+    "latency_median_s": 4.0,
+    "latency_iqr_s": [
+     3.0,
+     5.0
+    ]
+   },
+   "sub-110": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 167.27084993434414,
+    "false_alarms": 690,
+    "hours": 99.00111111111111,
+    "latency_median_s": 4.5,
+    "latency_iqr_s": [
+     3.25,
+     5.75
+    ]
+   },
+   "sub-111": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 244.70721518091057,
+    "false_alarms": 760,
+    "hours": 74.53805555555556,
+    "latency_median_s": 31.5,
+    "latency_iqr_s": [
+     21.25,
+     41.75
+    ]
+   },
+   "sub-113": {
+    "sensitivity": 0.4,
+    "detected": 4,
+    "seizures": 10,
+    "fa_per_24h": 227.84065716085968,
+    "false_alarms": 904,
+    "hours": 95.22444444444446,
+    "latency_median_s": 7.5,
+    "latency_iqr_s": [
+     1.5,
+     10.25
+    ]
+   },
+   "sub-123": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 157.85432892363804,
+    "false_alarms": 544,
+    "hours": 82.70916666666668,
+    "latency_median_s": 11.0,
+    "latency_iqr_s": [
+     9.5,
+     12.5
+    ]
+   },
+   "sub-009": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 266.22491025658934,
+    "false_alarms": 1103,
+    "hours": 99.43472222222222,
+    "latency_median_s": 14.0,
+    "latency_iqr_s": [
+     14.0,
+     14.0
+    ]
+   },
+   "sub-012": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 100.50946373393748,
+    "false_alarms": 477,
+    "hours": 113.89972222222224,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     3.5,
+     10.5
+    ]
+   },
+   "sub-015": {
+    "sensitivity": 0.8888888888888888,
+    "detected": 8,
+    "seizures": 9,
+    "fa_per_24h": 226.1312203011572,
+    "false_alarms": 835,
+    "hours": 88.62111111111112,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     5.0,
+     16.25
+    ]
+   },
+   "sub-017": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 254.63632573685516,
+    "false_alarms": 1223,
+    "hours": 115.27027777777779,
+    "latency_median_s": 36.0,
+    "latency_iqr_s": [
+     36.0,
+     36.0
+    ]
+   },
+   "sub-028": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 244.10457319370147,
+    "false_alarms": 900,
+    "hours": 88.48666666666668,
+    "latency_median_s": -1.0,
+    "latency_iqr_s": [
+     -6.75,
+     14.0
+    ]
+   },
+   "sub-033": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 229.33667967294758,
+    "false_alarms": 1083,
+    "hours": 113.33555555555556,
+    "latency_median_s": 42.0,
+    "latency_iqr_s": [
+     42.0,
+     42.0
+    ]
+   },
+   "sub-040": {
+    "sensitivity": 1.0,
+    "detected": 3,
+    "seizures": 3,
+    "fa_per_24h": 176.0329296418488,
+    "false_alarms": 394,
+    "hours": 53.71722222222222,
+    "latency_median_s": 17.0,
+    "latency_iqr_s": [
+     12.0,
+     19.5
+    ]
+   },
+   "sub-044": {
+    "sensitivity": 0.75,
+    "detected": 3,
+    "seizures": 4,
+    "fa_per_24h": 164.1658423726256,
+    "false_alarms": 680,
+    "hours": 99.41166666666666,
+    "latency_median_s": 1.0,
+    "latency_iqr_s": [
+     -1.0,
+     8.0
+    ]
+   },
+   "sub-051": {
+    "sensitivity": 0.0,
+    "detected": 0,
+    "seizures": 5,
+    "fa_per_24h": 58.437310720775294,
+    "false_alarms": 67,
+    "hours": 27.516666666666666,
+    "latency_median_s": null,
+    "latency_iqr_s": null
+   },
+   "sub-053": {
+    "sensitivity": 0.5,
+    "detected": 1,
+    "seizures": 2,
+    "fa_per_24h": 145.1678567966655,
+    "false_alarms": 156,
+    "hours": 25.79083333333333,
+    "latency_median_s": 31.0,
+    "latency_iqr_s": [
+     31.0,
+     31.0
+    ]
+   },
+   "sub-055": {
+    "sensitivity": 0.625,
+    "detected": 5,
+    "seizures": 8,
+    "fa_per_24h": 252.42710780346252,
+    "false_alarms": 444,
+    "hours": 42.214166666666664,
+    "latency_median_s": 28.0,
+    "latency_iqr_s": [
+     17.0,
+     30.0
+    ]
+   },
+   "sub-056": {
+    "sensitivity": 1.0,
+    "detected": 13,
+    "seizures": 13,
+    "fa_per_24h": 194.34730051054072,
+    "false_alarms": 508,
+    "hours": 62.73305555555555,
+    "latency_median_s": 9.0,
+    "latency_iqr_s": [
+     -8.0,
+     17.0
+    ]
+   },
+   "sub-057": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 198.7243115728349,
+    "false_alarms": 507,
+    "hours": 61.23055555555556,
+    "latency_median_s": 5.0,
+    "latency_iqr_s": [
+     5.0,
+     5.0
+    ]
+   },
+   "sub-061": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 347.481994434223,
+    "false_alarms": 1305,
+    "hours": 90.13416666666667,
+    "latency_median_s": 19.0,
+    "latency_iqr_s": [
+     19.0,
+     19.0
+    ]
+   },
+   "sub-066": {
+    "sensitivity": 0.75,
+    "detected": 3,
+    "seizures": 4,
+    "fa_per_24h": 218.8038057510699,
+    "false_alarms": 1074,
+    "hours": 117.80416666666667,
+    "latency_median_s": 28.0,
+    "latency_iqr_s": [
+     22.0,
+     39.0
+    ]
+   },
+   "sub-079": {
+    "sensitivity": 0.2,
+    "detected": 3,
+    "seizures": 15,
+    "fa_per_24h": 190.82004993278278,
+    "false_alarms": 759,
+    "hours": 95.46166666666667,
+    "latency_median_s": 14.0,
+    "latency_iqr_s": [
+     11.5,
+     21.5
+    ]
+   },
+   "sub-085": {
+    "sensitivity": 0.6666666666666666,
+    "detected": 2,
+    "seizures": 3,
+    "fa_per_24h": 231.37644580468225,
+    "false_alarms": 539,
+    "hours": 55.90888888888888,
+    "latency_median_s": 17.5,
+    "latency_iqr_s": [
+     13.75,
+     21.25
+    ]
+   },
+   "sub-087": {
+    "sensitivity": 0.7857142857142857,
+    "detected": 33,
+    "seizures": 42,
+    "fa_per_24h": 242.15893014440908,
+    "false_alarms": 210,
+    "hours": 20.812777777777782,
+    "latency_median_s": -5.0,
+    "latency_iqr_s": [
+     -11.0,
+     9.0
+    ]
+   },
+   "sub-090": {
+    "sensitivity": 1.0,
+    "detected": 4,
+    "seizures": 4,
+    "fa_per_24h": 155.49295774647888,
+    "false_alarms": 23,
+    "hours": 3.55,
+    "latency_median_s": 32.0,
+    "latency_iqr_s": [
+     7.5,
+     156.5
+    ]
+   },
+   "sub-093": {
+    "sensitivity": 1.0,
+    "detected": 1,
+    "seizures": 1,
+    "fa_per_24h": 218.41200597453707,
+    "false_alarms": 853,
+    "hours": 93.73111111111113,
+    "latency_median_s": 30.0,
+    "latency_iqr_s": [
+     30.0,
+     30.0
+    ]
+   },
+   "sub-104": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 243.49597636752577,
+    "false_alarms": 996,
+    "hours": 98.16999999999999,
+    "latency_median_s": 6.0,
+    "latency_iqr_s": [
+     5.5,
+     6.5
+    ]
+   },
+   "sub-107": {
+    "sensitivity": 0.0,
+    "detected": 0,
+    "seizures": 2,
+    "fa_per_24h": 205.2698803160036,
+    "false_alarms": 904,
+    "hours": 105.695,
+    "latency_median_s": null,
+    "latency_iqr_s": null
+   },
+   "sub-112": {
+    "sensitivity": 0.7142857142857143,
+    "detected": 5,
+    "seizures": 7,
+    "fa_per_24h": 299.3989929070334,
+    "false_alarms": 832,
+    "hours": 66.69361111111111,
+    "latency_median_s": 21.0,
+    "latency_iqr_s": [
+     20.0,
+     25.0
+    ]
+   },
+   "sub-118": {
+    "sensitivity": 0.5,
+    "detected": 1,
+    "seizures": 2,
+    "fa_per_24h": 176.99432247537396,
+    "false_alarms": 919,
+    "hours": 124.61416666666668,
+    "latency_median_s": 10.0,
+    "latency_iqr_s": [
+     10.0,
+     10.0
+    ]
+   },
+   "sub-125": {
+    "sensitivity": 1.0,
+    "detected": 2,
+    "seizures": 2,
+    "fa_per_24h": 222.6843541894575,
+    "false_alarms": 728,
+    "hours": 78.46083333333335,
+    "latency_median_s": 42.0,
+    "latency_iqr_s": [
+     26.0,
+     58.0
+    ]
+   }
   }
  },
  "latency": {
@@ -25548,6 +27445,653 @@
    16.0,
    12.0,
    98.0
+  ],
+  "EEG + PPG(sim) + context + HR-excess": [
+   7.0,
+   -3.0,
+   3.0,
+   30.0,
+   -11.0,
+   0.0,
+   -2.0,
+   -2.0,
+   -2.0,
+   42.0,
+   -4.0,
+   -12.0,
+   54.0,
+   14.0,
+   9.0,
+   17.0,
+   38.0,
+   8.0,
+   -1.0,
+   13.0,
+   9.0,
+   8.0,
+   7.0,
+   8.0,
+   6.0,
+   8.0,
+   6.0,
+   9.0,
+   -8.0,
+   0.0,
+   8.0,
+   7.0,
+   2.0,
+   8.0,
+   6.0,
+   8.0,
+   9.0,
+   11.0,
+   7.0,
+   8.0,
+   7.0,
+   6.0,
+   6.0,
+   9.0,
+   5.0,
+   16.0,
+   7.0,
+   9.0,
+   6.0,
+   5.0,
+   6.0,
+   5.0,
+   4.0,
+   8.0,
+   3.0,
+   6.0,
+   9.0,
+   7.0,
+   7.0,
+   5.0,
+   4.0,
+   7.0,
+   5.0,
+   7.0,
+   1.0,
+   -5.0,
+   6.0,
+   5.0,
+   3.0,
+   7.0,
+   5.0,
+   5.0,
+   6.0,
+   5.0,
+   5.0,
+   6.0,
+   5.0,
+   6.0,
+   9.0,
+   7.0,
+   -10.0,
+   22.0,
+   20.0,
+   15.0,
+   -2.0,
+   -3.0,
+   12.0,
+   9.0,
+   12.0,
+   12.0,
+   12.0,
+   17.0,
+   45.0,
+   0.0,
+   43.0,
+   22.0,
+   15.0,
+   14.0,
+   12.0,
+   42.0,
+   16.0,
+   -7.0,
+   -2.0,
+   10.0,
+   30.0,
+   6.0,
+   -11.0,
+   11.0,
+   9.0,
+   16.0,
+   19.0,
+   15.0,
+   46.0,
+   129.0,
+   8.0,
+   2.0,
+   1.0,
+   8.0,
+   13.0,
+   13.0,
+   33.0,
+   -6.0,
+   9.0,
+   10.0,
+   8.0,
+   5.0,
+   15.0,
+   2.0,
+   6.0,
+   7.0,
+   5.0,
+   -10.0,
+   -7.0,
+   0.0,
+   -12.0,
+   -5.0,
+   -8.0,
+   -7.0,
+   -9.0,
+   5.0,
+   7.0,
+   7.0,
+   7.0,
+   -11.0,
+   1.0,
+   -6.0,
+   -10.0,
+   9.0,
+   7.0,
+   -5.0,
+   9.0,
+   1.0,
+   11.0,
+   14.0,
+   14.0,
+   14.0,
+   5.0,
+   25.0,
+   12.0,
+   7.0,
+   14.0,
+   25.0,
+   13.0,
+   8.0,
+   -5.0,
+   -6.0,
+   0.0,
+   -3.0,
+   -2.0,
+   -6.0,
+   -5.0,
+   -2.0,
+   6.0,
+   -2.0,
+   10.0,
+   7.0,
+   -5.0,
+   19.0,
+   3.0,
+   4.0,
+   8.0,
+   6.0,
+   42.0,
+   61.0,
+   35.0,
+   6.0,
+   41.0,
+   -5.0,
+   -11.0,
+   27.0,
+   34.0,
+   6.0,
+   45.0,
+   23.0,
+   -8.0,
+   -7.0,
+   12.0,
+   7.0,
+   4.0,
+   2.0,
+   5.0,
+   -4.0,
+   2.0,
+   -5.0,
+   -5.0,
+   3.0,
+   -4.0,
+   5.0,
+   -5.0,
+   7.0,
+   -8.0,
+   -5.0,
+   15.0,
+   6.0,
+   -8.0,
+   -4.0,
+   3.0,
+   2.0,
+   3.0,
+   -3.0,
+   -10.0,
+   -13.0,
+   -9.0,
+   2.0,
+   -5.0,
+   7.0,
+   -6.0,
+   -3.0,
+   9.0,
+   16.0,
+   16.0,
+   11.0,
+   7.0,
+   10.0,
+   9.0,
+   -15.0,
+   5.0,
+   -9.0,
+   -2.0,
+   -8.0,
+   10.0,
+   16.0,
+   0.0,
+   34.0,
+   0.0,
+   72.0,
+   13.0,
+   7.0,
+   0.0,
+   15.0,
+   3.0,
+   22.0,
+   14.0,
+   18.0,
+   38.0,
+   8.0,
+   13.0,
+   10.0,
+   12.0,
+   15.0,
+   23.0,
+   25.0,
+   -2.0,
+   13.0,
+   28.0,
+   42.0,
+   15.0,
+   47.0,
+   1.0,
+   30.0,
+   -5.0,
+   15.0,
+   17.0,
+   6.0,
+   27.0,
+   17.0,
+   31.0,
+   10.0,
+   16.0,
+   -4.0,
+   21.0,
+   16.0,
+   15.0,
+   22.0,
+   19.0,
+   12.0,
+   16.0,
+   -6.0,
+   10.0,
+   23.0,
+   25.0,
+   8.0,
+   22.0,
+   -4.0,
+   37.0,
+   -1.0,
+   17.0,
+   47.0,
+   -5.0,
+   -10.0,
+   -13.0,
+   16.0,
+   33.0,
+   55.0,
+   14.0,
+   -10.0,
+   37.0,
+   -10.0,
+   4.0,
+   10.0,
+   14.0,
+   12.0,
+   8.0,
+   11.0,
+   18.0,
+   -11.0,
+   24.0,
+   41.0,
+   12.0,
+   10.0,
+   6.0,
+   15.0,
+   7.0,
+   14.0,
+   9.0,
+   256.0,
+   24.0,
+   -5.0,
+   -2.0,
+   12.0,
+   21.0,
+   26.0,
+   24.0,
+   13.0,
+   7.0,
+   39.0,
+   -7.0,
+   -7.0,
+   59.0,
+   37.0,
+   6.0,
+   3.0,
+   9.0,
+   -13.0,
+   15.0,
+   -7.0,
+   32.0,
+   16.0,
+   15.0,
+   10.0,
+   -4.0,
+   9.0,
+   5.0,
+   -10.0,
+   9.0,
+   7.0,
+   7.0,
+   7.0,
+   7.0,
+   8.0,
+   15.0,
+   40.0,
+   11.0,
+   7.0,
+   6.0,
+   4.0,
+   8.0,
+   9.0,
+   31.0,
+   -1.0,
+   23.0,
+   33.0,
+   24.0,
+   34.0,
+   12.0,
+   20.0,
+   35.0,
+   43.0,
+   48.0,
+   20.0,
+   16.0,
+   23.0,
+   6.0,
+   24.0,
+   21.0,
+   66.0,
+   14.0,
+   33.0,
+   -7.0,
+   31.0,
+   26.0,
+   44.0,
+   10.0,
+   4.0,
+   4.0,
+   12.0,
+   -3.0,
+   5.0,
+   6.0,
+   12.0,
+   9.0,
+   10.0,
+   9.0,
+   8.0,
+   10.0,
+   -15.0,
+   27.0,
+   22.0,
+   39.0,
+   -6.0,
+   7.0,
+   28.0,
+   37.0,
+   76.0,
+   39.0,
+   -14.0,
+   11.0,
+   10.0,
+   4.0,
+   22.0,
+   -14.0,
+   0.0,
+   -6.0,
+   3.0,
+   3.0,
+   35.0,
+   25.0,
+   42.0,
+   34.0,
+   15.0,
+   7.0,
+   -10.0,
+   9.0,
+   8.0,
+   14.0,
+   29.0,
+   1.0,
+   14.0,
+   10.0,
+   21.0,
+   26.0,
+   18.0,
+   32.0,
+   -5.0,
+   53.0,
+   19.0,
+   6.0,
+   12.0,
+   -2.0,
+   32.0,
+   21.0,
+   4.0,
+   0.0,
+   3.0,
+   -8.0,
+   -5.0,
+   -12.0,
+   -2.0,
+   9.0,
+   1.0,
+   3.0,
+   8.0,
+   10.0,
+   9.0,
+   8.0,
+   5.0,
+   6.0,
+   3.0,
+   11.0,
+   8.0,
+   4.0,
+   3.0,
+   5.0,
+   3.0,
+   10.0,
+   6.0,
+   8.0,
+   8.0,
+   6.0,
+   12.0,
+   9.0,
+   -4.0,
+   23.0,
+   17.0,
+   -3.0,
+   3.0,
+   13.0,
+   9.0,
+   12.0,
+   -11.0,
+   6.0,
+   10.0,
+   1.0,
+   4.0,
+   3.0,
+   5.0,
+   33.0,
+   19.0,
+   12.0,
+   23.0,
+   22.0,
+   13.0,
+   30.0,
+   7.0,
+   3.0,
+   31.0,
+   36.0,
+   -2.0,
+   6.0,
+   5.0,
+   -1.0,
+   8.0,
+   12.0,
+   12.0,
+   14.0,
+   37.0,
+   30.0,
+   14.0,
+   14.0,
+   10.0,
+   38.0,
+   18.0,
+   0.0,
+   6.0,
+   -6.0,
+   4.0,
+   5.0,
+   4.0,
+   5.0,
+   5.0,
+   -10.0,
+   5.0,
+   2.0,
+   4.0,
+   2.0,
+   7.0,
+   11.0,
+   52.0,
+   5.0,
+   11.0,
+   10.0,
+   -9.0,
+   14.0,
+   8.0,
+   14.0,
+   -2.0,
+   12.0,
+   9.0,
+   -5.0,
+   5.0,
+   26.0,
+   5.0,
+   6.0,
+   13.0,
+   6.0,
+   32.0,
+   36.0,
+   4.0,
+   -9.0,
+   -6.0,
+   44.0,
+   42.0,
+   22.0,
+   17.0,
+   7.0,
+   -3.0,
+   1.0,
+   15.0,
+   31.0,
+   30.0,
+   144.0,
+   10.0,
+   28.0,
+   17.0,
+   -8.0,
+   17.0,
+   14.0,
+   19.0,
+   -10.0,
+   9.0,
+   57.0,
+   7.0,
+   17.0,
+   5.0,
+   -13.0,
+   28.0,
+   -8.0,
+   5.0,
+   19.0,
+   50.0,
+   28.0,
+   16.0,
+   29.0,
+   14.0,
+   9.0,
+   25.0,
+   10.0,
+   -10.0,
+   8.0,
+   6.0,
+   5.0,
+   -2.0,
+   -9.0,
+   -12.0,
+   -11.0,
+   -2.0,
+   -13.0,
+   -7.0,
+   -13.0,
+   -5.0,
+   -12.0,
+   -10.0,
+   0.0,
+   -12.0,
+   9.0,
+   28.0,
+   21.0,
+   -6.0,
+   -9.0,
+   124.0,
+   40.0,
+   29.0,
+   7.0,
+   -12.0,
+   -7.0,
+   -12.0,
+   42.0,
+   79.0,
+   -14.0,
+   70.0,
+   461.0,
+   55.0,
+   3.0,
+   9.0,
+   30.0,
+   5.0,
+   7.0,
+   21.0,
+   33.0,
+   25.0,
+   15.0,
+   20.0,
+   10.0,
+   10.0,
+   74.0
   ]
  },
  "dataset": {
@@ -25616,6 +28160,12 @@
    "0.6": 82.79678245319207,
    "0.7": 165.00317671965263,
    "0.8": 500.56867486828617
+  },
+  "EEG + PPG(sim) + context + HR-excess": {
+   "0.5": 44.77041606235083,
+   "0.6": 83.53992842250442,
+   "0.7": 175.18634079359106,
+   "0.8": 376.5272911182585
   }
  },
  "budget": {
@@ -25688,6 +28238,13 @@
    "50": 0.535673839184598,
    "100": 0.6262740656851642,
    "200": 0.7168742921857305
+  },
+  "EEG + PPG(sim) + context + HR-excess": {
+   "5": 0.25934314835787087,
+   "20": 0.35447338618346547,
+   "50": 0.5300113250283126,
+   "100": 0.6058890147225368,
+   "200": 0.7180067950169875
   }
  }
 }

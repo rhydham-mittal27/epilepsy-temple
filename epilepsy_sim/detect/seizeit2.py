@@ -77,6 +77,8 @@ CONFIGS = {
     "EEG + ECG + context + HR-excess": ["eeg", "ecg", "ctx", "hrx"],
     # same inputs, more training data + a bigger model (see BIG)
     "EEG + ECG + context + HR-excess (big)": ["eeg", "ecg", "ctx", "hrx"],
+    # what the ear-hook's optical heart rate would give: ECG features degraded to PPG quality (see degrade_to_ppg())
+    "EEG + PPG(sim) + context + HR-excess": ["eeg", "ecg", "ctx", "hrx", "ppg"],
 }
 BIG = {"EEG + ECG + context + HR-excess (big)": {"neg_frac": 0.08, "max_iter": 400, "learning_rate": 0.05, "max_leaf_nodes": 63}}
 HRX_NAMES = ["hr_excess", "hr_excess_1min", "activity_15s", "hr_rise_unexplained_30s"]
@@ -409,7 +411,7 @@ def fetch(workers=3):
 # ------------------------------------------------------------------ evaluation
 CTX_TWIN = {"EEG + context": "EEG only (ear)", "EEG + ECG + context": "EEG + ECG",
             "EEG + ECG + HR-excess": "EEG + ECG", "EEG + ECG + context + HR-excess": "EEG + ECG",
-            "EEG + ECG + context + HR-excess (big)": "EEG + ECG"}  # same seed: the 3% pool is a subset of the 8% pool
+            "EEG + ECG + context + HR-excess (big)": "EEG + ECG", "EEG + PPG(sim) + context + HR-excess": "EEG + ECG"}  # same seed: the 3% pool is a subset of the 8% pool
 
 
 def neg_frac(cname):
@@ -473,6 +475,36 @@ def _ema(x, tau, x0=None):
     return lfilter([a], [1, a - 1], x, zi=[(1 - a) * x0])[0]
 
 
+def degrade_to_ppg(X):
+    """Turn the chest-ECG features into what in-ear PPG would plausibly give (literature-based):
+    at rest HR bias +0.78 bpm, SD 2.54 bpm (in-ear PPG vs ECG, 97 patients, 2,048 h) as a slowly
+    varying error; during movement +-15 % relative HR error and half the windows lost; 10 % of
+    resting windows lost to quality filtering; RMSSD +-30 % and SDNN +-9 % relative error
+    (PPG pulse-rate variability vs ECG HRV); beat quality lowered; no ECG waveform features.
+    Deterministic per recording (seeded by its length)."""
+    X = X.copy()
+    n = len(X)
+    rng = np.random.default_rng(n)
+    mv = X[:, [NAMES.index("back_acc_logstd"), NAMES.index("chest_acc_logstd")]]
+    moving = np.nan_to_num(np.nanmax(np.where(np.isnan(mv), -np.inf, mv), 1), neginf=-9) > -5
+    a = np.exp(-STEP / 30)  # slowly varying (30 s) measurement error
+    e = lfilter([np.sqrt(1 - a * a)], [1, -a], rng.normal(0, 1, n))
+    rel = lfilter([np.sqrt(1 - a * a)], [1, -a], rng.normal(0, 1, n))
+    hr_err = np.where(moving, 0.0, 0.78 + 2.54 * e)
+    hr_fac = np.where(moving, 1 + 0.15 * rel, 1.0)
+    for k in ("hr_4s", "hr_10s", "hr_30s"):
+        j = NAMES.index(k)
+        X[:, j] = X[:, j] * hr_fac + hr_err
+    X[:, NAMES.index("hr_slope_30s")] += rng.normal(0, 2.54 * np.sqrt(2), n) + np.where(moving, rng.normal(0, 8, n), 0)
+    X[:, NAMES.index("rmssd_30s")] *= np.exp(rng.normal(0, 0.30, n))
+    X[:, NAMES.index("sdnn_30s")] *= np.exp(rng.normal(0, 0.09, n))
+    X[:, NAMES.index("beat_quality")] -= np.where(moving, 0.3, 0.1)
+    X[:, NAMES.index("ecg_ll")] = np.nan  # a PPG sensor has no ECG waveform
+    lost = np.where(moving, rng.random(n) < 0.5, rng.random(n) < 0.10)
+    X[np.ix_(lost, [NAMES.index(k) for k in ECG_NAMES])] = np.nan
+    return X
+
+
 def hr_vs_motion(X):
     """Heart rate that the current movement can't explain. Per recording, a causal running linear fit
     HR ~ a + b * activity (30-min memory, past windows only) gives the heart rate expected from the
@@ -511,8 +543,12 @@ def design(X, groups):
     """Model input: baseline-normalised features of the chosen modalities, plus absolute heart rate
     / beat quality (absolute tachycardia matters, not only the change). With "ctx": + the recent
     history of key features (context()) and heart features against a slow 30-min baseline."""
-    base = [g for g in groups if g not in ("ctx", "hrx")]
+    if "ppg" in groups:
+        X = degrade_to_ppg(X)
+    base = [g for g in groups if g not in ("ctx", "hrx", "ppg")]
     cols = [i for g in base for i in (NAMES.index(n) for n in GROUPS[g])]
+    if "ppg" in groups:  # a PPG sensor has no ECG waveform: drop the column (an all-NaN column breaks the binning)
+        cols = [c for c in cols if c != NAMES.index("ecg_ll")]
     Z = normalise(X[:, cols])
     if "ctx" in groups:
         kc = [NAMES.index(n) for g in base for n in CTX_KEYS[g]]
