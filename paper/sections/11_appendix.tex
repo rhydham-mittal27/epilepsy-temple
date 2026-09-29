@@ -1,0 +1,89 @@
+% ============================================================================
+\section{Reproducibility}
+\label{app:repro}
+
+All commands run from \code{epilepsy_sim/} after \code{uv sync} (extras: \code{--extra tvb}, \code{--extra dl}).
+
+\begin{table}[H]
+\centering\small
+\caption{Commands and approximate run times.}
+\begin{tabularx}{\linewidth}{@{}L l@{}}
+\toprule
+Command & Time \\
+\midrule
+\code{uv run main.py} (spiking network + Epileptor) & $\approx$10 s \\
+\code{uv run ionic.py validate} & $\approx$7 s \\
+\code{uv run ionic.py healthy --t 90 --save}; \code{epileptic --t 120 --save} & $\approx$6 / 7 min \\
+\code{uv run infer.py --abc} (E1--E7) & $\approx$12 min \\
+\code{uv run --extra tvb tvb_compare.py} (T1, T2) & $\approx$12 min \\
+\code{uv run detect/fetch_chbmit.py}; \code{detect/detect.py} & minutes--hours \\
+\code{uv run detect/general.py fetch}, then \code{run} & $\approx$1 h + 2--3 h \\
+\code{uv run viz/export_data.py} (Live Lab data) & $\approx$2 min \\
+\code{uv run detect/seizeit2.py fetch} (126 GB streamed) & $\approx$2--4 h \\
+\code{uv run detect/seizeit2.py run [--snapshot] [--configs ...]}; \code{report} & $\approx$15--60 min \\
+\code{uv run detect/seizeit2.py finetune --k 2}; \code{personal --configs ...} & $\approx$35--45 min \\
+\code{uv run detect/analysis_responders.py}; \code{analysis_seizure_types.py} & $\approx$3 min each \\
+\code{uv run detect/stage2.py [--personal --w 20] [--quality]} & $\approx$15--25 min \\
+\code{uv run --extra dl detect/cnn.py fetch / train / eval} & hours \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Datasets are not redistributed: CHB-MIT is downloaded from PhysioNet (the only exception is a 3-minute excerpt of \code{chb01_03.edf} in the Live Lab data, with attribution), SeizeIT2 is streamed from OpenNeuro, and extracted features, caches and logs are git-ignored. Long jobs request that Windows not idle-sleep while running (a job was once paused $\approx$5\,h by Modern Standby overnight). Optional phone notifications use ntfy.
+
+% ============================================================================
+\section{Complete project log}
+\label{app:log}
+
+\begin{longtable}{@{}p{0.5cm} p{4.4cm} p{10.2cm}@{}}
+\caption{Chronological record of the whole project.}\\
+\toprule
+\# & Step & Outcome, including errors and fixes \\
+\midrule
+\endfirsthead
+\toprule
+\# & Step & Outcome \\
+\midrule
+\endhead
+1 & Temple information and technical details & Dossier with confirmed/reported/inferred tags; cannot detect seizures \\
+2 & Epilepsy research & Overview document (definition, epidemiology, causes, classification, diagnosis, treatment, SUDEP, wearables) \\
+3 & Neurological mechanisms & Life-cycle and second-by-second neurophysiology document \\
+4 & Simulation (neural network, Python/uv) & Izhikevich network (synchrony 0.02$\to$0.98) and Epileptor (3 vs 0 seizures) \\
+5 & Ion dynamics ``as close to real life as possible'' & Ionic model; 14-step calibration (Cressman erratum, background rate, pump and $I_{KNa}$, EC50 shift, warm-up, pathology, exponential Euler and its sign bug, synaptic depression tried and dropped, adenosine tied to pump flux, pump-current scale) \\
+6 & Documentation & SIMULATION.md; later corrections of \EGABA{} values (GHK vs chord) and the silence metric \\
+7 & Hardware for each factor; invasive to non-invasive & Gold-standard and non-invasive routes per variable \\
+8 & Meaning and formulas of ``inferred''; verification & Derivations; audit caught 3 errors (scalp DC formula, GHK vs chord, adenosine formula) \\
+9 & Simulations using the formulas vs a real simulator & E1--E7 twin experiments; TVB T1 (identical onset 886.2) and T2 (inverse crime) \\
+10 & Detection on real EEG (CHB-MIT) & 3-patient study: both temples 100\% at 9.8 \FAd; download mirror and file-name fixes \\
+11 & General model & 23 subjects: ear-hook 88\% vs cap 85\% (new user); fine-tuning $-$40--65\% false alarms; tqdm bug; memory reaping $\to$ user-run jobs \\
+12 & Ear-hook concept & ``?'' device worn on both ears \\
+13 & Live Lab & Orb field, charts, real EEG, one-screen layout, virtual EEG forward model, \Kp-DC detector (line length failed), bug fixes \\
+14 & Phone ``call'' & ntfy notifications for long runs \\
+15 & GitHub & Repository with a detailed README \\
+16 & Physiological signals research & Body-signal review; SeizeIT2 chosen \\
+17 & SeizeIT2 streaming and 5 setups & ECG $-$18--31\%; interpolation bug fixed; snapshots \\
+18 & Body sensors in the Live Lab & ECG/HR/EMG/ACC, walk artefact, fusion (40 s look-back bug fixed) \\
+19 & Instagram collage & Story (9:16) and landscape (16:9) collages of the outputs (local only) \\
+20 & 3D neuron plane & 10$\times$10 plane with per-neuron heights; glare and scale fixes \\
+21 & HUD interface & Boot sequence, holographic panels, arc-reactor gauges, reticle \\
+22 & Fine-tuning; personal thresholds & $-$62\% with ECG; thresholds no gain; calibration insight \\
+23 & How real devices keep false alarms low & Literature review (convulsive targets, night use, personalisation, cancellation) \\
+24 & ``impd'' check; false-alarm anatomy & ``impd'' misread then corrected; patient-specific false alarms; electrode instability \\
+25 & Context, HR-excess, responders, benchmarks & Best general model; responders; on par with or above published SeizeIT2 results \\
+26 & Big model; two-stage; personal verifier; weight sweep; quality features & Per-recording scoring bug fixed; personal verifier best (19\%/39\% at $\le$1 \FAd) \\
+27 & Ceiling; seizure types; PPG & Signal-limited; tonic-clonic 100\%; PPG $\approx$ ECG; PPG crash fixed; duplicate queue stopped \\
+28 & Raw-EEG CNN & In progress (slow Wi-Fi; captive-portal TLS failures; disk guard) \\
+29 & This paper & Full LaTeX record \\
+\bottomrule
+\end{longtable}
+
+\section{Operational incidents}
+
+\begin{itemize}
+\item \textbf{Memory-pressure reaping} repeatedly killed long background jobs started from the assistant's session; heavy jobs were moved to the user's terminal or detached processes with log files.
+\item \textbf{Sleep:} a stage-2 job paused for about 5 hours when the laptop entered Modern Standby; scripts now call \code{SetThreadExecutionState} to prevent idle sleep.
+\item \textbf{Duplicate queue:} a failed step did not stop its batch queue, so two copies ran and wrote to one status file; the stale copy was killed and later queues were designed to stop on failure.
+\item \textbf{Network:} slow PhysioNet (AWS mirror used), slow campus Wi-Fi, and a captive portal that intercepted TLS; certificate checks were never disabled.
+\item \textbf{Disk:} with the drive nearly full, all large data were streamed and only features stored; a disk guard stops raw downloads below 1.5\,GB free.
+\item \textbf{Tooling:} a PyTorch index configuration error (fixed with an explicit index); \code{uv sync --extra dl} removed the optional TVB packages from the environment (they reinstall with \code{--extra tvb}).
+\end{itemize}

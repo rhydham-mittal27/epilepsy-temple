@@ -1,0 +1,115 @@
+% ============================================================================
+\section{Background: epilepsy, seizure neurophysiology and whole-body signals}
+\label{sec:background}
+
+This section condenses three review documents written during the project (\code{Epilepsy_Overview.md}, \code{Seizure_Neurophysiology.md}, \code{Seizure_Physiological_Signals.md}), compiled from WHO, ILAE, AAN and peer-reviewed sources as of September 2026.
+
+\subsection{Definition}
+
+Epilepsy is a long-term brain disease causing recurrent, unprovoked seizures. A seizure is a burst of abnormal, overly synchronised electrical activity caused by an imbalance between excitation (glutamate) and inhibition (GABA). Under the ILAE 2014 practical definition, any one of the following is epilepsy: (1)~two or more unprovoked (or reflex) seizures more than 24\,h apart; (2)~one unprovoked seizure plus a $\ge$60\% chance of another within 10 years (e.g.\ abnormal EEG or MRI); (3)~a diagnosed epilepsy syndrome. It is considered resolved after 10 seizure-free years with 5 off medication, or when an age-dependent syndrome is outgrown. A single \emph{provoked} seizure (fever, hypoglycaemia, alcohol withdrawal) is not epilepsy.
+
+\subsection{Epidemiology}
+
+\begin{table}[H]
+\centering\small
+\caption{Epidemiology of epilepsy.}
+\begin{tabularx}{\linewidth}{@{}l L@{}}
+\toprule
+Measure & Figure \\
+\midrule
+People affected worldwide & $\approx$50 million \\
+New diagnoses per year & $\approx$5 million \\
+Active epilepsy & 4--10 per 1,000 people \\
+Incidence & 49/100,000/year (high-income); up to 139/100,000 (low/middle-income) \\
+Living in low/middle-income countries & $\approx$80\% \\
+India & $\approx$1 in 6 of all cases worldwide (8--10 million); prevalence 2.5--11.9 per 1,000, about 2$\times$ higher in rural areas (11.9 vs 5.7) \\
+Treatment gap & 50--90\% in India; $\approx$75\% in low-income countries \\
+Risk of early death & up to 3$\times$ the general population \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Causes}
+
+The ILAE groups causes into six categories; about 50\% of cases have no identifiable cause. \emph{Structural}: hippocampal sclerosis (the commonest cause of drug-resistant temporal lobe epilepsy), stroke, head injury, tumours, cortical malformations, perinatal injury. \emph{Genetic}: \textit{SCN1A} ($\approx$80\% of mutations cause Dravet syndrome), \textit{SCN2A}, \textit{KCNQ2}, \textit{CDKL5}, \textit{STXBP1}; inherited generalised epilepsies. \emph{Infectious}: neurocysticercosis (about 1 million cases in India; found in 11--61\% of Indian epilepsy cohorts, 42--61\% in Assam), meningitis, encephalitis, TB, HIV, cerebral malaria. \emph{Metabolic}: pyridoxine dependency, GLUT1 deficiency, mitochondrial disease. \emph{Immune}: anti-NMDA-receptor, LGI1, GAD65 encephalitis. Common triggers in people with epilepsy are missed medication (the single most common), sleep deprivation, alcohol, stress, fever, catamenial hormone changes, and flashing lights (only 3--5\% of patients).
+
+\subsection{Seizure classification (ILAE 2025)}
+
+The 2025 update reduced 63 seizure types to 21, dropped ``onset'' from class names, uses consciousness (awareness plus responsiveness) as the key classifier, renamed motor/non-motor to observable/non-observable, and added epileptic negative myoclonus. The four classes are focal, generalised, unknown and unclassified. \emph{Focal} seizures with preserved consciousness (formerly ``auras'') include déjà vu, fear, rising epigastric sensation, olfactory or gustatory hallucinations, tingling, focal twitching and visual flashes; focal seizures with impaired consciousness show staring, automatisms (lip-smacking, chewing, fumbling) and amnesia, typically for 30\,s--2\,min; \emph{focal to bilateral tonic-clonic} seizures spread to both hemispheres. \emph{Generalised} types include tonic-clonic, absence (5--15\,s stares, many per day in children), myoclonic, atonic, tonic, clonic and epileptic spasms. The postictal phase brings confusion, headache, sleepiness, Todd's paralysis and memory gaps.
+
+\subsection{Diagnosis and treatment}
+
+An eyewitness account or smartphone video is the most valuable diagnostic tool. The first routine EEG shows epileptiform spikes in only $\approx$40--50\% (82--92\% with repeats; $\approx$72\% for 24\,h ambulatory EEG). An epilepsy-protocol MRI is recommended for all. Video-EEG monitoring is the gold standard and distinguishes epilepsy from syncope, functional seizures, arrhythmias, migraine and sleep disorders.
+
+About 70\% of patients become seizure-free on medication (first drug $\approx$47--50\%, second $+\approx$12\%, third $+\approx$4\%, Kwan \& Brodie). Drug-resistant epilepsy (failure of two appropriate drugs) affects about 1 in 3. Broad-spectrum drugs include levetiracetam, valproate and lamotrigine; carbamazepine and oxcarbazepine are mainly for focal seizures; cenobamate is strong in drug-resistant focal epilepsy; fenfluramine and cannabidiol are used in Dravet and Lennox--Gastaut syndromes. Valproate exposure in pregnancy causes malformations in $\approx$10\% and neurodevelopmental problems in 30--40\% of children. For drug-resistant epilepsy, anterior temporal lobectomy gives 60--80\% seizure freedom, laser ablation 49--56\%, and VNS, RNS and DBS are palliative; ketogenic diets halve seizures in about half of children.
+
+\subsection{Emergencies and SUDEP}
+
+Status epilepticus is a seizure lasting $\ge$5\,min or repeated seizures without recovery; benzodiazepines are first-line and brain damage accumulates after $\approx$30\,min. SUDEP occurs in about 1.2 per 1,000 adults per year and 0.22 per 1,000 children per year; three or more tonic-clonic seizures a year raise the risk about 15-fold (up to $\approx$18/1,000/year). Nocturnal seizures, being alone, prone position and non-adherence are risk factors; \textbf{nocturnal supervision and seizure alarms reduce risk}. Depression ($\approx$39\%) and anxiety ($\approx$36\%) are common comorbidities.
+
+\subsection{Existing wearables}
+
+Cleared devices include Empatica Embrace2/EpiMonitor (wrist; motion, electrodermal activity, temperature), EpiWatch (Apple Watch; motion and heart rate), NightWatch (upper arm at night; PPG heart rate and motion) and sub-scalp EEG (UNEEG SubQ, Epiminder). Embrace detected tonic-clonic seizures with 92--100\% sensitivity at 0.2--2 false alarms/day in epilepsy monitoring units and 99.4\% at 0.18/day in three long-term users; NightWatch reached a median 86\% sensitivity with a positive predictive value of 49\%. \textbf{Every non-EEG wearable is good only at convulsive seizures}; focal impaired-awareness and absence seizures are mostly missed.
+
+\subsection{Seizure neurophysiology: the life cycle}
+\label{sec:neuro}
+
+\paragraph{Normal state.} Neurons rest near $-70$\,mV. Glutamate (AMPA, NMDA) admits \Nap{} and \Catwo; GABA-A admits \Clm{} and keeps cells below threshold. Healthy firing is sparse and asynchronous.
+
+\paragraph{Between seizures (the epileptic focus).} Faulty channels (e.g.\ \textit{SCN1A} loss disabling interneuron sodium channels; \textit{KCNQ2} loss weakening the damping M-current), rewired circuits (interneuron death and mossy-fibre sprouting in hippocampal sclerosis) and the \emph{paroxysmal depolarisation shift} (50--200\,ms depolarisations with spike bursts) generate interictal spikes, contained by inhibitory surround.
+
+\paragraph{Transition (pre-ictal).} Extracellular \Kp{} rises from $\approx$3\,mM to 8--12\,mM when astrocytes cannot clear it, depolarising neighbours (positive feedback). Chloride loading defeats KCC2 so that GABA weakens or becomes excitatory. Interneurons enter depolarisation block. Gap junctions and ephaptic coupling synchronise neurons; NMDA receptors lengthen bursts. EEG onset is often low-voltage fast activity (20--100+\,Hz) or a hypersynchronous onset.
+
+\paragraph{Ictal phase.} The focus fires in rhythmic lock-step at 3--30\,Hz; an ictal wavefront advances at $\approx$1\,mm/s while fast discharges travel along white matter. Consciousness is lost when thalamus and bilateral association cortex are captured. Absence seizures arise from a thalamocortical loop locking into 3\,Hz spike-and-wave (T-type \Catwo{} channels; hence ethosuximide).
+
+\paragraph{Second by second.} At onset, fast-spiking interneurons fire at 200--400\,Hz then enter depolarisation block. In seconds 1--10 pyramidal cells go into depolarisation shifts (+20--30\,mV for 50--200\,ms), glutamate spills over and synchrony climbs (in our spiking model from 0.02 to 0.98). In seconds 5--60 the seizure spreads; motor cortex produces a Jacksonian march, hippocampus/amygdala fear and déjà vu, the insula a heart-rate surge, the brainstem breathing changes. Tonic-clonic seizures have a tonic phase (10--20\,s of continuous firing and muscle contraction) and a clonic phase (30--90\,s) in which lengthening silent periods slow the jerks. Glucose and oxygen use rise 2--3$\times$, lactate rises and pH falls; neurovascular coupling raises local blood flow (NIRS detects ictal hyperperfusion in $\approx$96\% of cases vs 69\% for ictal SPECT). A sympathetic surge raises heart rate (+35\,bpm or more), blood pressure and sweating.
+
+\paragraph{Termination and aftermath.} Several brakes act together: low ATP opens K\textsubscript{ATP} channels, adenosine inhibits via A1 receptors, acidosis blocks NMDA receptors, Na\textsuperscript{+}/K\textsuperscript{+} pumps overshoot, and the whole network exhausts itself at once, producing sudden postictal EEG suppression. Postictal blood flow can fall by up to $\approx$50\% for about an hour. Postictal generalised EEG suppression with brainstem suppression of breathing and heart control is the leading SUDEP mechanism. If a seizure does not stop, GABA-A receptors are internalised and NMDA receptors trafficked to the surface within minutes (status epilepticus), with \Catwo-driven excitotoxicity. Repeated seizures drive epileptogenesis (neuronal loss, gliosis, blood--brain barrier leakage with TGF-$\beta$ signalling, inflammation).
+
+\begin{table}[H]
+\centering\small
+\caption{Which seizure events a sensor can see.}
+\begin{tabularx}{\linewidth}{@{}L l L@{}}
+\toprule
+Seizure event & Signal & Detectable by \\
+\midrule
+Interictal spikes, ictal rhythm, postictal suppression & Electrical & EEG only (scalp, sub-scalp, intracranial) \\
+Rise in local blood flow and volume & Haemodynamic & NIRS / multi-wavelength optics (in theory a Temple-style sensor) \\
+Heart-rate and blood-pressure surge & Autonomic & PPG, ECG \\
+Sweating & Autonomic & Electrodermal sensor (wrist) \\
+Convulsions & Motor & Accelerometer / IMU \\
+Postictal hypoperfusion & Haemodynamic & NIRS / optics (in theory) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Whole-body physiological signals during seizures}
+\label{sec:bodysignals}
+
+A seizure is a whole-body event, and several body signals change \emph{before} EEG onset. Table~\ref{tab:body} summarises the review that motivated the multimodal study.
+
+\begin{table}[H]
+\centering\small
+\caption{Physiological changes during seizures and whether an ear-worn device can sense them.}
+\label{tab:body}
+\begin{tabularx}{\linewidth}{@{}l L L l@{}}
+\toprule
+System & Change & Frequency / timing & From the ear? \\
+\midrule
+Brain (electrical) & Rhythmic discharge, DC shift, postictal suppression & Nearly all seizures & Yes (ear/behind-ear EEG) \\
+Heart rate & Ictal tachycardia & 82\% of patients; 71\% of focal and 64\% of generalised seizures; can start before EEG & Yes (in-ear PPG) \\
+HRV & Sympathetic shift & Pre-ictal change in 41\% of seizures, $\approx$5\,min before & Yes \\
+Bradycardia/asystole & Slowing or pause & $<$6\% (asystole $\approx$0.3\%); $\approx$80\% temporal-lobe & Yes (safety alarm) \\
+Blood pressure & Usually rises & Focal: MAP +33\%, HR +53\% (Hampel 2016) & Estimate only \\
+Breathing & Ictal central apnea & 47\% of focal patients, 36.5\% of seizures; only sign in 16.5\%; precedes EEG by 8$\pm$4.9\,s in 54\% & Yes (PPG-derived respiration) \\
+SpO\textsubscript{2} & Desaturation, sometimes $<$75\% & Mostly temporal-lobe & Yes (in-ear oximetry valid 70--100\%) \\
+Sweat (EDA) & Conductance rises & Strongest in tonic-clonic & Weak at the ear \\
+Temperature & Peri-/postictal changes & Variable & Yes (ear canal $\approx$ core) \\
+Muscle / movement & Tonic stiffening, clonic jerks, automatisms & Convulsive and hypermotor & Yes (temporalis EMG, head IMU) \\
+Brain blood flow & Focal rise, then fall & NIRS 96\% & Needs forehead/temple optics \\
+Blood chemistry & Lactate, prolactin, CK & Lactate $>$2.45\,mmol/L: 94\% sens., 93\% spec.\ for GTCS & No (lab only) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Four implications for device design followed: (1)~some body signals change before EEG (earlier alarms possible); (2)~some seizures show only in the body; (3)~the ear is an unusually good sensing site (validated in-ear SpO\textsubscript{2}, carotid-fed blood supply, near-core temperature, temporalis EMG); (4)~apnea, desaturation, bradycardia and asystole are SUDEP warning signs, turning a seizure counter into a safety monitor. Benchmarks from the literature at the time: wearable EMG 93.8\% sensitivity at 0.67 false alarms/day for tonic-clonic seizures (Beniczky 2018); pooled wearables 89.9\% at 1.43/day; patient-adaptive HRV+EEG 84.8\% at 0.25/day for seizures with ictal tachycardia (Jeppesen 2024); behind-the-ear EEG 98\% for absence seizures (Swinnen 2021). The caveats were that no body signal is universal ($\approx$18\% of patients show no heart-rate rise), that body signals change for normal reasons (exercise, stress, sleep apnea), and that focal non-convulsive seizures are the hard case.

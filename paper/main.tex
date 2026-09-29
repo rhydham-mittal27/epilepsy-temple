@@ -1,0 +1,87 @@
+% ============================================================================
+%  Epilepsy Temple: a complete research record
+%  Compile from this folder with:  latexmk -pdf main.tex   (or pdflatex x2)
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\setlength{\parskip}{4pt}
+\setlist{itemsep=1pt,topsep=3pt}
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\arraystretch}{1.15}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\graphicspath{{../}}
+
+% --- ions and units (text mode) ---
+\newcommand{\Kp}{K\textsuperscript{+}}
+\newcommand{\Nap}{Na\textsuperscript{+}}
+\newcommand{\Clm}{Cl\textsuperscript{$-$}}
+\newcommand{\Catwo}{Ca\textsuperscript{2+}}
+\newcommand{\HCO}{HCO\textsubscript{3}\textsuperscript{$-$}}
+\newcommand{\Ko}{$[\mathrm{K}^+]_o$}
+\newcommand{\Nai}{$[\mathrm{Na}^+]_i$}
+\newcommand{\Cli}{$[\mathrm{Cl}^-]_i$}
+\newcommand{\EGABA}{$E_{\mathrm{GABA}}$}
+\newcommand{\uV}{\textmu V}
+\newcommand{\us}{\textmu s}
+\newcommand{\uM}{\textmu M}
+\newcommand{\FAd}{FA/day}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\best}[1]{\textbf{#1}}
+
+\title{\textbf{Epilepsy Temple}\\[4pt]
+\large From a temple-worn optical wearable to a multimodal ``?''-shaped ear-hook seizure monitor:\\
+research, biophysical simulation, inference, and detection on real patient data\\[6pt]
+\normalsize A complete research record}
+\author{Rhydham Mittal\\\small with Claude (Anthropic) as research and engineering assistant}
+\date{29 September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+This paper records every step of a research project that asked whether a small consumer-style wearable could detect epileptic seizures. The starting point was \emph{Temple}, a temple-worn multi-wavelength photoplethysmography (PPG) device; a technical teardown showed that it measures scalp blood flow and cannot see the brain's electrical activity. We therefore (i)~reviewed epilepsy, the second-by-second neurophysiology of seizures and the whole-body physiological changes that accompany them; (ii)~built three seizure simulators of increasing realism, culminating in a 100-neuron conductance-based network with potassium, sodium, chloride, adenosine and haemodynamic dynamics that is validated against Cressman et al.\ (2009) and reproduces the ictal \Kp{} ceiling ($\approx$12\,mM), chloride loading, depolarising GABA, an adenosine surge, postictal silence, a \Kp{} undershoot and postictal hypoperfusion; (iii)~derived, audited and corrected the formulas needed to \emph{infer} hidden variables (\Kp, \Clm, $E_{\mathrm{GABA}}$, adenosine, excitation/inhibition balance, haemoglobin) from non-invasive signals, and tested them in twin experiments; (iv)~cross-validated our Epileptor against The Virtual Brain (identical first onset, 886.2); (v)~measured seizure detection on real scalp EEG (CHB-MIT, 23 subjects, 185 seizures), showing that two ear-level electrodes catch as many seizures as an 18-channel cap (88\% vs 85\% for a never-seen user) but with about twice the false alarms; (vi)~redesigned the concept as a bilateral ``?''-shaped ear-hook; (vii)~built an offline, single-screen interactive visualisation of the whole system; and (viii)~ran a large multimodal study on SeizeIT2 (125 patients, 883 seizures, 11,626\,h of behind-the-ear EEG, ECG, EMG and motion), streamed from the cloud through memory. Adding ECG to behind-the-ear EEG cut false alarms by 18--31\% at matched sensitivity and helped 115/125 patients; minute-scale context and a novel ``heart rate not explained by movement'' feature reduced false alarms by up to 62\% versus ear EEG alone; personal fine-tuning and a personal alarm verifier raised the share of seizures caught at $\le$1 false alarm/day from 4\% (ear EEG) to 19\% overall and to 39--40\% in ``heart responders''. All focal-to-bilateral tonic-clonic seizures were caught at $\le$5 false alarms/day, and simulated in-ear PPG retained most of the ECG benefit. A ceiling analysis showed that a quarter of seizures never raise the detector above 0.5: the remaining gap is a signal (hardware) problem, not an alarm-logic problem. Every experiment, result, failure, bug and correction is reported.
+\end{abstract}
+
+\noindent\textbf{Keywords:} epilepsy; wearable seizure detection; ear-EEG; behind-the-ear EEG; ECG; photoplethysmography; ion-concentration dynamics; Cressman model; Epileptor; The Virtual Brain; Bayesian inference; CHB-MIT; SeizeIT2; personalisation; false alarms.
+
+\vspace{4pt}
+\noindent\fbox{\parbox{0.97\linewidth}{\small\textbf{Disclaimer.} This is a research and educational project. Nothing here is a medical device or has been clinically validated; it must not be used to diagnose, monitor or treat epilepsy. Temple is a product of Temple Wearables / Continue Research; this project is independent and not affiliated with it.}}
+
+\tableofcontents
+\clearpage
+
+\input{sections/01_introduction}
+\input{sections/02_background}
+\input{sections/03_temple}
+\input{sections/04_simulation}
+\input{sections/05_inference}
+\input{sections/06_twin_tvb}
+\input{sections/07_chbmit}
+\input{sections/08_device_livelab}
+\input{sections/09_seizeit2}
+\input{sections/10_discussion}
+\appendix
+\input{sections/11_appendix}
+
+\input{sections/12_references}
+
+\end{document}
