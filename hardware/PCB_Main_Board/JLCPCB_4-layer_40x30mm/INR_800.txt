@@ -1,0 +1,15 @@
+JLCPCB_4-layer_40x30mm  (PCB Main Board)
+
+Estimated price per unit : Rs 800
+Price range              : Rs 300-800 per board (part of a 5-board order, Rs 12-25k with assembly)
+Quantity per device      : 1
+Line total per device    : Rs 800
+
+Role: Main board: ADS1299, module, power, protection, connectors.
+
+Where to buy / see a photo:
+  - https://jlcpcb.com
+  - https://www.pcbway.com
+  - https://www.lioncircuits.com
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

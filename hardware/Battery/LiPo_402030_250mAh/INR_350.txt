@@ -1,0 +1,14 @@
+LiPo_402030_250mAh  (Battery)
+
+Estimated price per unit : Rs 350
+Price range              : Rs 250-500
+Quantity per device      : 1
+Line total per device    : Rs 350
+
+Role: Powers the device; about a day of streaming. Charged only when OFF the head.
+
+Where to buy / see a photo:
+  - https://robu.in/?s=402030
+  - https://www.evelta.com/search?q=lipo+402030
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

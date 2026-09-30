@@ -1,0 +1,14 @@
+ADI_MAX86141ENP  (PPG SpO2 Sensor)
+
+Estimated price per unit : Rs 500
+Price range              : Rs 450-600 (US$ 5-6)  [alternative, needs external LEDs + photodiode]
+Quantity per device      : 0 (alternative or one-time tool)
+Line total per device    : Rs 0
+
+Role: Higher-performance PPG front end for a later version (lower power, better motion handling).
+
+Where to buy / see a photo:
+  - https://www.analog.com/en/products/max86141.html
+  - https://www.lcsc.com/product-detail/C5328762.html
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

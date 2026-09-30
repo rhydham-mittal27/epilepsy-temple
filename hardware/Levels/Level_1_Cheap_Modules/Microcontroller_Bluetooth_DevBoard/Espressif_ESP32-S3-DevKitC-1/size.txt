@@ -1,0 +1,7 @@
+Espressif_ESP32-S3-DevKitC-1
+
+Board: approx. 63 x 25.4 mm (varies by clone)
+Chip: ESP32-S3 (dual-core 240 MHz, Wi-Fi + Bluetooth LE 5)
+USB programming - no separate programmer needed
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

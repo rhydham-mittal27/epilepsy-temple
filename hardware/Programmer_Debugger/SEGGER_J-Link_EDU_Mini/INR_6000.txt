@@ -1,0 +1,14 @@
+SEGGER_J-Link_EDU_Mini  (Programmer Debugger)
+
+Estimated price per unit : Rs 6,000
+Price range              : Rs 5,000-7,000 (one-time tool)
+Quantity per device      : 0 (alternative or one-time tool)
+Line total per device    : Rs 0
+
+Role: Flashes and debugs the nRF firmware (one-time tool, not per device).
+
+Where to buy / see a photo:
+  - https://www.segger.com/products/debug-probes/j-link/models/j-link-edu-mini/
+  - https://www.mouser.in/c/?q=j-link%20edu%20mini
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

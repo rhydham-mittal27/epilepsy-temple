@@ -1,0 +1,6 @@
+BMI270_Breakout_Board
+
+Module: approx. 18 x 18 mm (varies)
+Bosch BMI270, I2C/SPI, low power
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

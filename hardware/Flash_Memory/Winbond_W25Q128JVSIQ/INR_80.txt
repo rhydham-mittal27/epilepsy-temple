@@ -1,0 +1,14 @@
+Winbond_W25Q128JVSIQ  (Flash Memory)
+
+Estimated price per unit : Rs 80
+Price range              : Rs 60-120
+Quantity per device      : 1
+Line total per device    : Rs 80
+
+Role: Backup storage of raw signals when the Bluetooth link drops.
+
+Where to buy / see a photo:
+  - https://www.winbond.com/hq/product/code-storage-flash-memory/serial-nor-flash/
+  - https://www.lcsc.com/search?q=W25Q128JVSIQ
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

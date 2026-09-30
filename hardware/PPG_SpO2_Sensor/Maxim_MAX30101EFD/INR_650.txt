@@ -1,0 +1,14 @@
+Maxim_MAX30101EFD  (PPG SpO2 Sensor)
+
+Estimated price per unit : Rs 650
+Price range              : Rs 550-800 (US$ 6-8)
+Quantity per device      : 1
+Line total per device    : Rs 650
+
+Role: In-ear heart rate + SpO2, on a small flex PCB in the ear tip.
+
+Where to buy / see a photo:
+  - https://www.analog.com/en/products/max30101.html
+  - https://www.lcsc.com/search?q=MAX30101EFD
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

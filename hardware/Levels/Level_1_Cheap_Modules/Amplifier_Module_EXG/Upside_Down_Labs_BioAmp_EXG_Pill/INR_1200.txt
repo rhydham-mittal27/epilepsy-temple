@@ -1,0 +1,14 @@
+Upside_Down_Labs_BioAmp_EXG_Pill  (Amplifier Module EXG)
+
+Estimated price per unit : Rs 1,200
+Price range              : Rs 900-1,600 each (check the maker's store)
+Quantity                 : 2
+Line total               : Rs 2,400
+
+Role: Better-suited single-channel EEG/EMG amplifier than AD8232 for the ear channels.
+
+Where to buy / see a photo:
+  - https://store.upsidedownlabs.tech/
+  - https://github.com/upsidedownlabs/BioAmp-EXG-Pill
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

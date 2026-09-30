@@ -1,0 +1,15 @@
+JLCPCB_Open-Source_ADS1299_Board_5pcs  (PCB Fabrication)
+
+Estimated price per unit : Rs 2,000
+Price range              : Rs 1,500-3,000 per 5-board order (1 used, 4 spares)
+Quantity                 : 1
+Line total               : Rs 2,000
+
+Role: Bare boards made from an open-source ADS1299 design (e.g. OpenBCI Cyton or HackEEG files; check each licence).
+
+Where to buy / see a photo:
+  - https://jlcpcb.com
+  - https://github.com/OpenBCI
+  - https://github.com/starcat-io/hackeeg-shield
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

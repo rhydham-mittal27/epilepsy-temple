@@ -1,0 +1,15 @@
+TI_ADS1299IPAGR  (EEG EMG Front End)
+
+Estimated price per unit : Rs 5,000
+Price range              : Rs 4,500-5,500 (US$ 55-60 at qty 1)
+Quantity per device      : 1
+Line total per device    : Rs 5,000
+
+Role: 8-channel 24-bit EEG/EMG converter with built-in lead-off (electrode contact) detection. Channels: 4 EEG (T7-P7, T8-P8, P7-O1, P8-O2) or 6 (+P3-O1, P4-O2), 2 jaw EMG.
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/ADS1299
+  - https://www.lcsc.com/search?q=ADS1299IPAGR
+  - https://www.mouser.in/c/?q=ADS1299IPAGR
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

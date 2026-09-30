@@ -1,0 +1,6 @@
+GY-521_MPU6050_Module
+
+Module: approx. 21 x 16 x 3 mm
+6-axis accelerometer + gyroscope, I2C
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

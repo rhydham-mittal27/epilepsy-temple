@@ -1,0 +1,13 @@
+Polar_H10  (Reference Heart Rate Strap)
+
+Estimated price per unit : Rs 8,000
+Price range              : Rs 7,000-9,000 (one-time validation tool)
+Quantity per device      : 0 (alternative or one-time tool)
+Line total per device    : Rs 0
+
+Role: Ground truth for validating the in-ear PPG heart rate during self-wear tests.
+
+Where to buy / see a photo:
+  - https://www.polar.com/en/sensors/h10-heart-rate-sensor
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

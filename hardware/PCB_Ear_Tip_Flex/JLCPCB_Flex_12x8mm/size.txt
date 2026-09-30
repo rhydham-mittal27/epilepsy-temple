@@ -1,0 +1,5 @@
+JLCPCB_Flex_12x8mm
+
+Flex PCB: ~12 x 8 mm, 0.1-0.2 mm thick (approx.)
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

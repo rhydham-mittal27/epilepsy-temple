@@ -615,6 +615,37 @@ Share & Type and signature & Likely cause & Suggested fix \\
 \end{tabularx}
 \end{table}
 
+\paragraph{Fourier analysis and noise reduction.} In sub-103, false-alarm windows carried about twice the power of seizure windows (2,467 vs 1,272\,\textmu V\textsuperscript{2}). They had a larger $\gamma$ share (16.3\% vs 12.0\%) and a larger 45--100\,Hz share (25.8\% vs 22.2\%), and appeared in spectrograms as short broadband bursts, consistent with muscle and movement artefacts. Seizure windows had a larger $\delta$ share. Mains interference was 2\% of power in sub-103 but 7--12\% in sub-047.
+
+On single patients, the effect of cleaning depended on the recording:
+\begin{itemize}
+\item the notch helped only where mains was present (sub-047: $-68\%$ false alarms at 50\% sensitivity);
+\item clipping did not help;
+\item 30\,Hz low-pass plus spectral features gave the largest reductions, $-46\%$ (sub-103) and $-84\%$ (sub-047).
+\end{itemize}
+Across all 125 patients the gains were smaller (Table~\ref{tab:spectral}). For ear EEG alone, low-pass plus spectral features reduced false alarms by 17\% at 60\% sensitivity and 48\% at 80\%, and raised seizures caught at $\le$1 and $\le$5 \FAd{} from 7\% and 14\% to 10\% and 17\%. On the best multimodal model the reduction was 6--15\% at 50--80\% sensitivity, with no change at the strictest budgets.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Cleaning + artefact-aware spectral features on all 125 SeizeIT2 patients (patient-wise 5-fold, same folds and training windows as the main study).}
+\label{tab:spectral}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Setup & FA/day at 50/60/70/80\% & Caught at $\le$1/5/20/50 \FAd \\
+\midrule
+Ear EEG only & 92.9 / 161.7 / 239.3 / 757.4 & 7 / 14 / 26 / 38\% \\
+\quad + notch & 94.0 / 139.6 / 241.8 / 541.3 & 8 / 14 / 28 / 38\% \\
+\quad + notch + spectral & 87.9 / 131.3 / 227.6 / 452.9 & 8 / 16 / 29 / 43\% \\
+\quad + low-pass 30 + spectral & 90.2 / 133.9 / 231.1 / 396.9 & 10 / 17 / 30 / 41\% \\
+\midrule
+Best (EEG+ECG+ctx+HRx) & 43.1 / 77.7 / 150.1 / 356.4 & 17 / 29 / 41 / 53\% \\
+\quad + notch + spectral & 42.7 / 77.3 / 139.9 / 355.9 & 16 / 29 / 42 / 53\% \\
+\quad + low-pass 30 + spectral & 36.8 / 71.2 / 150.1 / 335.7 & 16 / 29 / 43 / 54\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Event-based precision.} At threshold 0.5, every Siena montage caught 85--98\% of seizures, but only 2--6\% of its alarms were real. At the best-F1 thresholds, F1 was 0.32--0.40:
 \begin{itemize}
 \item ear + back + ECG reached 65\% precision (13 of 20 alarms real) at 28\% sensitivity and 1.2 FP/day;

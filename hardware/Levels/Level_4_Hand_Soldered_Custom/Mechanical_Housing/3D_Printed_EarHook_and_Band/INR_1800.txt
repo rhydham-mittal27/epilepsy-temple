@@ -1,0 +1,14 @@
+3D_Printed_EarHook_and_Band  (Mechanical Housing)
+
+Estimated price per unit : Rs 1,800
+Price range              : Rs 1,000-2,500 per set (TPU/resin; several iterations)
+Quantity                 : 1
+Line total               : Rs 1,800
+
+Role: The '?' ear-hooks, the band around the back of the head, battery/board pod.
+
+Where to buy / see a photo:
+  - https://jlc3dp.com
+  - local 3D-printing shops
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

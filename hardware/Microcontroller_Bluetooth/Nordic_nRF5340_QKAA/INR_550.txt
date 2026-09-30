@@ -1,0 +1,14 @@
+Nordic_nRF5340_QKAA  (Microcontroller Bluetooth)
+
+Estimated price per unit : Rs 550
+Price range              : Rs 500-700 (US$ 5-6)  [alternative bare chip; needs RF design + certification]
+Quantity per device      : 0 (alternative or one-time tool)
+Line total per device    : Rs 0
+
+Role: Dual-core option if more processing is needed on the device; bare chip, so antenna/RF layout and certification are on you.
+
+Where to buy / see a photo:
+  - https://www.nordicsemi.com/products/nrf5340
+  - https://www.lcsc.com/product-detail/C3015611.html
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

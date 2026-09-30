@@ -1,0 +1,14 @@
+TI_ADS1299-6PAGR  (EEG EMG Front End)
+
+Estimated price per unit : Rs 3,000
+Price range              : Rs 2,800-3,500 (US$ 32-40)  [alternative, 6 channels]
+Quantity per device      : 0 (alternative or one-time tool)
+Line total per device    : Rs 0
+
+Role: Cheaper 6-channel version (4 EEG + 2 EMG). Same footprint and firmware as ADS1299.
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/ADS1299-6
+  - https://www.lcsc.com/search?q=ADS1299-6PAGR
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

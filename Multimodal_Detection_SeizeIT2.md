@@ -817,7 +817,7 @@ If `detect/ntfy_topic.txt` exists, your phone gets a notification when fetch or 
 
 ## Appendix A. Experiment log (chronological)
 
-*Status (30 Sep 2026): experiments 1–28 are complete. Earlier status: experiments 1–23 are complete. The raw-EEG CNN (22) ran on a 33-patient subset. Experiment 23 and the Siena validation are written up in `Electrodes_and_Siena_Validation.md`.*
+*Status (30 Sep 2026): experiments 1–30 are complete. Earlier status: experiments 1–23 are complete. The raw-EEG CNN (22) ran on a 33-patient subset. Experiment 23 and the Siena validation are written up in `Electrodes_and_Siena_Validation.md`.*
 
 Every experiment run on SeizeIT2, what it tested, and what came out, including mistakes and how they were caught.
 
@@ -853,7 +853,10 @@ Every experiment run on SeizeIT2, what it tested, and what came out, including m
 | 27 | False-alarm taxonomy and type-aware verifier | `analysis_fa_types.py [--verify]` | 8 types (muscle 12%, movement 12%, contact 8%, heart surge 10%, bursts 16%, subtle 42%); type-aware verifier no better than yes/no |
 | 28 | Combined pipeline: k = 1 fine-tuned detector + personal verifier trained on the stretch between the 1st and 2nd seizure | `fa_reduction.py stack` | No gain: 17% / 30% at ≤1 / 5 FA/day vs 19% / 30% for the general detector + personal verifier (reproduced). Personalisation saturates |
 
-Full write-up of 24–28, plus CHB-MIT and Siena ear + back-of-head montages and SzCORE precision: [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md).
+| 29 | Fourier analysis + 5 cleaning variants + spectral features, single patients (sub-103, sub-047) | `fourier_denoise.py` | False alarms are broadband muscle/movement bursts (~2× seizure power). Mains noise 2% vs 12% of power depending on recording. Best: low-pass 30 + spectral features, −46% / −84% FA at 50% caught |
+| 30 | Cleaning + spectral features on all 125 patients | `seizeit2_spectral.py` | Ear EEG only: up to −48% FA (80% caught), ≤1 / 5 per day 7 → 10%, 14 → 17%. Best model: −6 to −15% at 50–80%, strict budgets unchanged. Overlaps with heart + context |
+
+Full write-up of 24–28, plus CHB-MIT and Siena ear + back-of-head montages and SzCORE precision: [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md). Experiments 29–30: [`Fourier_and_Denoising.md`](Fourier_and_Denoising.md).
 
 **Operational notes:**
 - Long jobs ran as detached background processes with log files (`epilepsy_sim/detect/logs/`, gitignored). An earlier attempt to run them inside the assistant session was killed by memory pressure.

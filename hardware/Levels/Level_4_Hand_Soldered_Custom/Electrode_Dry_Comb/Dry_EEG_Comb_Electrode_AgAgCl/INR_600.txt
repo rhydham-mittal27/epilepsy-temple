@@ -1,0 +1,15 @@
+Dry_EEG_Comb_Electrode_AgAgCl  (Electrode Dry Comb)
+
+Estimated price per unit : Rs 600
+Price range              : Rs 500-1,300 each (AliExpress ~US$ 6; Neurospec ~US$ 14)
+Quantity                 : 4
+Line total               : Rs 2,400
+
+Role: Through-hair contact at P7/P8 and O1/O2 (and P3/P4 on the 6-channel version).
+
+Where to buy / see a photo:
+  - https://shop.openbci.com/products/5-mm-spike-electrode-pack-of-30
+  - https://shop.neurospec.com/products/electrodes/dry-electrodes
+  - https://www.aliexpress.com/item/1005003443803910.html
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

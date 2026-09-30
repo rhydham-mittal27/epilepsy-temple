@@ -1,0 +1,7 @@
+Dry_EEG_Comb_Electrode_AgAgCl
+
+Base disc: ~12-15 mm diameter (approx.)
+Pins: ~8-12 pins, ~3-5 mm long (approx.)
+Snap connector on the back
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

@@ -285,6 +285,7 @@ This is why alarms need well below 1 false alarm/day, and why tonic-clonic mode 
 | Cluster prior −24% to −33% | App: seizure diary + caregiver confirmation drive a 12-h lowered threshold |
 | Resting mode = fewer alarms, same rate | Optional "sleep-safety" mode, not an accuracy fix |
 | Fine-tuning + personal verifier = no gain over the verifier alone | One personal layer: general detector + personal alarm verifier |
+| Fourier analysis: false alarms are broadband muscle/movement bursts; low-pass 30 Hz + spectral features help ear EEG (up to −48%) but only −6 to −15% on the best model | Add the low-pass + 5 spectral features to the pipeline (free); notch where mains noise is detected; details in `Fourier_and_Denoising.md` |
 | False-alarm types | Sensors: jaw EMG (chewing), head IMU (movement), contact impedance (electrodes); label artefacts during self-wear to re-run §7 |
 | Precision collapses at real-life seizure rates | Alarm target must be ≪1 FA/day; tonic-clonic mode is the only one there today |
 | SUDEP relevance | In-ear SpO₂ for peri-/postictal desaturation |

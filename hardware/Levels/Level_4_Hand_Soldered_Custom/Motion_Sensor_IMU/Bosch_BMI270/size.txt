@@ -1,0 +1,7 @@
+Bosch_BMI270
+
+Package: LGA-14
+Size: 2.5 x 3.0 x 0.8 mm
+6-axis: accelerometer + gyroscope
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

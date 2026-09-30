@@ -1,0 +1,7 @@
+TI_TPD4E1U06DBVR
+
+Package: SOT-23-6 (DBV)
+Body: 2.9 x 1.6 mm; with leads 2.9 x 2.8 mm
+Protects 4 lines per chip
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

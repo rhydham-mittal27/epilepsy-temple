@@ -1,0 +1,7 @@
+Upside_Down_Labs_NPG_Lite_Beast_Pack
+
+Board: Adafruit Feather, approx. 22.9 mm wide x 51-65 mm long, ~7-8 mm tall
+6 channels with VibZ+ Playmate
+Pack: NPG Lite, VibZ+ Playmate, 13 snap cables, 8 alligator cables, 24 gel electrodes, battery connector, USB-C cable, 3D-printed case
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

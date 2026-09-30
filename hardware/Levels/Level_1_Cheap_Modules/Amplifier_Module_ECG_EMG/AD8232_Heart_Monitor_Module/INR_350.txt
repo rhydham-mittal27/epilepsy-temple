@@ -1,0 +1,14 @@
+AD8232_Heart_Monitor_Module  (Amplifier Module ECG EMG)
+
+Estimated price per unit : Rs 350
+Price range              : Rs 250-450 each
+Quantity                 : 3
+Line total               : Rs 1,050
+
+Role: One channel each: jaw EMG, ECG, 1 test EEG channel. Output read by the ESP32 ADC.
+
+Where to buy / see a photo:
+  - https://robu.in/?s=ad8232
+  - https://www.sparkfun.com/products/12650
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

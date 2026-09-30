@@ -1,0 +1,14 @@
+JST_SH_SM04B-SRSS-TB  (Connector)
+
+Estimated price per unit : Rs 30
+Price range              : Rs 20-50 each
+Quantity per device      : 4
+Line total per device    : Rs 120
+
+Role: Detachable electrode leads / ear-tip flex to the main board.
+
+Where to buy / see a photo:
+  - https://www.jst-mfg.com/product/index.php?series=231
+  - https://www.lcsc.com/search?q=SM04B-SRSS-TB
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

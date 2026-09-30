@@ -82,6 +82,8 @@ This led to the body-signal review and the SeizeIT2 study.
 32 & Ear + back of the head; SzCORE precision & Siena and CHB-MIT: about half the false alarms; 6 ch $\approx$ full cap; precision 2--65\% depending on threshold \\
 33 & False-alarm strategies & Tonic-clonic mode 87\% at $\le$1 \FAd; cluster prior $-$24--33\%; resting mode fewer alarms, same rate; night mode impossible (anonymised clocks); combined pipeline (fine-tuned detector + personal verifier) no gain \\
 34 & False-alarm taxonomy & 8 types; type-aware verifier no gain; sensors for Prototype 1 \\
+35 & 3D device-comparison HUD; hardware parts and build levels & Offline three.js page; parts with price, size, drawing; five build levels (Rs~6.6k--38k) \\
+36 & Fourier analysis and noise reduction & False alarms = broadband bursts; low-pass 30 + spectral features up to $-48\%$ (ear EEG), $-6$ to $-15\%$ (best model) on 125 patients \\
 \bottomrule
 \end{longtable}
 
@@ -118,6 +120,7 @@ Siena & Seizure-list errors: file name given once and not matching (PN01), lette
 SeizeIT2 & EDF start times anonymised (all \code{00.00.00}); first night-mode run used time since recording start as clock time & Night-mode results discarded; accelerometer-based resting mode instead \\
 SeizeIT2 & EDF-header pass stopped at a connection reset (WinError 10054) and halted the queue & Retries with back-off, fewer parallel requests, resumable saves; queue continues past failures \\
 SeizeIT2 & Rolling median over $\sim$13 million windows in a Python loop (too slow) & Vectorised 1-min block median \\
+SeizeIT2 & Spectral-feature stream at $\sim$2 min/run (3 workers, CPU-bound) & 6 workers, resumable: $\sim$3.3 s/run; 12 network timeouts succeeded on automatic retry \\
 Tooling & scikit-learn 1.9 weighted binning called a percentile routine per bin edge: small-dataset fits 10--50$\times$ slower & Vectorised equivalent in \code{detect.py}; thresholds identical (200/200), predictions bit-identical; fit 33 s $\to$ 4 s \\
 Tooling & PyTorch index made the resolver look for all packages there & Explicit index \\
 Tooling & \code{uv sync --extra dl} removed TVB packages & Reinstall with \code{--extra tvb} \\
@@ -171,6 +174,8 @@ Command & Time \\
 \code{uv run detect/siena.py fetch --workers 2}; \code{run}; \code{szcore} & $\approx$46 min + 5 min \\
 \code{uv run detect/fa_reduction.py rest / prior / chb / target / stack} & 5 min -- 1.5 h each \\
 \code{uv run detect/analysis_fa_types.py [--verify]} & $\approx$10 / 20 min \\
+\code{uv run detect/fourier_denoise.py sub-103 sub-047} & $\approx$15 min \\
+\code{uv run detect/seizeit2_spectral.py fetch --workers 6}; \code{run} & $\approx$2.2 h + 50 min \\
 \bottomrule
 \end{tabularx}
 \end{table}

@@ -1,0 +1,7 @@
+AgAgCl_Flat_Disc_10mm
+
+Disc: ~10 mm diameter, ~2 mm thick (approx.)
+Sintered Ag/AgCl or conductive silicone
+Lead wire or snap
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

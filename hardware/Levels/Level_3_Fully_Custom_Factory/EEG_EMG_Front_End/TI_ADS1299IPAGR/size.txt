@@ -1,0 +1,8 @@
+TI_ADS1299IPAGR
+
+Package: TQFP-64 (PAG), 0.5 mm pin pitch
+Body: 10.0 x 10.0 mm; with leads 12.0 x 12.0 mm
+Height: 1.2 mm max
+Pins: 64 (16 per side)
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

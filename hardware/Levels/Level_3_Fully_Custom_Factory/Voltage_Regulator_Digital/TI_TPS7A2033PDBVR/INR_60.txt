@@ -1,0 +1,14 @@
+TI_TPS7A2033PDBVR  (Voltage Regulator Digital)
+
+Estimated price per unit : Rs 60
+Price range              : Rs 40-80
+Quantity                 : 1
+Line total               : Rs 60
+
+Role: 3.3 V rail for the module, sensors and ADS1299 digital side.
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/TPS7A20
+  - https://www.lcsc.com/search?q=TPS7A2033PDBVR
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

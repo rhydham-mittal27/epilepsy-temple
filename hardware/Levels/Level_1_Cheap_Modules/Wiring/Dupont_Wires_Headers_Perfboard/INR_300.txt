@@ -1,0 +1,13 @@
+Dupont_Wires_Headers_Perfboard  (Wiring)
+
+Estimated price per unit : Rs 300
+Price range              : Rs 200-500
+Quantity                 : 1
+Line total               : Rs 300
+
+Role: Prototype wiring.
+
+Where to buy / see a photo:
+  - https://robu.in
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

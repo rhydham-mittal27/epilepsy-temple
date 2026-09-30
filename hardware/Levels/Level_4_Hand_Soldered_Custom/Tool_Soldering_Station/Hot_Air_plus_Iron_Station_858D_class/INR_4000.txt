@@ -1,0 +1,14 @@
+Hot_Air_plus_Iron_Station_858D_class  (Tool Soldering Station)
+
+Estimated price per unit : Rs 4,000
+Price range              : Rs 3,000-6,000 (one-time)
+Quantity                 : 1
+Line total               : Rs 4,000
+
+Role: Hot air for LGA/QFN parts; fine-tip iron + drag soldering for TQFP.
+
+Where to buy / see a photo:
+  - https://robu.in/?s=858d
+  - https://www.amazon.in/s?k=858d+hot+air
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

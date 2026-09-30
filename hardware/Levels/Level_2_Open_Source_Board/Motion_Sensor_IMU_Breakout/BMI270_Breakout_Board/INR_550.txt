@@ -1,0 +1,14 @@
+BMI270_Breakout_Board  (Motion Sensor IMU Breakout)
+
+Estimated price per unit : Rs 550
+Price range              : Rs 400-900
+Quantity                 : 1
+Line total               : Rs 550
+
+Role: Better, lower-power IMU than MPU6050.
+
+Where to buy / see a photo:
+  - https://robu.in/?s=bmi270
+  - https://www.adafruit.com/?q=bmi270
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

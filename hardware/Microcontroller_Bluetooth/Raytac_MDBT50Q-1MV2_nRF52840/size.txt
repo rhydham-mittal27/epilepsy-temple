@@ -1,0 +1,7 @@
+Raytac_MDBT50Q-1MV2_nRF52840
+
+Module: 10.0 x 15.0 x 2.2 mm (with shield)
+Chip inside: Nordic nRF52840 (Arm Cortex-M4F, 1 MB flash, 256 KB RAM, BLE 5)
+Antenna: on-module chip antenna; pre-certified module (FCC/CE/TELEC)
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

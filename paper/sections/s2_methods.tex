@@ -480,6 +480,25 @@ Targets were seizures starting in the alarm window, and false alarms were normal
 \end{itemize}
 The false alarms were robust-standardised and clustered with a Gaussian mixture (diagonal covariance, $k$ chosen by BIC among 3--8). Clusters were named from their median profiles. Separability of each cluster from true seizure alarms was measured by patient-wise AUC. A \emph{type-aware verifier} (seizure vs the eight false-alarm types, with types learned on training folds only) was compared with the yes/no verifier on the same candidates and folds.
 
+\paragraph{Fourier analysis and noise reduction.} The behind-the-ear EEG of two patients was streamed at 256\,Hz: sub-103 (15 seizures, 90\,h, one of the highest false-alarm rates) and sub-047 (64 seizures, 68\,h). Welch spectra (0.5--100\,Hz) were computed for seizure windows, background windows, and the windows where a patient-specific detector raised false alarms, together with spectrograms around seizures and false alarms.
+
+Five cleaning variants were compared with a patient-specific detector (runs in five chronological folds):
+\begin{itemize}
+\item baseline: the 0.5--45\,Hz band-pass used throughout;
+\item notch: added 50 and 100\,Hz notches;
+\item 30\,Hz low-pass: a 0.5--30\,Hz band-pass instead of the baseline one;
+\item clipping: clipping at 6$\times$ a running robust SD;
+\item low-pass plus clipping.
+\end{itemize}
+Five \emph{artefact-aware spectral features} per channel were also computed on the unfiltered signal:
+\begin{itemize}
+\item the 45--100\,Hz muscle share of power;
+\item spectral flatness and spectral entropy (2--45\,Hz);
+\item the 1/$f$ slope;
+\item the peak frequency (1--30\,Hz).
+\end{itemize}
+The cleaning and the spectral features were then tested on all 125 patients. All 2,850 EEG files were streamed and features stored on the main window grid. The ear-EEG-only and best general setups were retrained with the same folds and training windows as before.
+
 \paragraph{Event-based precision.} Following the SzCORE framework \cite{dan2024}, sensitivity, precision $=\mathrm{TP}/(\mathrm{TP}+\mathrm{FP})$, F1 and false positives per 24\,h were computed for every Siena montage, at threshold 0.5 and at each montage's best-F1 threshold.
 
 % ----------------------------------------------------------------------------

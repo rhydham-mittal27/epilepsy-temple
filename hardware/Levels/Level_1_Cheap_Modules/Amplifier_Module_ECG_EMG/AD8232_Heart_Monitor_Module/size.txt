@@ -1,0 +1,6 @@
+AD8232_Heart_Monitor_Module
+
+Module: approx. 36 x 28 mm (red clone) / 35 x 28 mm (SparkFun)
+Single-channel analog biopotential amp (designed for ECG)
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

@@ -1,0 +1,13 @@
+JLCPCB_Flex_12x8mm  (PCB Ear Tip Flex)
+
+Estimated price per unit : Rs 500
+Price range              : Rs 300-700 per board (5-board order Rs 3-6k)
+Quantity per device      : 1
+Line total per device    : Rs 500
+
+Role: Carries the MAX30101 (+ TMP117) inside the silicone ear tip.
+
+Where to buy / see a photo:
+  - https://jlcpcb.com/flex-pcb
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

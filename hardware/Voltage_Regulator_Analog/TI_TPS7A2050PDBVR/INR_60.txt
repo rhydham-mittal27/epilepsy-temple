@@ -1,0 +1,14 @@
+TI_TPS7A2050PDBVR  (Voltage Regulator Analog)
+
+Estimated price per unit : Rs 60
+Price range              : Rs 40-80
+Quantity per device      : 1
+Line total per device    : Rs 60
+
+Role: Clean 5 V analog supply (AVDD) for the ADS1299: clean power = clean EEG.
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/TPS7A20
+  - https://www.lcsc.com/search?q=TPS7A2050PDBVR
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

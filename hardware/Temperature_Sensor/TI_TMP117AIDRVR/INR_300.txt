@@ -1,0 +1,14 @@
+TI_TMP117AIDRVR  (Temperature Sensor)
+
+Estimated price per unit : Rs 300
+Price range              : Rs 250-350 (US$ 3-4)  [optional]
+Quantity per device      : 1
+Line total per device    : Rs 300
+
+Role: Ear-canal temperature (optional).
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/TMP117
+  - https://www.lcsc.com/search?q=TMP117AIDRVR
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

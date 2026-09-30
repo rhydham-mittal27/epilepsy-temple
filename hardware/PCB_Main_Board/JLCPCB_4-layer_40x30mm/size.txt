@@ -1,0 +1,6 @@
+JLCPCB_4-layer_40x30mm
+
+Board: ~40 x 30 mm, 4 layers, 1.0-1.6 mm thick
+Factory assembly (ADS1299 is 0.5 mm pitch)
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

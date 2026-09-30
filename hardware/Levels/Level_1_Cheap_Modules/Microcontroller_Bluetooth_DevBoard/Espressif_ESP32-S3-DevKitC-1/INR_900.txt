@@ -1,0 +1,14 @@
+Espressif_ESP32-S3-DevKitC-1  (Microcontroller Bluetooth DevBoard)
+
+Estimated price per unit : Rs 900
+Price range              : Rs 700-1,200 (clones from ~Rs 600)
+Quantity                 : 1
+Line total               : Rs 900
+
+Role: Reads the sensors and streams to phone/laptop over Bluetooth or Wi-Fi; programmed over USB (Arduino / ESP-IDF).
+
+Where to buy / see a photo:
+  - https://www.espressif.com/en/products/devkits
+  - https://robu.in/?s=esp32-s3
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

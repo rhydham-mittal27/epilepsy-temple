@@ -1,0 +1,5 @@
+JLCPCB_Open-Source_ADS1299_Board_5pcs
+
+Board: ~40-60 mm (depends on the chosen open design), 4 layers
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

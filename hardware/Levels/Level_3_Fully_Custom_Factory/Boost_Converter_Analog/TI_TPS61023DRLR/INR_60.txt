@@ -1,0 +1,14 @@
+TI_TPS61023DRLR  (Boost Converter Analog)
+
+Estimated price per unit : Rs 60
+Price range              : Rs 40-80
+Quantity                 : 1
+Line total               : Rs 60
+
+Role: Boosts the battery to ~5.5 V, feeding the low-noise 5 V analog regulator for the ADS1299.
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/TPS61023
+  - https://www.lcsc.com/search?q=TPS61023DRLR
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

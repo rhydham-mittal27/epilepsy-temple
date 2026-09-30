@@ -1,0 +1,7 @@
+LiPo_402030_250mAh
+
+Cell: 4.0 x 20 x 30 mm (thickness x width x length)
+3.7 V nominal, ~250 mAh, with protection circuit
+Weight: ~5 g
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

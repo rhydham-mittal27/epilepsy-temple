@@ -1,0 +1,13 @@
+JLCPCB_SMT_Assembly_setup_and_parts  (PCB Assembly)
+
+Estimated price per unit : Rs 4,000
+Price range              : Rs 3,000-5,000 (setup + passives + placing the ADS1299)
+Quantity                 : 1
+Line total               : Rs 4,000
+
+Role: Avoids hand-soldering the fine-pitch chip.
+
+Where to buy / see a photo:
+  - https://jlcpcb.com/smt-assembly
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

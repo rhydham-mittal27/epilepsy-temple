@@ -1,0 +1,14 @@
+Bosch_BMI270  (Motion Sensor IMU)
+
+Estimated price per unit : Rs 280
+Price range              : Rs 250-400 (US$ 3-4)
+Quantity                 : 1
+Line total               : Rs 280
+
+Role: Head motion: rhythmic jerking of tonic-clonic seizures, and movement artefacts.
+
+Where to buy / see a photo:
+  - https://www.bosch-sensortec.com/products/motion-sensors/imus/bmi270/
+  - https://www.lcsc.com/search?q=BMI270
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

@@ -1,0 +1,13 @@
+GY-521_MPU6050_Module  (Motion Sensor IMU Breakout)
+
+Estimated price per unit : Rs 150
+Price range              : Rs 100-250
+Quantity                 : 1
+Line total               : Rs 150
+
+Role: Cheapest head-motion sensor (convulsion rhythm, movement artefacts).
+
+Where to buy / see a photo:
+  - https://robu.in/?s=mpu6050
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

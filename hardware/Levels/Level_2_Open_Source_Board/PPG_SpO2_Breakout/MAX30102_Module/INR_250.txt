@@ -1,0 +1,13 @@
+MAX30102_Module  (PPG SpO2 Breakout)
+
+Estimated price per unit : Rs 250
+Price range              : Rs 150-400
+Quantity                 : 1
+Line total               : Rs 250
+
+Role: Heart rate + SpO2 from an ear clip / earlobe (test-grade).
+
+Where to buy / see a photo:
+  - https://robu.in/?s=max30102
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

@@ -1,0 +1,14 @@
+Microchip_MCP73831T-2ACI_OT  (Battery Charger)
+
+Estimated price per unit : Rs 50
+Price range              : Rs 35-70
+Quantity per device      : 1
+Line total per device    : Rs 50
+
+Role: Single-cell Li-ion/LiPo charger (charge-only port, device off the head).
+
+Where to buy / see a photo:
+  - https://www.microchip.com/en-us/product/MCP73831
+  - https://www.lcsc.com/search?q=MCP73831T-2ACI%2FOT
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

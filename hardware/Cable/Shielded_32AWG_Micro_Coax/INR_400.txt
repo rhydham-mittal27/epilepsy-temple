@@ -1,0 +1,13 @@
+Shielded_32AWG_Micro_Coax  (Cable)
+
+Estimated price per unit : Rs 400
+Price range              : Rs 300-600 for ~2 m
+Quantity per device      : 1
+Line total per device    : Rs 400
+
+Role: Low-noise leads from electrodes to the board.
+
+Where to buy / see a photo:
+  - https://www.mouser.in/c/?q=32%20awg%20micro%20coax
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

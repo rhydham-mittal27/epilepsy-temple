@@ -1,0 +1,13 @@
+USB_Microscope_or_Loupe  (Tool Magnification)
+
+Estimated price per unit : Rs 2,000
+Price range              : Rs 800-5,000 (one-time)
+Quantity                 : 1
+Line total               : Rs 2,000
+
+Role: Inspect 0.5 mm-pitch joints for bridges.
+
+Where to buy / see a photo:
+  - https://robu.in/?s=usb+microscope
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

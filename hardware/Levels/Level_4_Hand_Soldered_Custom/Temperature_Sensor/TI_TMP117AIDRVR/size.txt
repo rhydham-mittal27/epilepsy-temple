@@ -1,0 +1,7 @@
+TI_TMP117AIDRVR
+
+Package: WSON-6 (DRV)
+Size: 2.0 x 2.0 x 0.8 mm
+Accuracy: +/-0.1 C (-20 to 50 C)
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

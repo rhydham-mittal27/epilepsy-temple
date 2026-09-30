@@ -1,0 +1,6 @@
+TI_TPS61023DRLR
+
+Package: SOT-563 (DRL)
+Size: 1.6 x 1.6 x 0.6 mm
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

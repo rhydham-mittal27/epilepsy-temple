@@ -1,0 +1,6 @@
+ADI_MAX86141ENP
+
+Package: WLP-20, 2.0 x 2.0 mm (approx.)
+Needs separate LEDs + photodiode
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

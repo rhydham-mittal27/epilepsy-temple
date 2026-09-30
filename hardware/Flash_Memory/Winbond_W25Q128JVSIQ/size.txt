@@ -1,0 +1,8 @@
+Winbond_W25Q128JVSIQ
+
+Package: SOIC-8, 208 mil
+Body: 5.3 x 5.3 mm; with leads 5.3 x 8.0 mm
+Height: ~2.0 mm
+Capacity: 16 MB (128 Mbit)
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

@@ -1,0 +1,14 @@
+TI_TPD4E1U06DBVR  (ESD Protection)
+
+Estimated price per unit : Rs 40
+Price range              : Rs 25-60 each
+Quantity                 : 3
+Line total               : Rs 120
+
+Role: ESD protection on every electrode line (with series resistors) - wearer and chip safety.
+
+Where to buy / see a photo:
+  - https://www.ti.com/product/TPD4E1U06
+  - https://www.lcsc.com/search?q=TPD4E1U06DBVR
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

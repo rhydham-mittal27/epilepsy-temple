@@ -1,0 +1,6 @@
+SEGGER_J-Link_EDU_Mini
+
+Size: ~33 x 20 x 10 mm (approx.)
+10-pin 1.27 mm Cortex debug cable
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

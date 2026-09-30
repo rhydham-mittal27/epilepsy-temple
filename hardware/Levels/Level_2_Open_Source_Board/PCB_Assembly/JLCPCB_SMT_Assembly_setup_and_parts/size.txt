@@ -1,0 +1,5 @@
+JLCPCB_SMT_Assembly_setup_and_parts
+
+Factory places the 0.5 mm-pitch ADS1299 and small parts
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

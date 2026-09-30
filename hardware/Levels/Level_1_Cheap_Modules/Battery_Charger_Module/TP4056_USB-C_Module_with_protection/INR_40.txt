@@ -1,0 +1,13 @@
+TP4056_USB-C_Module_with_protection  (Battery Charger Module)
+
+Estimated price per unit : Rs 40
+Price range              : Rs 25-60
+Quantity                 : 1
+Line total               : Rs 40
+
+Role: Charges the LiPo (only while the device is OFF the head).
+
+Where to buy / see a photo:
+  - https://robu.in/?s=tp4056
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

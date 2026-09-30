@@ -23,6 +23,7 @@ Model-based inference outperformed single-formula conversion. Adenosine and KCC2
 \item \textbf{Choosing what to alarm on matters more than any model change.} Restricting alarms to tonic-clonic seizures moved performance from 17\% to 87\% of target seizures caught at $\le$1 false alarm/day, with a dedicated convulsive model. That is in the range reported for cleared convulsive-seizure wearables \cite{onorati2017,beniczky2021}.
 \item \textbf{Coverage behind the ear and towards the occiput halves false alarms} in both adults and children. Six channels match a full cap at moderate sensitivity. A seizure-cluster prior removes another quarter to a third. Restricting alarms to rest lowers the number of alarms but not their rate.
 \item \textbf{False alarms are heterogeneous.} About a third are artefacts with a distinct signature (muscle, movement, electrode contact), a sixth are bursts from a few patients, and a tenth are autonomic surges that mimic seizures. On SeizeIT2's sensors this structure does not improve a verifier, but it specifies which sensors a device needs.
+\item \textbf{Cleaning the signal helps ear EEG but mostly overlaps with body signals.} Fourier analysis showed that false alarms are dominated by broadband muscle and movement bursts. Artefact-aware spectral features, computed on the band the pipeline normally discards, helped an ear-EEG-only detector. Once heart and context features were present they added little, and gains of $-46\%$ to $-84\%$ in two patients shrank to single digits across 125.
 \item \textbf{The ceiling is the signal.} Short focal seizures ($<$30\,s, more than half of all seizures) were nearly invisible to two mastoid channels, and a quarter of seizures never raised the detector above 0.5. Better alarm logic cannot close this gap; hardware must (contact quality, more or better-placed electrodes).
 \end{enumerate}
 
@@ -71,6 +72,16 @@ ECG Matrix Profile, responders only \cite{reintjes2025} & 70.7\% & $\approx$46 &
 \item an app with a seizure diary, which drives the cluster prior, and user cancellation.
 \end{itemize}
 The general architecture described below remains the long-term target.
+
+\paragraph{Cost of Prototype~1.} A parts analysis (India, September 2026 estimates) gives five build routes for a first device:
+\begin{enumerate}
+\item a commercial open biosignal kit with add-ons, about Rs~28k;
+\item ready-made amplifier modules on an ESP32 (low EEG quality), about Rs~6.6k;
+\item an open-source 24-bit ADS1299 board, factory-assembled, with an ESP32, about Rs~15k;
+\item a fully custom factory-assembled design, about Rs~38k for the first batch and Rs~8--13k per further device;
+\item the custom design hand-soldered, about Rs~31k including tools.
+\end{enumerate}
+The open-source ADS1299 route is the cheapest way to research-grade EEG.
 
 The evidence defines a concrete architecture, which we call Prototype~1. Its hardware is:
 \begin{itemize}

@@ -1,0 +1,6 @@
+Nordic_nRF5340_QKAA
+
+Package: aQFN-94, 7.0 x 7.0 mm
+Height: 0.85 mm
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

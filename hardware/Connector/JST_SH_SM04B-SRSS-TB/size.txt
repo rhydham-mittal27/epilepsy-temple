@@ -1,0 +1,6 @@
+JST_SH_SM04B-SRSS-TB
+
+1.0 mm pitch, 4-pin, side entry
+Size: ~6.0 x 4.3 x 2.9 mm (approx.)
+
+Source: manufacturer datasheet / product page (values marked approx. vary by supplier).

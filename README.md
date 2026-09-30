@@ -60,6 +60,7 @@
 | 13 | **Tonic-clonic alarm mode reaches cleared-device level.** Alarming only for focal-to-bilateral tonic-clonic seizures (the SUDEP-risk type), a dedicated convulsive model caught **87% at ≤1 false alarm/day, 90% at 1.1/day, 96% at ≤5/day** (125 patients, 55 tonic-clonic seizures, never-seen patients). **Prototype 1 targets tonic-clonic alarms + a diary for everything else.** | `False_Alarm_Reduction.md` |
 | 14 | **Ear + back of the head halves false alarms** in adults (Siena) and children (CHB-MIT); 6 channels (ear + back + parietal) match or beat a full 18-channel cap at 50–70% sensitivity. A **seizure-cluster prior** cuts false alarms by another 24–33%. | `False_Alarm_Reduction.md` |
 | 15 | **False alarms come in 8 types**: about a third are artefacts a sensor can flag (chewing/muscle 12%, big movements 12%, electrode contact 8%); 16% are bursts from 13 noisy patients; 10% are heart surges that mimic seizures. They define Prototype 1's extra sensors (jaw EMG, head IMU, contact impedance). | `False_Alarm_Reduction.md` §7 |
+| 16 | **Fourier analysis explains the false alarms; cleaning helps ear EEG, not much more.** False alarms are broadband muscle/movement bursts (~2× the power of seizures, more energy above 30 Hz). A 30 Hz low-pass + five artefact-aware spectral features cut ear-EEG-only false alarms by up to 48% (125 patients), but add only 6–15% on top of heart + context features. | `Fourier_and_Denoising.md` |
 
 ---
 
@@ -93,7 +94,9 @@ flowchart LR
 | 11 | Does a CNN on the raw ear EEG find what features miss? | `detect/cnn.py`, `Multimodal_Detection_SeizeIT2.md` §6.19 |
 | 12 | Are the datasets' electrodes the problem? Does the ear-hook hold up in adults? | `detect/analysis_electrodes.py`, `detect/siena.py`, `Electrodes_and_Siena_Validation.md` |
 | 13 | How can false alarms be cut further? What kinds of false alarms are there? | `detect/fa_reduction.py`, `detect/analysis_fa_types.py`, `False_Alarm_Reduction.md` |
-| 14 | Everything, written up as a research paper | `paper/main.pdf` (LaTeX source in `paper/`) |
+| 14 | Does Fourier analysis or noise reduction cut false alarms? | `detect/fourier_denoise.py`, `detect/seizeit2_spectral.py`, `Fourier_and_Denoising.md` |
+| 15 | What would Prototype 1 cost to build, at each level of "from scratch"? | `hardware/` (parts, prices, sizes, drawings; `hardware/Levels/`) |
+| 16 | Everything, written up as a research paper | `paper/main.pdf` (LaTeX source in `paper/`) |
 
 ---
 
@@ -110,7 +113,11 @@ epilepsy_temple/
 ├── Multimodal_Detection_SeizeIT2.md SeizeIT2 multimodal study (125 patients), incl. the raw-EEG CNN
 ├── Electrodes_and_Siena_Validation.md  electrode-stability test + adult validation on Siena
 ├── False_Alarm_Reduction.md         tonic-clonic mode, ear + back of head, cluster prior, resting mode, false-alarm types, SzCORE precision
+├── Fourier_and_Denoising.md         Fourier analysis of seizures vs false alarms; cleaning + spectral features (2 patients, then all 125)
 ├── paper/                           research paper (LaTeX source + main.pdf)
+├── hardware/                        Prototype 1 parts: <Component>/<Model>/ with INR_<price>.txt, image, size.txt;
+│   ├── Levels/                      five build levels (kit -> cheap modules -> open-source board -> custom -> hand-soldered)
+│   └── generate_hardware_folders.py rebuilds the whole folder from one parts table
 ├── docs/images/                     README figures
 └── epilepsy_sim/                    all code (Python 3.13, uv)
     ├── main.py                      Model 1: Izhikevich network · Model 2: Epileptor
@@ -136,6 +143,8 @@ epilepsy_temple/
     │   ├── siena.py                 adult validation on Siena: ear-hook vs full cap, ± ECG, ear + back of head; SzCORE metrics (streamed)
     │   ├── fa_reduction.py          false-alarm strategies: tonic-clonic mode, CHB-MIT ear + back, cluster prior, resting mode, combined pipeline
     │   ├── analysis_fa_types.py     false-alarm taxonomy (8 types) + type-aware verifier
+    │   ├── fourier_denoise.py       single-patient Fourier analysis + cleaning variants + spectral features (streamed)
+    │   ├── seizeit2_spectral.py     cleaning + spectral features on all 125 patients (streamed, features only)
     │   ├── results/                 3-patient detection metrics + figure
     │   ├── results_general/         23-subject general-model metrics
     │   ├── results_seizeit2/        125-patient multimodal metrics + figure, CNN and electrode results
@@ -177,6 +186,8 @@ uv sync                                    # numpy, scipy, matplotlib, numba, mn
 | Electrode-stability test (SeizeIT2) | `uv run detect/analysis_electrodes.py` | ~3 min |
 | Siena adult validation (streamed from PhysioNet, features only) | `uv run detect/siena.py fetch --workers 2` then `run`, `szcore` | ~46 min + ~5 min |
 | False-alarm strategies (see `False_Alarm_Reduction.md` §12) | `uv run detect/fa_reduction.py rest / prior / chb / target / stack`; `analysis_fa_types.py [--verify]` | 5 min – 1.5 h each |
+| Fourier analysis + noise reduction (see `Fourier_and_Denoising.md` §10) | `uv run detect/fourier_denoise.py sub-103 sub-047`; `seizeit2_spectral.py fetch --workers 6` then `run` | ~15 min; ~2.2 h + ~50 min |
+| Rebuild the hardware folder (parts, prices, drawings, levels) | `uv run python ../hardware/generate_hardware_folders.py` | ~1 min |
 | Rebuild live-lab data | `uv run viz/export_data.py` | ~2 min |
 
 > **Memory:** network simulations use ~1–2 GB. On machines with little free RAM, run one long job at a time.
@@ -398,7 +409,20 @@ The ear-hook catches as many adult seizures as the full cap; the cap has 2–3×
 - **Heads:** two hologram heads wearing MK-I (ear-hook) and MK-II (ear + back + parietal), with their electrodes and EEG channels.
 - **Stats:** tonic-clonic first (87% at ≤1 false alarm/day shared baseline; Siena PN10 per-device check), then all seizures (CHB-MIT or Siena), with bars against the full cap.
 
-### 6.9 Epilepsy Live Lab (`viz/epilepsy_live.html`)
+### 6.9 Fourier analysis and noise reduction (`fourier_denoise.py`, `seizeit2_spectral.py`)
+
+**Fourier analysis (sub-103).** False-alarm windows carry about 2× the power of seizures, with more γ (16% vs 12%) and 45–100 Hz muscle energy (26% vs 22%). In spectrograms they show as short all-frequency stripes: muscle and movement bursts. Mains (50 Hz) noise is 2% of power here, but 7–12% in sub-047.
+
+**All 125 patients** (same folds and training windows as the main study; FA/day at 50 / 60 / 70 / 80% caught):
+
+| Setup | Baseline | + 30 Hz low-pass + spectral features |
+|---|---|---|
+| Ear EEG only | 92.9 / 161.7 / 239.3 / 757.4 | 90.2 / **133.9 / 231.1 / 396.9**; caught at ≤1 / 5 FA/day 7 → **10%**, 14 → **17%** |
+| Best model (EEG + ECG + context + HR-excess) | 43.1 / 77.7 / 150.1 / 356.4 | **36.8 / 71.2** / 150.1 / **335.7**; strict budgets unchanged |
+
+Cleaning plus "artefact-aware" spectral features help an ear-EEG-only detector, and are worth adopting (free, and useful when the heart sensor drops out). They mostly overlap with what the heart and context features already know. Two single patients had shown −46% and −84%; averaged over everyone the effect is modest. Full write-up: [`Fourier_and_Denoising.md`](Fourier_and_Denoising.md).
+
+### 6.10 Epilepsy Live Lab (`viz/epilepsy_live.html`)
 
 A single-screen, offline dashboard:
 
@@ -467,6 +491,8 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | ✅ | ~~Are the electrodes the problem? Adult validation~~ (contact drives false alarms, not misses; Siena confirms ear-hook ≈ cap in catches, ECG helps; §6.7) |
 | ✅ | ~~Cut false alarms further~~ (tonic-clonic mode 87% at ≤1 FA/day; ear + back of head halves false alarms; cluster prior −24–33%; 8 false-alarm types; §6.8) |
 | ✅ | ~~Combined pipeline: fine-tuned detector + personal verifier~~ (no gain; one personal layer is enough) |
+| ✅ | ~~Fourier analysis / noise reduction~~ (30 Hz low-pass + spectral features: up to −48% FA for ear EEG only, −6 to −15% on the best model; adopt in the pipeline; §6.9) |
+| ✅ | ~~Hardware parts list and cost at every build level~~ (`hardware/`, `hardware/Levels/`) |
 | ★★★ | **Hardware Prototype 1 (tonic-clonic alarm + diary)**: bilateral ear-hook + band around the back of the head, dry electrodes (T7/T8, P7/P8, O1/O2), jaw EMG, head IMU, contact-impedance sensing, in-ear PPG/SpO₂, phone app with seizure diary and cancellation |
 | ★★ | TUSZ (675 patients, requires registration) for a larger general model and the CNN |
 | ✅ | ~~Finish the general-model comparison: one ear vs both ears vs full cap~~ (done, §6.5) |
@@ -488,6 +514,8 @@ EEG alone gives far too many false alarms (§6.5). The planned fixes:
 | [`Multimodal_Detection_SeizeIT2.md`](Multimodal_Detection_SeizeIT2.md) | SeizeIT2 multimodal detector: streaming 126 GB through RAM, features for ear-EEG / ECG / EMG / motion, patient-wise CV, matched-sensitivity results, snapshots, limitations |
 | [`Electrodes_and_Siena_Validation.md`](Electrodes_and_Siena_Validation.md) | Is electrode quality the limit? Stable vs unstable contact on SeizeIT2; adult validation on Siena (ear-hook vs full cap, ± ECG); dataset typos; scikit-learn binning slowdown and fix |
 | [`False_Alarm_Reduction.md`](False_Alarm_Reduction.md) | Tonic-clonic and long-seizure alarm modes, dedicated convulsive model, ear + back of head (Siena, CHB-MIT), seizure-cluster prior, resting mode, anonymised clocks, false-alarm taxonomy, type-aware verifier, SzCORE precision, Prototype 1 conclusions |
+| [`Fourier_and_Denoising.md`](Fourier_and_Denoising.md) | Fourier spectra of seizures vs false alarms vs background; 5 cleaning variants + artefact-aware spectral features on 2 patients, then all 125 patients (ear EEG only and best model) |
+| [`hardware/README.md`](hardware/README.md), [`hardware/Levels/README.md`](hardware/Levels/README.md) | Prototype 1 parts list (price, size, drawing per model) and five build levels from ~Rs 6.6k to ~Rs 38k |
 | [`paper/main.pdf`](paper/main.pdf) | The whole project as a research paper (IMRaD, LaTeX source in `paper/`) |
 | [`Inference_Formulas.md`](Inference_Formulas.md) | Measured vs inferred; Bayes, least squares, Kalman, ABC; derivations for K⁺, Cl⁻, E/I, fNIRS; verification audit |
 | [`epilepsy_sim/SIMULATION.md`](epilepsy_sim/SIMULATION.md) | Full model documentation: equations, parameters with sources, validation, results, 14-step calibration log |

@@ -1,0 +1,6 @@
+Upside_Down_Labs_BioAmp_EXG_Pill
+
+Module: approx. 25 x 10 mm ('pill', approx.)
+Single-channel EXG (EEG/ECG/EMG/EOG) analog front end
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

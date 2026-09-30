@@ -1,0 +1,15 @@
+Raytac_MDBT50Q-1MV2_nRF52840  (Microcontroller Bluetooth)
+
+Estimated price per unit : Rs 900
+Price range              : Rs 800-1,200 (US$ 9-13)
+Quantity per device      : 1
+Line total per device    : Rs 900
+
+Role: Runs the firmware, reads ADS1299 (SPI) + PPG/IMU (I2C), streams to the phone over Bluetooth LE.
+
+Where to buy / see a photo:
+  - https://www.raytac.com/product/ins.php?index_id=31
+  - https://www.nordicsemi.com/products/nrf52840
+  - https://www.mouser.in/c/?q=MDBT50Q-1MV2
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.

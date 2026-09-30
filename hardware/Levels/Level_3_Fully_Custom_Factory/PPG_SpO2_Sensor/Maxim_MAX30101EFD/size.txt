@@ -1,0 +1,7 @@
+Maxim_MAX30101EFD
+
+Package: 14-pin OESIP (optical module)
+Size: 5.6 x 3.3 x 1.55 mm
+Includes red, IR and green LEDs + photodetector + AFE
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

@@ -1,0 +1,13 @@
+JLCPCB_First_Batch_5_boards_with_assembly  (PCB Batch Order)
+
+Estimated price per unit : Rs 18,000
+Price range              : Rs 12,000-25,000 one-time (5 main boards + 5 flex, assembled)
+Quantity                 : 1
+Line total               : Rs 18,000
+
+Role: First production batch (one-time).
+
+Where to buy / see a photo:
+  - https://jlcpcb.com
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

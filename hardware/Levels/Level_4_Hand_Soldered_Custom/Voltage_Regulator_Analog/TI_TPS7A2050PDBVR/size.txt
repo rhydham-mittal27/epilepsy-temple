@@ -1,0 +1,7 @@
+TI_TPS7A2050PDBVR
+
+Package: SOT-23-5 (DBV)
+Body: 2.9 x 1.6 mm; with leads 2.9 x 2.8 mm
+Output: 5.0 V, very low noise
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

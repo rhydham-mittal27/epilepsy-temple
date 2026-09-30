@@ -1,0 +1,13 @@
+JLCPCB_Bare_Boards_5pcs_plus_Stencil  (PCB Fabrication)
+
+Estimated price per unit : Rs 3,000
+Price range              : Rs 2,000-4,000 (5 main + 5 flex boards, steel stencil)
+Quantity                 : 1
+Line total               : Rs 3,000
+
+Role: You place and solder every part.
+
+Where to buy / see a photo:
+  - https://jlcpcb.com
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

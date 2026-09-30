@@ -1,0 +1,6 @@
+MAX30102_Module
+
+Module: approx. 14 x 14 mm (purple board) / 20 x 15 mm (varies)
+Red + IR LEDs, photodetector, I2C
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

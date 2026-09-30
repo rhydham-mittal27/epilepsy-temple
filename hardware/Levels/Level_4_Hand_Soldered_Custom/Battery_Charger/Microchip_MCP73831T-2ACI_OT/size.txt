@@ -1,0 +1,7 @@
+Microchip_MCP73831T-2ACI_OT
+
+Package: SOT-23-5
+Body: 2.9 x 1.6 mm; with leads 2.9 x 2.8 mm
+Height: 1.45 mm max
+
+Source: manufacturer / seller listing (values marked approx. vary by supplier).

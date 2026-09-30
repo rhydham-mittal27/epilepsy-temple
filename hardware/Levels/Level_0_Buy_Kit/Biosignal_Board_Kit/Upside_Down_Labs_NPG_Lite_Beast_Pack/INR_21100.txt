@@ -1,0 +1,14 @@
+Upside_Down_Labs_NPG_Lite_Beast_Pack  (Biosignal Board Kit)
+
+Estimated price per unit : Rs 21,100
+Price range              : US$ 240 (~Rs 21,100) on Crowd Supply incl. shipping; check the Indian store for INR price
+Quantity                 : 1
+Line total               : Rs 21,100
+
+Role: Ready-made 6-channel wireless biosignal recorder (ESP32-C6, 12-bit).
+
+Where to buy / see a photo:
+  - https://www.crowdsupply.com/upside-down-labs/neuro-playground-lite
+  - https://store.upsidedownlabs.tech/
+
+Estimate as of Sep 2026 (about Rs 88 per US$). Confirm before ordering.

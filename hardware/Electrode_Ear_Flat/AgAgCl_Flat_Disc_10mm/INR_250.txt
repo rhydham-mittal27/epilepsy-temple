@@ -1,0 +1,14 @@
+AgAgCl_Flat_Disc_10mm  (Electrode Ear Flat)
+
+Estimated price per unit : Rs 250
+Price range              : Rs 150-400 each
+Quantity per device      : 6
+Line total per device    : Rs 1,500
+
+Role: Ear contacts (T7/T8 area), mastoid reference + bias, and 2 jaw (temporalis) EMG contacts.
+
+Where to buy / see a photo:
+  - https://shop.neurospec.com/products/electrodes/dry-electrodes
+  - https://www.fri-fl-shop.com/collections/electrodes-eeg-electrodes
+
+Estimate as of Sep 2026 (about Rs 88 per US$, import margin included where relevant). Confirm before ordering.
