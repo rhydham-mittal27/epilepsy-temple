@@ -94,8 +94,8 @@ const rise = (dt, d = .6) => (1 - expo(dt / d)) * 40;
 const IMG = {};
 const CLIPN = { lab: 150, dev: 150 };   // frames on disk (set by init)
 const fname = (name, f) => `build/clip_${name}/${String(f).padStart(4, "0")}.jpg`;
-function clipFrame(name, t0, dur) {      // stretch the clip over dur seconds; blend neighbours = smooth slow motion
-  const n = CLIPN[name], x = clamp((T - t0) / dur) * (n - 1), f = Math.floor(x);
+function clipFrame(name, t0, dur, rev = false) {   // stretch the clip over dur seconds; blend neighbours = smooth slow motion
+  const n = CLIPN[name], u = clamp((T - t0) / dur), x = (rev ? 1 - u : u) * (n - 1), f = Math.floor(x);
   return [fname(name, f), fname(name, Math.min(n - 1, f + 1)), x - f];
 }
 async function loadImg(src) {
@@ -336,7 +336,7 @@ S.build = (t, sc) => {
   const x = M, y = 600, w = W - 2 * M;
   ctx.save(); ctx.globalAlpha = enter; ctx.translate(0, (1 - enter) * 60);
   if (s9 < 0) footage(src, 0, 0, 1920, 1080, x, y, w, w * 1080 / 1920, { zoom: 1 + s8 * .03 });
-  else if (s10 < 0) footage(src, 10, 80, 790, 500, x, y, w, w * 500 / 790, { zoom: 1.02 + s9 * .04, alpha: fade(s9, .25) });
+  else if (s10 < 0) footage(clipFrame("lab", L(9).t0 - 2, L(10).t0 - L(9).t0 + 2, true), 10, 80, 790, 500, x, y, w, w * 500 / 790, { zoom: 1.02 + s9 * .04, alpha: fade(s9, .25) });
   else footage(src, 805, 640, 630, 285, x, y, w, w * 285 / 630, { zoom: 1 + s10 * .03, alpha: fade(s10, .25) });
   ctx.restore();
   const capY = s9 < 0 ? y + w * 1080 / 1920 + 50 : s10 < 0 ? y + w * 500 / 790 + 50 : y + w * 285 / 630 + 50;
@@ -344,7 +344,7 @@ S.build = (t, sc) => {
   else if (s10 < 0) { label("100 NEURONS  ·  K⁺  Na⁺  Cl⁻  ·  ADENOSINE  ·  BLOOD FLOW", M, capY, { size: 21, alpha: fade(s9 - .1), color: C.fg });
     label("height = each neuron's potassium load", M, capY + 40, { size: 20, ls: 0, alpha: fade(s9 - .3) }); }
   else { label("VIRTUAL EAR-EEG  ·  forward model", M, capY, { size: 22, alpha: fade(s10 - .1), color: C.fg });
-    label("✓  Epileptor matches The Virtual Brain: identical first onset", M, capY + 44, { size: 21, ls: 0, color: C.green, alpha: fade(sinceW(10, 2) - .1) }); }
+    label("✓  Matches The Virtual Brain (Epileptor)", M, capY + 44, { size: 21, ls: 0, color: C.green, alpha: fade(sinceW(10, 2) - .1) }); }
 };
 S.data = () => {
   const s11 = since(11), s12 = since(12);
