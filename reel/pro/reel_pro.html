@@ -1,0 +1,519 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Epilepsy Temple Build Log</title>
+<style>
+  @font-face { font-family: "Inter"; src: url("../fonts/Inter.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "Mono"; src: url("../fonts/JetBrainsMono.ttf"); font-weight: 100 800; }
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; width: 360px; height: 640px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Professional cut: editorial type, chapter structure, real project footage, restrained motion.
+const W = 1080, H = 1920, M = 90;                 // canvas + side margin
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+const C = { bg: "#05070A", fg: "#F2F4F7", dim: "#8A93A3", faint: "rgba(255,255,255,.10)",
+            acc: "#3FD8FF", red: "#FF4D6A", grey: "#4A5260", green: "#5BE49B" };
+let TL = null, T = 0;
+
+// ---------- maths ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const expo = x => { x = clamp(x); return x === 1 ? 1 : 1 - Math.pow(2, -10 * x); };
+const cubic = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---------- timeline ----------
+const L = i => TL.lines[i];
+const since = i => T - TL.lines[i].t0;
+const wordAt = (i, k) => TL.lines[i].words[k].t0;
+const sinceW = (i, k) => T - wordAt(i, k);
+function sceneAt(t) { let s = TL.scenes[0]; for (const x of TL.scenes) if (t >= x.t0) s = x; return s; }
+
+// ---------- type ----------
+function font(size, weight = 700, fam = "Inter") { ctx.font = `${weight} ${size}px ${fam}`; }
+function label(str, x, y, o = {}) {    // small mono label
+  ctx.save(); font(o.size || 24, o.weight || 500, "Mono"); ctx.textAlign = o.align || "left"; ctx.textBaseline = "middle";
+  ctx.globalAlpha *= o.alpha === undefined ? 1 : o.alpha;
+  ctx.fillStyle = o.color || C.dim;
+  if (o.spacing !== false) ctx.letterSpacing = (o.ls || 3) + "px";
+  ctx.fillText(str, x, y); ctx.restore();
+}
+// Kinetic headline: words rise out of a mask, staggered. "*word*" = accent.
+function headline(str, x, y, size, t0, o = {}) {
+  const dt = T - t0; if (dt < 0) return;
+  const words = str.split(" "), lh = size * (o.lh || 1.05), maxW = o.maxW || W - 2 * M;
+  font(size, o.weight || 750); ctx.letterSpacing = (o.ls === undefined ? -size * .035 : o.ls) + "px";
+  const lines = [[]]; let lw = 0; const sp = size * .26;
+  for (const w of words) { const ww = ctx.measureText(w.replace(/\*/g, "")).width;
+    if (lw + ww > maxW && lines[lines.length - 1].length) { lines.push([]); lw = 0; }
+    lines[lines.length - 1].push([w, ww]); lw += ww + sp; }
+  let k = 0;
+  const out = o.out === undefined ? 1 : o.out, base = ctx.globalAlpha;
+  lines.forEach((ln, li) => {
+    const total = ln.reduce((a, [, ww]) => a + ww, 0) + sp * (ln.length - 1);
+    let cx = o.align === "center" ? x - total / 2 : x;
+    const ly = y + li * lh;
+    for (const [w, ww] of ln) {
+      const p = expo((dt - k * (o.stagger || .07)) / .7); k++;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(cx - 10, ly - size * .95, ww + 20, size * 1.25); ctx.clip();
+      ctx.globalAlpha = base * p * out;
+      ctx.fillStyle = w.startsWith("*") ? (o.accent || C.acc) : (o.color || C.fg);
+      ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+      ctx.fillText(w.replace(/\*/g, ""), cx, ly + (1 - p) * size * 1.0);
+      ctx.restore();
+      cx += ww + sp;
+    }
+  });
+  ctx.letterSpacing = "0px";
+  return lines.length * lh;
+}
+function bigNumber(str, x, y, size, color, alpha = 1, align = "left") {
+  ctx.save(); font(size, 800); ctx.letterSpacing = -size * .05 + "px"; ctx.globalAlpha *= alpha;
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = "alphabetic"; ctx.fillText(str, x, y); ctx.restore();
+}
+function hline(x0, y, x1, p, color = C.faint, w = 2) {
+  if (p <= 0) return; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(lerp(x0, x1, p), y); ctx.lineWidth = w; ctx.strokeStyle = color; ctx.stroke();
+}
+function glowDot(x, y, r, color, a = 1) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 6); g.addColorStop(0, color); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.save(); ctx.globalAlpha = a * .5; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 6, 0, 7); ctx.fill();
+  ctx.globalAlpha = a; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore();
+}
+const fade = (dt, d = .35) => clamp(dt / d);
+const rise = (dt, d = .6) => (1 - expo(dt / d)) * 40;
+
+// ---------- footage ----------
+const IMG = {};
+function clipFrame(name, t0, fps = 30, n = 150) {
+  const f = Math.max(0, Math.floor((T - t0) * fps)) % n;
+  return `build/clip_${name}/${String(f).padStart(4, "0")}.jpg`;
+}
+async function loadImg(src) {
+  if (IMG[src]) return IMG[src];
+  const im = new Image(); im.src = src; try { await im.decode(); IMG[src] = im; } catch (e) { return null; }
+  const keys = Object.keys(IMG); if (keys.length > 12) delete IMG[keys[0]];
+  return im;
+}
+const NEED = [];    // srcs requested during a dry pass of draw()
+function footage(src, sx, sy, sw, sh, dx, dy, dw, dh, o = {}) {
+  NEED.push(src);
+  const im = IMG[src];
+  ctx.save();
+  ctx.globalAlpha *= o.alpha === undefined ? 1 : o.alpha;
+  ctx.shadowColor = "rgba(63,216,255,.18)"; ctx.shadowBlur = 60;
+  ctx.beginPath(); ctx.roundRect(dx, dy, dw, dh, 28); ctx.fillStyle = "#0A0F16"; ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.clip();
+  if (im) {
+    const z = o.zoom || 1;   // slow push: shrink the source window around its centre
+    const cx = sx + sw / 2 + (o.panX || 0), cy = sy + sh / 2 + (o.panY || 0), w = sw / z, h = sh / z;
+    ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h, dx, dy, dw, dh);
+  }
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha *= o.alpha === undefined ? 1 : o.alpha;
+  ctx.beginPath(); ctx.roundRect(dx, dy, dw, dh, 28); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,.16)"; ctx.stroke(); ctx.restore();
+}
+
+// ---------- waveforms ----------
+function eegSample(x, mode, seed = 0) {
+  const a = Math.sin(x * .9 + seed) * 6 + Math.sin(x * 2.3 + seed * 2) * 4 + Math.sin(x * 5.1) * 2;
+  if (mode === "seizure") { const ph = (x * .55) % 1; return (ph < .1 ? -60 * Math.sin(ph / .1 * Math.PI) : 18 * Math.sin((ph - .1) / .9 * Math.PI)) + a * .4; }
+  return a;
+}
+function ppgSample(x) { const ph = (x * .18) % 1; return -(ph < .3 ? Math.sin(ph / .3 * Math.PI / 2) : Math.cos((ph - .3) / .7 * Math.PI / 2)) * 34 + (ph > .45 && ph < .6 ? -6 * Math.sin((ph - .45) / .15 * Math.PI) : 0); }
+function ecgSample(x) { const ph = (x * .16) % 1;
+  if (ph > .40 && ph < .43) return -90 * Math.sin((ph - .4) / .03 * Math.PI);
+  if (ph > .43 && ph < .46) return 25 * Math.sin((ph - .43) / .03 * Math.PI);
+  if (ph > .55 && ph < .68) return -14 * Math.sin((ph - .55) / .13 * Math.PI);
+  if (ph > .25 && ph < .33) return -8 * Math.sin((ph - .25) / .08 * Math.PI); return 0; }
+function trace(fn, x0, x1, y, color, width = 3, p = 1, scroll = 0) {
+  ctx.save(); ctx.beginPath();
+  const xe = lerp(x0, x1, p);
+  for (let x = x0; x <= xe; x += 3) ctx.lineTo(x, y + fn((x + scroll) / 12, x));
+  ctx.lineWidth = width; ctx.strokeStyle = color; ctx.lineJoin = "round"; ctx.stroke();
+  if (p < 1 && p > 0) glowDot(xe, y + fn((xe + scroll) / 12, xe), 5, color);
+  ctx.restore();
+}
+
+// ---------- line-art heads ----------
+function profileHead(x, y, s, p, o = {}) {      // single-stroke side profile, drawn on with p
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath();
+  ctx.moveTo(-40, 330); ctx.bezierCurveTo(-30, 260, -10, 230, -5, 200);       // neck front
+  ctx.bezierCurveTo(30, 190, 70, 185, 80, 165);                                // jaw
+  ctx.bezierCurveTo(95, 150, 92, 130, 100, 118); ctx.bezierCurveTo(110, 110, 100, 100, 112, 92);  // chin, lips
+  ctx.bezierCurveTo(118, 82, 108, 76, 116, 64); ctx.bezierCurveTo(128, 48, 132, 40, 120, 30);    // nose
+  ctx.bezierCurveTo(112, 18, 118, -20, 110, -60);                              // brow
+  ctx.bezierCurveTo(95, -150, 0, -190, -80, -170);                             // forehead/crown
+  ctx.bezierCurveTo(-170, -150, -200, -40, -180, 40);                          // back of head
+  ctx.bezierCurveTo(-170, 100, -130, 140, -120, 200); ctx.bezierCurveTo(-115, 260, -110, 300, -105, 330); // nape
+  ctx.setLineDash([2200 * p, 2400]); ctx.lineWidth = 4 / s; ctx.strokeStyle = o.color || "rgba(242,244,247,.85)"; ctx.lineCap = "round"; ctx.stroke();
+  ctx.setLineDash([]);
+  // ear
+  if (p > .6) { ctx.globalAlpha = clamp((p - .6) / .3); ctx.beginPath(); ctx.ellipse(-50, 40, 26, 44, .15, 0, Math.PI * 2); ctx.lineWidth = 3 / s; ctx.stroke(); }
+  ctx.restore();
+}
+function frontHead(x, y, s, p, o = {}) {        // minimal front head with electrode cap
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath(); ctx.ellipse(0, 0, 150, 185, 0, 0, Math.PI * 2);
+  ctx.setLineDash([1100 * p, 1200]); ctx.lineWidth = 4; ctx.strokeStyle = "rgba(242,244,247,.8)"; ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(-60, 175); ctx.lineTo(-70, 300); ctx.moveTo(60, 175); ctx.lineTo(70, 300); ctx.lineWidth = 4; ctx.globalAlpha = clamp(p * 2 - 1); ctx.stroke();
+  ctx.globalAlpha = 1;
+  if (o.electrodes) {
+    const k = o.electrodes, r = rng(5), pts = [];
+    for (const [n, rad, yy] of [[7, 140, -60], [6, 110, -120], [4, 70, -160], [1, 0, -178]]) for (let i = 0; i < n; i++) {
+      const a = n === 1 ? 0 : (i / (n - 1) - .5) * 2.3; pts.push([Math.sin(a) * rad, yy + (1 - Math.cos(a)) * 40]); }
+    pts.forEach(([px, py], i) => {
+      const e = expo((k * 18 - i) / 3);
+      if (e <= 0) return;
+      ctx.beginPath(); ctx.moveTo(px, py);
+      const side = px < 0 ? -1 : 1;
+      ctx.bezierCurveTo(px + side * 140, py - 60, side * (210 + r() * 40), 120, side * (150 + r() * 120), 320);
+      ctx.lineWidth = 1.5; ctx.strokeStyle = `rgba(242,244,247,${.35 * e})`; ctx.stroke();
+      glowDot(px, py, 7 * e, C.red, e);
+    });
+  }
+  ctx.restore();
+}
+
+// ---------- chrome: header, chapter, progress ----------
+const CH = { hook: "00  THE RESULT", problem: "01  THE PROBLEM", spark: "02  THE SPARK", twist: "03  THE TWIST",
+             build: "04  THE LAB", data: "05  THE DATA", design: "06  THE DEVICE", result: "07  THE VERDICT",
+             honest: "08  THE HARD PART", next: "09  WHAT'S NEXT" };
+function chrome(sc, t) {
+  label("EPILEPSY TEMPLE", M, 290, { color: C.fg, size: 24, weight: 700 });
+  label("BUILD LOG", W - M, 290, { align: "right", size: 24 });
+  hline(M, 320, W - M, 1, "rgba(255,255,255,.12)", 2);
+  hline(M, 320, W - M, t / TL.duration, C.acc, 2);
+  const p = fade(t - sc.t0 - .1, .4);
+  label(CH[sc.name], M, 362, { color: C.acc, size: 24, alpha: p, weight: 600 });
+}
+
+// ---------- captions: sentence case, karaoke fill ----------
+function captions(t) {
+  let li = -1; TL.lines.forEach((l, i) => { if (t >= l.t0 - .05) li = i; });
+  if (li < 0) return;
+  const line = TL.lines[li], next = TL.lines[li + 1];
+  if (t > line.t1 + .45 && (!next || t < next.t0 - .05)) return;
+  const size = 44; font(size, 600);
+  const sp = ctx.measureText(" ").width, maxW = W - 2 * M - 20;
+  // chunk to <= 2 lines
+  const words = line.words.map(w => ({ ...w, width: ctx.measureText(w.w).width }));
+  const rows = [[]]; let rw = 0;
+  for (const w of words) { if (rw + w.width > maxW && rows[rows.length - 1].length) { rows.push([]); rw = 0; } rows[rows.length - 1].push(w); rw += w.width + sp; }
+  const pages = []; for (let i = 0; i < rows.length; i += 2) pages.push(rows.slice(i, i + 2));
+  let page = pages[0]; for (const pg of pages) if (t >= pg[0][0].t0 - .05) page = pg;
+  const a = fade(t - line.t0 + .05, .15) * (1 - fade(t - line.t1 - .3, .15));
+  const y0 = 1395 - (page.length - 1) * 30;
+  page.forEach((row, ri) => {
+    const total = row.reduce((s, w) => s + w.width, 0) + sp * (row.length - 1);
+    let x = W / 2 - total / 2; const y = y0 + ri * 60;
+    for (const w of row) {
+      const on = t >= w.t0, active = on && t < w.t1 + .03;
+      ctx.save(); ctx.globalAlpha = a * (on ? 1 : .32);
+      ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.textBaseline = "middle"; ctx.fillText(w.w, x + 2, y + 3);
+      ctx.fillStyle = active || (on && w.hi) ? C.acc : C.fg; ctx.fillText(w.w, x, y);
+      ctx.restore(); x += w.width + sp;
+    }
+  });
+}
+
+// ---------- scenes ----------
+const S = {};
+S.hook = () => {
+  const s0 = since(0), s1 = since(1);
+  const out = 1 - fade(s1 - .1, .35);
+  const lift = cubic(s1 / .5) * 120;
+  ctx.save(); ctx.translate(0, -lift);
+  const a = fade(s0 + .3, .3) * out;            // visible from frame 0
+  const n1 = Math.round(96 * expo((s0 + .2) / 1.6));
+  bigNumber(`${n1}%`, M - 8, 700, 300, C.acc, a);
+  label("2 SENSORS  ·  AT THE EARS", M, 760, { color: C.fg, alpha: a, size: 26 });
+  hline(M, 840, W - M, expo((s0 - .4) / .8) * out, "rgba(255,255,255,.2)");
+  const k = sinceW(0, 10);
+  const n2 = Math.round(91 * expo((k + .1) / 1.4));
+  bigNumber(`${k > 0 ? n2 : 0}%`, M - 8, 1120, 300, "#5D6676", fade(k, .3) * out);
+  label("18-ELECTRODE HOSPITAL CAP", M, 1180, { alpha: fade(k, .3) * out, size: 26 });
+  label("Siena Scalp EEG · 14 adults · 47 seizures · unseen patients", M, 1255, { size: 20, ls: 0, alpha: fade(k - .6, .4) * .8 * out });
+  ctx.restore();
+  if (s1 > 0) headline("How I *built* *it.*", M, 900, 150, L(1).t0 + .15);
+};
+S.problem = () => {
+  const s2 = since(2), s3 = since(3), s4 = since(4);
+  if (s3 < .3) { // 50M + dot field
+    const o = 1 - fade(s3, .3);
+    ctx.save(); ctx.globalAlpha = o;
+    bigNumber("50M", M - 10, 720, 360, C.fg, fade(s2, .3));
+    label("PEOPLE LIVE WITH EPILEPSY  ·  WHO", M, 790, { alpha: fade(s2 - .2, .3), size: 24 });
+    const cols = 25, rows = 12;
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      const d = (i + j * .7) / (cols + rows * .7), e = fade(s2 - .2 - d * 1.2, .25);
+      ctx.beginPath(); ctx.arc(M + 6 + i * 36.2, 880 + j * 30, 5.5, 0, 7);
+      ctx.fillStyle = (i * 7 + j * 13) % 41 === 0 ? C.acc : `rgba(242,244,247,${.55 * e})`; ctx.globalAlpha = o * e; ctx.fill();
+    }
+    ctx.restore();
+  }
+  if (s3 > 0 && s4 < .3) {
+    const o = 1 - fade(s4, .3);
+    ctx.save(); ctx.globalAlpha = o;
+    headline("No *warning.*", M, 600, 150, L(3).t0 + .05);
+    const p = expo(s3 / 1.1);
+    const sc = T * 140;
+    // calm then sudden seizure: switch at 60% of the width
+    ctx.save(); ctx.beginPath(); ctx.rect(M, 700, W - 2 * M, 400); ctx.clip();
+    ctx.beginPath(); const xe = lerp(M, W - M, p);
+    for (let x = M; x <= xe; x += 3) { const mode = x > 620 ? "seizure" : "calm"; ctx.lineTo(x, 900 + eegSample((x + sc) / 12, mode) * (mode === "seizure" ? 2.2 : 1.6)); }
+    ctx.lineWidth = 3; ctx.strokeStyle = C.fg; ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = "rgba(255,77,106,.08)"; ctx.fillRect(620, 720, W - M - 620, 360);
+    hline(620, 720, 620, 1); ctx.beginPath(); ctx.moveTo(620, 720); ctx.lineTo(620, 1080); ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.globalAlpha = o * fade(s3 - .5); ctx.stroke(); ctx.globalAlpha = o;
+    label("EEG  ·  T7", M, 745, { size: 22 });
+    label("● SEIZURE ONSET", 640, 745, { size: 22, color: C.red, alpha: fade(s3 - .6, .2) * (Math.sin(T * 8) > -.3 ? 1 : .4) });
+    ctx.restore();
+  }
+  if (s4 > 0) {
+    headline("A cap. *18* electrodes. Gel. Wires.", M, 560, 96, L(4).t0 + .05, { maxW: 900 });
+    frontHead(540, 960, 1.05, expo(s4 / 1.2), { electrodes: clamp((s4 - .3) / 1.4) });
+  }
+};
+S.spark = () => {
+  const s5 = since(5), s6 = since(6);
+  const up = cubic(s6 / .6);
+  ctx.save(); ctx.globalAlpha = 1 - up * .75;
+  const hx = 560, hy = lerp(930, 990, up);
+  profileHead(hx, hy, 1.25, expo(s5 / 1.6));
+  // Temple sensor + callout
+  const tp = fade(sinceW(5, 10), .3) * (1 - up);
+  if (tp > 0) {
+    const tx = hx + 95 * 1.25, ty = hy - 95 * 1.25;
+    glowDot(tx, ty, 9, C.acc, tp * (.75 + .25 * Math.sin(T * 6)));
+    ctx.beginPath(); ctx.moveTo(tx + 14, ty - 10); ctx.lineTo(tx + 80, ty - 120); ctx.lineTo(W - M, ty - 120);
+    ctx.setLineDash([300 * expo(sinceW(5, 10) / .6), 400]); ctx.lineWidth = 2; ctx.strokeStyle = C.acc; ctx.stroke(); ctx.setLineDash([]);
+    label("TEMPLE", W - M, ty - 150, { align: "right", color: C.fg, size: 24, alpha: tp, weight: 700 });
+    label("OPTICAL BLOOD-FLOW SENSOR", W - M, ty - 90, { align: "right", size: 20, alpha: tp });
+  }
+  ctx.restore();
+  if (s5 > 0 && s6 < 0) headline("A brain sensor, *on* *the* *temple.*", M, 560, 92, L(5).t0 + .1, { maxW: 900 });
+  if (s6 > 0) headline("Could something this small *catch* *a* *seizure?*", M, 600, 108, L(6).t0 + .05, { maxW: 900 });
+};
+S.twist = () => {
+  const s7 = since(7);
+  headline("It *can't.*", M, 560, 170, L(7).t0, { accent: C.red });
+  const card = (y, title, sub, fn, color, scroll) => {
+    ctx.save(); ctx.beginPath(); ctx.roundRect(M, y, W - 2 * M, 250, 22); ctx.fillStyle = "rgba(255,255,255,.035)"; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,.1)"; ctx.stroke(); ctx.clip();
+    label(title, M + 30, y + 40, { color: C.fg, size: 22, weight: 700 });
+    label(sub, M + 30, y + 72, { size: 18, ls: 1 });
+    trace(fn, M + 30, W - M - 30, y + 170, color, 3, 1, scroll);
+    ctx.restore();
+  };
+  const a = fade(sinceW(7, 4), .3), b = fade(sinceW(7, 6), .3);
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(0, rise(sinceW(7, 4)));
+  card(700, "WHAT TEMPLE READS", "blood flow · optical PPG", (x) => ppgSample(x), C.acc, T * 120); ctx.restore();
+  ctx.save(); ctx.globalAlpha = b; ctx.translate(0, rise(sinceW(7, 6)));
+  card(990, "WHAT A SEIZURE IS", "electrical brain activity · EEG", (x) => eegSample(x, "seizure") * 1.3, C.red, T * 120); ctx.restore();
+  if (b > 0) {  // verdict stamp on the PPG card
+    const k = expo((sinceW(7, 6) - .3) / .4);
+    label("✕  NO SEIZURE SIGNAL", W - M - 30, 740, { align: "right", color: C.red, size: 22, weight: 700, alpha: k });
+  }
+};
+S.build = (t, sc) => {
+  const s8 = since(8), s9 = since(9), s10 = since(10);
+  headline("I built *my* *own* *lab.*", M, 520, 104, L(8).t0 + .05);
+  const src = clipFrame("lab", sc.t0);
+  const enter = expo(s8 / .8);
+  const x = M, y = 600, w = W - 2 * M;
+  ctx.save(); ctx.globalAlpha = enter; ctx.translate(0, (1 - enter) * 60);
+  if (s9 < 0) footage(src, 0, 0, 1920, 1080, x, y, w, w * 1080 / 1920, { zoom: 1 + s8 * .03 });
+  else if (s10 < 0) footage(src, 10, 80, 790, 500, x, y, w, w * 500 / 790, { zoom: 1.02 + s9 * .04, alpha: fade(s9, .25) });
+  else footage(src, 805, 640, 630, 285, x, y, w, w * 285 / 630, { zoom: 1 + s10 * .03, alpha: fade(s10, .25) });
+  ctx.restore();
+  const capY = s9 < 0 ? y + w * 1080 / 1920 + 50 : s10 < 0 ? y + w * 500 / 790 + 50 : y + w * 285 / 630 + 50;
+  if (s9 < 0) label("EPILEPSY LIVE LAB  ·  real-time simulator", M, capY, { size: 22, alpha: fade(s8 - .4) });
+  else if (s10 < 0) { label("100 NEURONS  ·  K⁺  Na⁺  Cl⁻  ·  ADENOSINE  ·  BLOOD FLOW", M, capY, { size: 21, alpha: fade(s9 - .1), color: C.fg });
+    label("height = each neuron's potassium load", M, capY + 40, { size: 20, ls: 0, alpha: fade(s9 - .3) }); }
+  else { label("VIRTUAL EAR-EEG  ·  forward model", M, capY, { size: 22, alpha: fade(s10 - .1), color: C.fg });
+    label("✓  Epileptor matches The Virtual Brain: identical first onset", M, capY + 44, { size: 21, ls: 0, color: C.green, alpha: fade(sinceW(10, 2) - .1) }); }
+};
+S.data = () => {
+  const s11 = since(11), s12 = since(12);
+  headline("Real *hospital* *EEG.*", M, 520, 110, L(11).t0 + .05);
+  const rows = [["CHB-MIT", "children", 23, 185], ["SeizeIT2", "wearable", 125, 883], ["Siena", "adults", 14, 47]];
+  label("DATASET", M, 610, { size: 18 }); label("PATIENTS", 650, 610, { size: 18, align: "right" }); label("SEIZURES", W - M, 610, { size: 18, align: "right" });
+  hline(M, 635, W - M, expo(s11 / .8), "rgba(255,255,255,.18)");
+  rows.forEach(([n, d, p, s], i) => {
+    const dt = s11 - .3 - i * .18, a = fade(dt, .3), y = 690 + i * 78;
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(0, rise(dt, .5) * .5);
+    font(38, 650); ctx.fillStyle = C.fg; ctx.textBaseline = "middle"; ctx.fillText(n, M, y);
+    label(d, M + 230, y + 2, { size: 20, ls: 1 });
+    font(38, 500, "Mono"); ctx.textAlign = "right"; ctx.fillText(String(p), 650, y); ctx.fillText(String(s), W - M, y);
+    ctx.restore();
+    hline(M, y + 38, W - M, a, "rgba(255,255,255,.07)");
+  });
+  if (s12 > 0) {
+    const c1 = Math.round(162 * expo(s12 / 1.2)), c2 = Math.round(1115 * expo((sinceW(12, 2)) / 1.2));
+    bigNumber(`${Math.min(160, c1)}+`, M - 6, 1150, 150, C.fg, fade(s12, .2));
+    label("PATIENTS", M, 1195, { size: 22, alpha: fade(s12, .2) });
+    if (sinceW(12, 2) > 0) { bigNumber(`${Math.min(1100, Math.max(0, c2)).toLocaleString("en-US")}+`, W - M + 6, 1150, 150, C.acc, fade(sinceW(12, 2), .2), "right");
+      label("SEIZURES", W - M, 1195, { size: 22, align: "right", alpha: fade(sinceW(12, 2), .2) }); }
+  }
+};
+S.design = (t, sc) => {
+  const s13 = since(13), s14 = since(14);
+  headline("The *“?”* *ear-hook.*", M, 520, 100, L(13).t0 + .3);
+  const src = clipFrame("dev", sc.t0);
+  const h = 600, w = h * 610 / 740, x = (W - w) / 2, y = 590, e = expo(s13 / .8);
+  ctx.save(); ctx.globalAlpha = e; ctx.translate(0, (1 - e) * 60);
+  footage(src, 18, 140, 610, 740, x, y, w, h, { zoom: 1.05 + (T - sc.t0) * .025 });
+  ctx.restore();
+  label("MK-I  ·  BOTH EARS  ·  DISCREET", M, y + h + 48, { size: 22, alpha: fade(s13 - .6), color: C.fg });
+  if (s14 > 0) {
+    const k = expo(s14 / .5);
+    ctx.save(); ctx.globalAlpha = k;
+    ctx.beginPath(); ctx.roundRect(x + w - 230, y + 30, 200, 96, 18); ctx.fillStyle = "rgba(5,7,10,.75)"; ctx.fill(); ctx.strokeStyle = C.acc; ctx.lineWidth = 2; ctx.stroke();
+    bigNumber("2", x + w - 200, y + 106, 80, C.acc); label("EEG CH", x + w - 150, y + 78, { size: 20, color: C.fg, weight: 700 });
+    ctx.restore();
+    label("vs. 18 for a hospital cap", M, y + h + 92, { size: 20, ls: 0, alpha: fade(s14 - .3) });
+  }
+};
+S.result = () => {
+  const s15 = since(15), s16 = since(16);
+  headline("*96%* caught.", M, 540, 150, sinceW(15, 8) > -0.3 ? wordAt(15, 8) - .3 : 1e9);
+  label("UNSEEN ADULT PATIENTS  ·  SEIZURES DETECTED", M, 640, { size: 20, alpha: fade(s15, .3) });
+  const bar = (y, name, sub, pct, t0, color, numColor) => {
+    const dt = T - t0, a = fade(dt + .4, .3), p = expo(dt / 1.3) * pct / 100;
+    ctx.save(); ctx.globalAlpha = a;
+    font(40, 650); ctx.fillStyle = C.fg; ctx.textBaseline = "middle"; ctx.fillText(name, M, y);
+    label(sub, M, y + 40, { size: 19, ls: 1 });
+    bigNumber(`${Math.round(Math.max(0, p) * 100)}%`, W - M, y + 16, 84, numColor, 1, "right");
+    ctx.beginPath(); ctx.roundRect(M, y + 80, W - 2 * M, 22, 11); ctx.fillStyle = "rgba(255,255,255,.07)"; ctx.fill();
+    if (p > 0) { ctx.beginPath(); ctx.roundRect(M, y + 80, (W - 2 * M) * p, 22, 11); ctx.fillStyle = color; ctx.fill(); }
+    ctx.restore();
+  };
+  bar(760, "Ear-hook", "2 channels · at the ears", 96, wordAt(15, 8) - .2, C.acc, C.acc);
+  if (s16 > -.4) bar(960, "Full hospital cap", "18 channels", 91, wordAt(16, 4) - .2, "#5D6676", C.fg);
+  label("Siena Scalp EEG · 14 adults · 47 focal seizures · leave-one-patient-out", M, 1150, { size: 19, ls: 0, alpha: fade(s16 - .4) * .85 });
+  label("Children (CHB-MIT, 23 patients): 88% vs 85%", M, 1190, { size: 19, ls: 0, alpha: fade(s16 - .7) * .85 });
+};
+S.honest = () => {
+  const s17 = since(17), s18 = since(18);
+  headline("The hard part: *false* *alarms.*", M, 540, 100, L(17).t0 + .05, { accent: C.red, maxW: 900 });
+  // 24 h strip with alarm ticks
+  const y = 800, x0 = M, x1 = W - M, r = rng(9);
+  label("ONE DAY  ·  ALARMS", M, y - 120, { size: 20, alpha: fade(s17, .3) });
+  hline(x0, y, x1, expo(s17 / .8), "rgba(255,255,255,.25)");
+  for (let i = 0; i < 46; i++) {
+    const x = x0 + r() * (x1 - x0), h = 30 + r() * 60, gone = r() < .48, dt = s17 - .3 - i * .025;
+    let a = fade(dt, .15);
+    if (gone && s18 > 0) a *= 1 - fade(sinceW(18, 8) - .2 - (i % 12) * .04, .25);
+    if (a <= 0) continue;
+    ctx.save(); ctx.globalAlpha = a; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - h); ctx.lineWidth = 4; ctx.strokeStyle = C.red; ctx.stroke(); ctx.restore();
+  }
+  label("00:00", x0, y + 34, { size: 18 }); label("24:00", x1, y + 34, { size: 18, align: "right" });
+  if (s18 > 0) {
+    ctx.save(); ctx.beginPath(); ctx.rect(M, 880, W - 2 * M, 200); ctx.clip();
+    trace((x) => ecgSample(x), M, W - M, 1000, C.green, 3, expo(s18 / 1.2), T * 90);
+    ctx.restore();
+    label("+ HEART (ECG)", M, 900, { size: 20, color: C.green, alpha: fade(s18, .3), weight: 700 });
+    const k = sinceW(18, 8);
+    bigNumber("−48%", M - 6, 1235, 150, C.green, fade(k, .25));
+    label("fewer false alarms · ear EEG + ECG · Siena (27–48%)", M, 1275, { size: 18, ls: 0, alpha: fade(k - .3) });
+  }
+};
+S.next = () => {
+  const s19 = since(19), s20 = since(20);
+  const end = fade(s20 - .05, .4);
+  ctx.save(); ctx.globalAlpha = 1 - end;
+  headline("Prototype *1.*", M, 540, 150, L(19).t0 + .05);
+  const parts = [["ADS1299", "24-bit EEG front-end"], ["nRF52840", "Bluetooth LE"], ["MAX30101", "in-ear PPG"], ["BMI270", "motion"]];
+  parts.forEach(([a, b], i) => {
+    const dt = s19 - .4 - i * .16, y = 660 + i * 80;
+    ctx.save(); ctx.globalAlpha *= fade(dt, .25); ctx.translate(rise(dt, .5) * -.5, 0);
+    font(38, 600, "Mono"); ctx.fillStyle = C.fg; ctx.textBaseline = "middle"; ctx.fillText(a, M, y);
+    label(b, M + 300, y + 2, { size: 22, ls: 1 });
+    ctx.restore(); hline(M, y + 38, W - M, fade(dt, .3), "rgba(255,255,255,.08)");
+  });
+  label("TARGET: TONIC-CLONIC ALARM  ·  87% AT ≤1 FALSE ALARM/DAY", M, 1020, { size: 20, color: C.acc, alpha: fade(s19 - 1.2) });
+  ctx.restore();
+  if (end > 0) { // end card
+    ctx.save(); ctx.globalAlpha = end;
+    glowDot(540, 700, 10, C.acc, .9);
+    ctx.font = "800 104px Inter"; ctx.letterSpacing = "-3px"; ctx.textAlign = "center"; ctx.fillStyle = C.fg; ctx.fillText("Epilepsy", 540, 840); ctx.fillText("Temple", 540, 950);
+    ctx.letterSpacing = "0px";
+    label("OPEN-SOURCE NEUROTECH RESEARCH", 540, 1010, { align: "center", size: 22 });
+    headline("Follow *the* *build* →", 540, 1150, 64, L(20).t0 + .2, { align: "center", weight: 650, ls: -1 });
+    label("Research prototype. Not a medical device.", 540, 1235, { align: "center", size: 19, ls: 0, alpha: .8 });
+    ctx.restore();
+  }
+};
+
+// ---------- background + grain ----------
+const GRAIN = [];
+function makeGrain() {
+  for (let k = 0; k < 6; k++) {
+    const g = document.createElement("canvas"); g.width = 540; g.height = 960;
+    const gx = g.getContext("2d"), im = gx.createImageData(540, 960), r = rng(k + 1);
+    for (let i = 0; i < im.data.length; i += 4) { const v = r() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    gx.putImageData(im, 0, 0); GRAIN.push(g);
+  }
+}
+function background(t, name) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const tint = { twist: "rgba(255,77,106,.10)", honest: "rgba(255,77,106,.06)", result: "rgba(63,216,255,.10)" }[name] || "rgba(63,216,255,.06)";
+  const g = ctx.createRadialGradient(540 + Math.sin(t * .3) * 120, 760, 0, 540, 760, 1100);
+  g.addColorStop(0, tint); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+
+function drawScene(sc, t) {
+  ctx.save();
+  const z = 1 + .025 * (t - sc.t0) / Math.max(1, sc.t1 - sc.t0);   // slow push-in
+  ctx.translate(540, 900); ctx.scale(z, z); ctx.translate(-540, -900);
+  S[sc.name](t, sc);
+  ctx.restore();
+}
+function draw(t) {
+  T = t; NEED.length = 0;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.letterSpacing = "0px";
+  const sc = sceneAt(t), idx = TL.scenes.indexOf(sc), prev = TL.scenes[idx - 1];
+  background(t, sc.name);
+  const tr = t - sc.t0;
+  if (prev && tr < .3) { ctx.save(); ctx.globalAlpha = 1 - tr / .3; drawScene(prev, t); ctx.restore(); }
+  ctx.save(); ctx.globalAlpha = prev ? fade(tr - .05, .3) : 1; drawScene(sc, t); ctx.restore();
+  // twist glitch: slice offsets for a few frames
+  if (sc.name === "twist" && tr > .05 && tr < .4) {
+    const r = rng(Math.floor(t * 30));
+    for (let i = 0; i < 7; i++) { const y = r() * H, h = 20 + r() * 90, dx = (r() - .5) * 80;
+      ctx.drawImage(cv, 0, y, W, h, dx, y, W, h); }
+    ctx.fillStyle = "rgba(255,77,106,.06)"; ctx.fillRect(0, 0, W, H);
+  }
+  chrome(sc, t);
+  captions(t);
+  // vignette + grain
+  const v = ctx.createRadialGradient(540, 900, 600, 540, 900, 1300);
+  v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.55)"); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.globalAlpha = .045; ctx.globalCompositeOperation = "overlay";
+  ctx.drawImage(GRAIN[Math.floor(t * 24) % GRAIN.length], 0, 0, W, H); ctx.restore();
+}
+async function frame(t) {         // dry pass to learn which footage frames are needed, load them, then draw
+  draw(t);
+  const need = [...new Set(NEED)];
+  if (need.some(s => !IMG[s])) { await Promise.all(need.map(loadImg)); draw(t); }
+}
+async function init(timeline) {
+  TL = timeline; makeGrain();
+  await Promise.all([document.fonts.load("700 80px Inter"), document.fonts.load("500 30px Mono")]);
+  await document.fonts.ready;
+  return TL.duration;
+}
+window.frame = frame; window.init = init; window.draw = draw;
+</script>
+</body>
+</html>
