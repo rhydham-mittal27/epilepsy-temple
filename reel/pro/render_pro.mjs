@@ -29,7 +29,8 @@ const page = await browser.newPage({ viewport: { width: 400, height: 700 } });
 page.on("console", m => console.log("[page]", m.text()));
 page.on("pageerror", e => { console.error("[page error]", e); process.exit(1); });
 await page.goto(`http://127.0.0.1:${port}/pro/reel_pro.html`);
-const duration = await page.evaluate(tl => window.init(tl), timeline);
+const clipn = Object.fromEntries(["lab", "dev"].map(n => [n, fs.readdirSync(path.join(BUILD, "clip_" + n)).length]));
+const duration = await page.evaluate(([tl, cn]) => window.init(tl, cn), [timeline, clipn]);
 
 const grab = t => page.evaluate(async t => { await window.frame(t); return document.getElementById("c").toDataURL("image/jpeg", 0.93); }, t);
 

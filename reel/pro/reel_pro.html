@@ -92,30 +92,33 @@ const rise = (dt, d = .6) => (1 - expo(dt / d)) * 40;
 
 // ---------- footage ----------
 const IMG = {};
-function clipFrame(name, t0, fps = 30, n = 150) {
-  const f = Math.max(0, Math.floor((T - t0) * fps)) % n;
-  return `build/clip_${name}/${String(f).padStart(4, "0")}.jpg`;
+const CLIPN = { lab: 150, dev: 150 };   // frames on disk (set by init)
+const fname = (name, f) => `build/clip_${name}/${String(f).padStart(4, "0")}.jpg`;
+function clipFrame(name, t0, dur) {      // stretch the clip over dur seconds; blend neighbours = smooth slow motion
+  const n = CLIPN[name], x = clamp((T - t0) / dur) * (n - 1), f = Math.floor(x);
+  return [fname(name, f), fname(name, Math.min(n - 1, f + 1)), x - f];
 }
 async function loadImg(src) {
   if (IMG[src]) return IMG[src];
   const im = new Image(); im.src = src; try { await im.decode(); IMG[src] = im; } catch (e) { return null; }
-  const keys = Object.keys(IMG); if (keys.length > 12) delete IMG[keys[0]];
+  const keys = Object.keys(IMG); if (keys.length > 16) delete IMG[keys[0]];
   return im;
 }
 const NEED = [];    // srcs requested during a dry pass of draw()
 function footage(src, sx, sy, sw, sh, dx, dy, dw, dh, o = {}) {
-  NEED.push(src);
-  const im = IMG[src];
+  const [sa, sb, mix] = Array.isArray(src) ? src : [src, src, 0];
+  NEED.push(sa); if (mix > 0) NEED.push(sb);
   ctx.save();
   ctx.globalAlpha *= o.alpha === undefined ? 1 : o.alpha;
   ctx.shadowColor = "rgba(63,216,255,.18)"; ctx.shadowBlur = 60;
   ctx.beginPath(); ctx.roundRect(dx, dy, dw, dh, 28); ctx.fillStyle = "#0A0F16"; ctx.fill();
   ctx.shadowBlur = 0;
   ctx.clip();
-  if (im) {
+  if (IMG[sa]) {
     const z = o.zoom || 1;   // slow push: shrink the source window around its centre
     const cx = sx + sw / 2 + (o.panX || 0), cy = sy + sh / 2 + (o.panY || 0), w = sw / z, h = sh / z;
-    ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h, dx, dy, dw, dh);
+    ctx.drawImage(IMG[sa], cx - w / 2, cy - h / 2, w, h, dx, dy, dw, dh);
+    if (mix > 0 && IMG[sb]) { ctx.globalAlpha *= mix; ctx.drawImage(IMG[sb], cx - w / 2, cy - h / 2, w, h, dx, dy, dw, dh); }
   }
   ctx.restore();
   ctx.save(); ctx.globalAlpha *= o.alpha === undefined ? 1 : o.alpha;
@@ -328,7 +331,7 @@ S.twist = () => {
 S.build = (t, sc) => {
   const s8 = since(8), s9 = since(9), s10 = since(10);
   headline("I built *my* *own* *lab.*", M, 520, 104, L(8).t0 + .05);
-  const src = clipFrame("lab", sc.t0);
+  const src = clipFrame("lab", sc.t0, sc.t1 - sc.t0);
   const enter = expo(s8 / .8);
   const x = M, y = 600, w = W - 2 * M;
   ctx.save(); ctx.globalAlpha = enter; ctx.translate(0, (1 - enter) * 60);
@@ -369,10 +372,10 @@ S.data = () => {
 S.design = (t, sc) => {
   const s13 = since(13), s14 = since(14);
   headline("The *“?”* *ear-hook.*", M, 520, 100, L(13).t0 + .3);
-  const src = clipFrame("dev", sc.t0);
-  const h = 600, w = h * 610 / 740, x = (W - w) / 2, y = 590, e = expo(s13 / .8);
+  const src = clipFrame("dev", sc.t0, sc.t1 - sc.t0);
+  const h = 640, w = 640, x = (W - w) / 2, y = 590, e = expo(s13 / .8);
   ctx.save(); ctx.globalAlpha = e; ctx.translate(0, (1 - e) * 60);
-  footage(src, 18, 140, 610, 740, x, y, w, h, { zoom: 1.05 + (T - sc.t0) * .025 });
+  footage(src, 50, 215, 560, 560, x, y, w, h, { zoom: 1.05 + (T - sc.t0) * .025 });
   ctx.restore();
   label("MK-I  ·  BOTH EARS  ·  DISCREET", M, y + h + 48, { size: 22, alpha: fade(s13 - .6), color: C.fg });
   if (s14 > 0) {
@@ -507,8 +510,8 @@ async function frame(t) {         // dry pass to learn which footage frames are 
   const need = [...new Set(NEED)];
   if (need.some(s => !IMG[s])) { await Promise.all(need.map(loadImg)); draw(t); }
 }
-async function init(timeline) {
-  TL = timeline; makeGrain();
+async function init(timeline, clipn) {
+  TL = timeline; Object.assign(CLIPN, clipn || {}); makeGrain();
   await Promise.all([document.fonts.load("700 80px Inter"), document.fonts.load("500 30px Mono")]);
   await document.fonts.ready;
   return TL.duration;
