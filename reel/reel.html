@@ -1,0 +1,812 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Epilepsy Temple Reel</title>
+<style>
+  @font-face { font-family: "Lucky"; src: url("fonts/LuckiestGuy.ttf"); }
+  @font-face { font-family: "Fredoka"; src: url("fonts/Fredoka.ttf"); font-weight: 300 700; }
+  html, body { margin: 0; background: #111; }
+  canvas { display: block; width: 360px; height: 640px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Deterministic cartoon renderer: draw(t) paints frame at time t (seconds).
+// timeline.json (from voice.py) drives every beat, so visuals follow the voice.
+const W = 1080, H = 1920;
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d", { willReadFrequently: true });
+let TL = null;
+const OUT = "#1A1033";          // cartoon outline colour
+const C = { yellow: "#FFD23F", cyan: "#3DDCFF", pink: "#FF5FA8", red: "#FF4B4B", green: "#4ADE80",
+            skin: "#FFD1AE", hair: "#3B2A20", brain: "#FF93C4", white: "#FFFFFF", purple: "#8B5CF6" };
+
+// ---------- maths ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeOut = x => 1 - Math.pow(1 - clamp(x), 3);
+const easeInOut = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const easeBack = x => { x = clamp(x); const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const pop = (dt, d = .38) => dt <= 0 ? 0 : easeBack(dt / d);
+const fadeIn = (dt, d = .25) => clamp(dt / d);
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---------- timeline helpers ----------
+let T = 0;                                   // current time
+const L = i => TL.lines[i];
+const since = i => T - TL.lines[i].t0;       // seconds since line i started
+const wordT = (i, k) => TL.lines[i].words[k].t0;
+const sinceWord = (i, k) => T - wordT(i, k);
+function sceneAt(t) { let s = TL.scenes[0]; for (const x of TL.scenes) if (t >= x.t0) s = x; return s; }
+function mouthAt(t) { const f = Math.floor(t * TL.fps); return TL.mouth[f] || 0; }
+let shake = 0;
+
+// ---------- drawing primitives ----------
+function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); }
+function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function fillStroke(fill, lw = 8, stroke = OUT) {
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  if (lw) { ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.stroke(); }
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+}
+function outlinedFill(fill, lw = 8) {   // stroke behind fill for chunky outlines
+  ctx.lineJoin = "round"; ctx.lineWidth = lw * 2; ctx.strokeStyle = OUT; ctx.stroke(); ctx.fillStyle = fill; ctx.fill();
+}
+function text(str, x, y, size, o = {}) {
+  if (size * (o.scale === undefined ? 1 : o.scale) < 1) return;
+  ctx.save();
+  ctx.translate(x, y);
+  if (o.rot) ctx.rotate(o.rot);
+  if (o.scale !== undefined) ctx.scale(o.scale, o.scale);
+  ctx.font = `${o.weight || ""} ${size}px ${o.font || "Lucky"}`;
+  ctx.textAlign = o.align || "center"; ctx.textBaseline = "middle";
+  ctx.globalAlpha *= (o.alpha === undefined ? 1 : o.alpha);
+  if (o.shadow !== false) { ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fillText(str, 0, size * .09); }
+  if (o.stroke !== false) { ctx.lineJoin = "round"; ctx.lineWidth = o.lw || size * .2; ctx.strokeStyle = o.strokeColor || OUT; ctx.strokeText(str, 0, 0); }
+  ctx.fillStyle = o.fill || C.white; ctx.fillText(str, 0, 0);
+  ctx.restore();
+}
+function withT(x, y, s, rot, fn) { ctx.save(); ctx.translate(x, y); if (rot) ctx.rotate(rot); ctx.scale(s, s); fn(); ctx.restore(); }
+function glow(x, y, r, color, a = 1) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = g; circle(x, y, r); ctx.fill(); ctx.restore();
+}
+function pill(x, y, label, size, bg, fg = C.white, s = 1, rot = 0) {
+  if (s <= 0) return;
+  withT(x, y, s, rot, () => {
+    ctx.font = `${size}px Lucky`; const w = ctx.measureText(label).width + size * 1.1, h = size * 1.55;
+    rrect(-w / 2, -h / 2, w, h, h / 2); outlinedFill(bg, 5);
+    text(label, 0, size * .06, size, { fill: fg, lw: size * .16, shadow: false, stroke: fg !== OUT });
+  });
+}
+function starburst(x, y, r, n, fill, s = 1, rot = 0) {
+  if (s <= 0.01) return;
+  withT(x, y, s, rot, () => {
+    ctx.beginPath();
+    for (let i = 0; i < n * 2; i++) { const a = i / (n * 2) * Math.PI * 2, rr = i % 2 ? r * .72 : r; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr * .8); }
+    ctx.closePath(); outlinedFill(fill, 6);
+  });
+}
+
+// ---------- characters ----------
+function eyes(ex, ey, r, o = {}) {
+  const blink = ((T + (o.phase || 0)) % 3.3) < .11;
+  for (const sx of [-1, 1]) {
+    const x = ex * sx;
+    ctx.save();
+    if (blink) { ctx.beginPath(); ctx.moveTo(x - r, ey); ctx.quadraticCurveTo(x, ey + r * .5, x + r, ey); fillStroke(null, 6); ctx.restore(); continue; }
+    ctx.beginPath(); ctx.ellipse(x, ey, r, r * 1.15, 0, 0, Math.PI * 2); fillStroke("#fff", 5);
+    const lx = (o.lookX || 0) * r * .4, ly = (o.lookY || 0) * r * .4;
+    circle(x + lx, ey + ly + r * .1, r * (o.big ? .62 : .5)); ctx.fillStyle = OUT; ctx.fill();
+    circle(x + lx - r * .18, ey + ly - r * .12, r * .16); ctx.fillStyle = "#fff"; ctx.fill();
+    if (o.angry) { ctx.beginPath(); ctx.moveTo(x - r * sx * 1.1, ey - r * 1.5); ctx.lineTo(x + r * sx * .9, ey - r * .9); fillStroke(null, 8); }
+    if (o.worried) { ctx.beginPath(); ctx.moveTo(x - r * sx * 1, ey - r * 1.0); ctx.lineTo(x + r * sx * .9, ey - r * 1.55); fillStroke(null, 7); }
+    ctx.restore();
+  }
+}
+function mouth(x, y, w, mood, open = 0) {
+  ctx.save();
+  if (open > .08) {
+    ctx.beginPath(); ctx.ellipse(x, y + 4, w * .45, w * (.12 + .38 * open), 0, 0, Math.PI * 2); fillStroke("#7A1F3D", 6);
+    ctx.beginPath(); ctx.ellipse(x, y + 4 + w * .2 * open, w * .25, w * .1 * open, 0, 0, Math.PI * 2); ctx.fillStyle = "#FF7AA2"; ctx.fill();
+  } else if (mood === "sad") {
+    ctx.beginPath(); ctx.arc(x, y + w * .45, w * .4, Math.PI * 1.2, Math.PI * 1.8); fillStroke(null, 7);
+  } else if (mood === "shock") {
+    ctx.beginPath(); ctx.ellipse(x, y + 6, w * .2, w * .28, 0, 0, Math.PI * 2); fillStroke("#7A1F3D", 6);
+  } else if (mood === "flat") {
+    ctx.beginPath(); ctx.moveTo(x - w * .3, y); ctx.lineTo(x + w * .3, y); fillStroke(null, 7);
+  } else {
+    ctx.beginPath(); ctx.arc(x, y - w * .15, w * .42, Math.PI * .15, Math.PI * .85); fillStroke(null, 7);
+  }
+  ctx.restore();
+}
+
+// Detective Brain mascot. o: mood, talk, hat, glass, wave, look
+function drawBrain(x, y, s, o = {}) {
+  withT(x, y + Math.sin(T * 3.2) * 6 * s, s, o.rot || 0, () => {
+    // legs + arms
+    ctx.lineCap = "round"; ctx.strokeStyle = OUT; ctx.lineWidth = 10;
+    for (const sx of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(sx * 35, 90); ctx.lineTo(sx * 42, 150); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(sx * 52, 156, 24, 13, 0, 0, Math.PI * 2); fillStroke("#5B3A8C", 5);
+    }
+    const wave = o.wave ? Math.sin(T * 10) * .5 : 0;
+    ctx.beginPath(); ctx.moveTo(-110, 30); ctx.lineTo(-150, 70 - (o.wave ? 90 : 0) + wave * 30); ctx.lineWidth = 10; ctx.stroke();
+    circle(-150, 70 - (o.wave ? 90 : 0) + wave * 30, 15); fillStroke("#fff", 5);
+    ctx.beginPath(); ctx.moveTo(110, 30); ctx.lineTo(150, 60); ctx.lineWidth = 10; ctx.stroke();
+    if (o.glass) { // magnifying glass
+      ctx.beginPath(); ctx.moveTo(150, 60); ctx.lineTo(185, 10); ctx.lineWidth = 16; ctx.strokeStyle = "#8B5A2B"; ctx.stroke();
+      circle(205, -25, 42); ctx.fillStyle = "rgba(170,230,255,.55)"; ctx.fill(); ctx.lineWidth = 12; ctx.strokeStyle = OUT; ctx.stroke();
+      ctx.beginPath(); ctx.arc(205, -25, 28, Math.PI * 1.1, Math.PI * 1.45); ctx.lineWidth = 6; ctx.strokeStyle = "#fff"; ctx.stroke();
+    }
+    circle(150, 60, 15); fillStroke("#fff", 5);
+    // bumpy brain body (outline pass then fill pass = merged blob)
+    const bumps = [[-72, -38, 58], [0, -60, 64], [72, -38, 58], [-100, 18, 50], [100, 18, 50], [-52, 52, 52], [52, 52, 52], [0, 22, 75]];
+    ctx.fillStyle = OUT; for (const [bx, by, br] of bumps) { circle(bx, by, br + 8); ctx.fill(); }
+    ctx.fillStyle = o.color || C.brain; for (const [bx, by, br] of bumps) { circle(bx, by, br); ctx.fill(); }
+    ctx.strokeStyle = "rgba(160,40,100,.45)"; ctx.lineWidth = 7; ctx.lineCap = "round";
+    for (const [a, b, c2, d] of [[-95, -55, -55, -80], [-20, -95, 25, -90], [60, -78, 95, -50], [-130, 30, -110, 60], [120, 40, 140, 10]]) {
+      ctx.beginPath(); ctx.moveTo(a, b); ctx.quadraticCurveTo((a + c2) / 2, b - 18, c2, d); ctx.stroke();
+    }
+    // face
+    circle(-62, 38, 15); ctx.fillStyle = "rgba(255,60,120,.35)"; ctx.fill();
+    circle(62, 38, 15); ctx.fill();
+    eyes(36, -2, 21, { lookX: o.lookX || 0, lookY: o.lookY || 0, worried: o.mood === "sad" || o.mood === "worried", phase: .7 });
+    mouth(0, 42, 70, o.mood, o.talk || 0);
+    if (o.mood === "worried") { ctx.beginPath(); ctx.moveTo(120, -30); ctx.quadraticCurveTo(135, -5, 120, 5); ctx.quadraticCurveTo(105, -5, 120, -30); fillStroke("#8FE3FF", 4); }
+    if (o.hat) { // deerstalker hat
+      ctx.beginPath(); ctx.ellipse(0, -92, 120, 26, 0, 0, Math.PI * 2); fillStroke("#A0703A", 7);
+      ctx.beginPath(); ctx.ellipse(0, -112, 88, 52, 0, Math.PI, 0); ctx.closePath(); fillStroke("#C18A4A", 7);
+      ctx.beginPath(); ctx.rect(-86, -116, 172, 16); fillStroke("#6B4423", 5);
+      circle(0, -166, 10); fillStroke("#6B4423", 5);
+    }
+  });
+}
+
+// Front-view person. o: cap, hooks (0..1 draw progress), temple, look, mood, shirt
+function drawHead(x, y, s, o = {}) {
+  withT(x, y, s, o.rot || 0, () => {
+    // shoulders
+    ctx.beginPath(); ctx.moveTo(-170, 330); ctx.quadraticCurveTo(-170, 170, 0, 165); ctx.quadraticCurveTo(170, 170, 170, 330); ctx.closePath();
+    fillStroke(o.shirt || "#5B6CFF", 8);
+    ctx.beginPath(); ctx.rect(-38, 120, 76, 60); fillStroke(C.skin, 7);
+    // ears
+    for (const sx of [-1, 1]) { circle(sx * 148, 10, 36); fillStroke(C.skin, 8); circle(sx * 150, 12, 16); ctx.fillStyle = "#F2A98A"; ctx.fill(); }
+    // face
+    circle(0, 0, 150); fillStroke(C.skin, 8);
+    ctx.save(); circle(0, 0, 150); ctx.clip();
+    ctx.fillStyle = o.hairColor || C.hair; ctx.fillRect(-160, -170, 320, 85);
+    for (let i = -3; i <= 3; i++) { circle(i * 42, -88, 34); ctx.fill(); }
+    ctx.restore();
+    circle(0, 0, 150); ctx.lineWidth = 8; ctx.strokeStyle = OUT; ctx.stroke();
+    circle(-75, 48, 17); ctx.fillStyle = "rgba(255,100,120,.3)"; ctx.fill(); circle(75, 48, 17); ctx.fill();
+    eyes(52, 5, 22, { lookX: o.lookX || 0, lookY: o.lookY || 0, phase: o.phase || 0, worried: o.mood === "worried" });
+    mouth(0, 68, 60, o.mood || "happy", o.talk || 0);
+    if (o.cap) drawCap(o.cap);
+    if (o.temple) drawTempleDevice(o.temple);
+    if (o.hooks) { drawHook(148, 10, 1, o.hooks, o.glow); drawHook(-148, 10, -1, o.hooks, o.glow); }
+  });
+}
+function drawCap(k) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(0, 0, 162, Math.PI * 1.06, Math.PI * 1.94); ctx.quadraticCurveTo(0, -30, -153, -55); ctx.closePath();
+  fillStroke("#8AD0FF", 8);
+  const r = rng(7), pts = [];
+  for (const [row, n, rad] of [[0, 7, 150], [1, 6, 112], [2, 4, 72]]) for (let i = 0; i < n; i++) {
+    const a = Math.PI * (1.12 + .76 * (i + .5) / n); pts.push([Math.cos(a) * rad * .98, Math.sin(a) * rad * .9 - 8 - row * 6]);
+  }
+  pts.push([0, -150]);
+  // spaghetti wires
+  const cols = [C.yellow, C.pink, C.green, "#FF9F43", C.purple, C.red];
+  pts.forEach(([px, py], i) => {
+    const side = px < 0 ? -1 : 1, wob = Math.sin(T * 3 + i) * 10;
+    ctx.beginPath(); ctx.moveTo(px, py);
+    ctx.bezierCurveTo(px + side * 120, py - 120 + wob, side * (230 + r() * 60), 50 + wob, side * (200 + r() * 90), 330);
+    ctx.lineWidth = 5; ctx.strokeStyle = cols[i % cols.length]; ctx.globalAlpha = .9 * k; ctx.stroke(); ctx.globalAlpha = 1;
+  });
+  pts.forEach(([px, py], i) => { const pk = pop(k * 2 - i * .05, .4); if (pk > 0) { circle(px, py, 13 * pk); fillStroke("#E6EEF5", 5); } });
+  ctx.restore();
+}
+function drawHook(ex, ey, dir, k, glowA = 1) {
+  ctx.save(); ctx.translate(ex, ey); ctx.scale(dir, 1);
+  ctx.beginPath(); ctx.moveTo(-18, -42);
+  ctx.bezierCurveTo(-6, -78, 58, -78, 60, -20); ctx.bezierCurveTo(62, 25, 26, 30, 24, 62);
+  const len = 260; ctx.setLineDash([len * k, len]);
+  ctx.lineCap = "round"; ctx.lineWidth = 26; ctx.strokeStyle = OUT; ctx.stroke();
+  ctx.lineWidth = 14; ctx.strokeStyle = C.cyan; ctx.stroke(); ctx.setLineDash([]);
+  if (k > .85) {
+    const p = .5 + .5 * Math.sin(T * 6);
+    glow(24, 92, 55, "rgba(61,220,255,.9)", glowA * (.5 + .5 * p));
+    circle(24, 92, 15 * pop(k - .85, .15)); fillStroke(C.cyan, 6);
+  }
+  ctx.restore();
+}
+function drawTempleDevice(k) {
+  withT(-118, -58, pop(k), -.5, () => {
+    rrect(-34, -20, 68, 40, 18); fillStroke("#2E2E44", 6);
+    circle(14, 0, 7); ctx.fillStyle = (Math.floor(T * 3) % 2) ? C.green : "#1E7A45"; ctx.fill();
+    for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(-50, 0, 14 + i * 14 + (T * 30) % 14, Math.PI * .7, Math.PI * 1.3);
+      ctx.lineWidth = 5; ctx.strokeStyle = `rgba(255,80,80,${.8 - i * .2})`; ctx.stroke(); }
+  });
+}
+function drawNeuron(x, y, s, state, seed) {
+  const r = rng(seed);
+  const col = { calm: "#6EC6FF", fire: "#FF5A5A", sleep: "#8A8FA8" }[state];
+  const jit = state === "fire" ? 7 : 0;
+  withT(x + (r() - .5) * jit * Math.sin(T * 40 + seed), y + (r() - .5) * jit * Math.cos(T * 37 + seed), s, 0, () => {
+    ctx.lineCap = "round";
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2 + r() * .5, l = 70 + r() * 30;
+      ctx.beginPath(); ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(Math.cos(a + .4) * l * .6, Math.sin(a + .4) * l * .6, Math.cos(a) * l, Math.sin(a) * l);
+      ctx.lineWidth = 20; ctx.strokeStyle = OUT; ctx.stroke(); ctx.lineWidth = 10; ctx.strokeStyle = col; ctx.stroke();
+    }
+    circle(0, 0, 44); fillStroke(col, 7);
+    if (state === "sleep") {
+      for (const sx of [-1, 1]) { ctx.beginPath(); ctx.arc(sx * 16, -2, 9, .1, Math.PI - .1); fillStroke(null, 5); }
+      mouth(0, 18, 30, "flat");
+    } else {
+      eyes(16, -4, 10, { angry: state === "fire", phase: seed * .37, big: state === "fire" });
+      mouth(0, 20, 34, state === "fire" ? "shock" : "happy");
+    }
+  });
+}
+function drawBell(x, y, s, seed, alpha = 1) {
+  if (s <= 0) return;
+  const sw = Math.sin(T * 28 + seed) * .35;
+  ctx.save(); ctx.globalAlpha = alpha;
+  withT(x, y, s, sw, () => {
+    for (const sx of [-1, 1]) for (let i = 1; i <= 2; i++) {
+      ctx.beginPath(); ctx.arc(0, -10, 70 + i * 18, sx > 0 ? -.5 : Math.PI - .5, sx > 0 ? .5 : Math.PI + .5);
+      ctx.lineWidth = 6; ctx.strokeStyle = C.yellow; ctx.stroke();
+    }
+    circle(0, 52, 14); fillStroke("#C98A00", 5);
+    ctx.beginPath(); ctx.moveTo(-58, 45); ctx.quadraticCurveTo(-52, -60, 0, -62); ctx.quadraticCurveTo(52, -60, 58, 45); ctx.closePath();
+    fillStroke(C.yellow, 7);
+    circle(0, -66, 9); fillStroke(C.yellow, 5);
+    eyes(17, -10, 9, { angry: true, phase: seed });
+    mouth(0, 18, 30, "shock");
+  });
+  ctx.restore();
+}
+function heartPath(sz) {
+  ctx.beginPath(); ctx.moveTo(0, sz * .35);
+  ctx.bezierCurveTo(-sz * 1.1, -sz * .3, -sz * .55, -sz * 1.05, 0, -sz * .5);
+  ctx.bezierCurveTo(sz * .55, -sz * 1.05, sz * 1.1, -sz * .3, 0, sz * .35); ctx.closePath();
+}
+function drawHeart(x, y, s) {
+  const beat = 1 + .1 * Math.pow(Math.max(0, Math.sin(T * Math.PI * 2.4)), 8);
+  withT(x, y, s * beat, 0, () => {
+    heartPath(170); outlinedFill("#FF3B5C", 8);
+    ctx.beginPath(); ctx.ellipse(-60, -95, 26, 14, -.6, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fill();
+    eyes(36, -55, 18, { phase: 1.3 }); mouth(0, -5, 52, "happy");
+  });
+}
+function drawHookChar(x, y, s, k = 1) {   // the "?" ear-hook as a WANTED suspect
+  withT(x, y, s, Math.sin(T * 2) * .05, () => {
+    ctx.beginPath(); ctx.moveTo(-90, -60); ctx.bezierCurveTo(-90, -190, 110, -190, 100, -60);
+    ctx.bezierCurveTo(95, 20, 10, 20, 8, 110);
+    ctx.lineCap = "round"; ctx.lineWidth = 92; ctx.strokeStyle = OUT; ctx.stroke(); ctx.lineWidth = 64; ctx.strokeStyle = C.cyan; ctx.stroke();
+    circle(8, 200, 40); fillStroke(C.cyan, 9);
+    eyes(26, -120, 15, { phase: 2 });
+    // smirk
+    ctx.beginPath(); ctx.moveTo(-20, -82); ctx.quadraticCurveTo(10, -66, 32, -88); fillStroke(null, 7);
+  });
+}
+
+// ---------- background ----------
+const BG = {
+  hook: ["#3A1C78", "#140A33"], gadget: ["#164A7A", "#0A1A33"], twist: ["#7A1C3A", "#2A0A18"],
+  sim: ["#123E5C", "#071422"], evidence: ["#2C2C6E", "#0E0E2A"], suspect: ["#6E4A12", "#2A1A06"],
+  verdict: ["#5A1C7A", "#1A0A2E"], catch: ["#7A2A12", "#2A0E06"], cta: ["#1C5A7A", "#081E2E"],
+};
+function background(name, t) {
+  const [a, b] = BG[name];
+  const g = ctx.createRadialGradient(540, 820, 50, 540, 900, 1300);
+  g.addColorStop(0, a); g.addColorStop(1, b); ctx.fillStyle = g; ctx.fillRect(-100, -100, W + 200, H + 200);
+  ctx.save(); ctx.translate(540, 820); ctx.rotate(t * .12);
+  ctx.fillStyle = "rgba(255,255,255,.045)";
+  for (let i = 0; i < 18; i++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 1700, i / 18 * Math.PI * 2, (i + .5) / 18 * Math.PI * 2); ctx.fill(); }
+  ctx.restore();
+  const r = rng(99);
+  for (let i = 0; i < 34; i++) {
+    const x = r() * W, sp = 20 + r() * 50, y = ((r() * H - t * sp) % H + H) % H, rad = 3 + r() * 7;
+    circle(x + Math.sin(t + i) * 12, y, rad); ctx.fillStyle = `rgba(255,255,255,${.06 + r() * .12})`; ctx.fill();
+  }
+}
+
+// ---------- scenes ----------
+const S = {};
+S.hook = (t) => {
+  const k0 = pop(since(0) + .4), k1 = pop(since(1));   // hero visible from frame 0
+  const look = since(2) > 0 ? Math.sin(since(2) * 6) : 0;
+  if (k0 > 0) {
+    drawHead(290, 800, .95 * k0, { hooks: clamp((since(0) - .35) / .8), lookX: since(1) > 0 ? 1 : 0, mood: "happy", shirt: "#2BB673", phase: .2 });
+    text("2", 290, 480, 190 * pop(sinceWord(0, 0) + .4), { fill: C.cyan });
+    text("SENSORS", 290, 590, 46 * pop(sinceWord(0, 2)), { fill: "#fff" });
+  }
+  if (k1 > 0) {
+    drawHead(790, 800, .95 * k1, { cap: clamp(since(1) / 1.2), lookX: -1, mood: since(2) > 0 ? "shock" : "happy", shirt: "#FF6B6B", hairColor: "#C27A3A", phase: 1.1 });
+    text("18", 790, 480, 190 * pop(sinceWord(1, 5)), { fill: C.pink });
+    text("ELECTRODES", 790, 590, 46 * pop(sinceWord(1, 5) + .1), { fill: "#fff" });
+    const v = pop(since(1) - .5, .3);
+    if (v > 0) { starburst(540, 820, 120, 12, C.yellow, v, T * .5); text("VS", 540, 828, 96 * v, { fill: C.red, lw: 16 }); }
+  }
+  if (since(2) > 0) {
+    const k = pop(since(2), .45);
+    for (let i = 0; i < 5; i++) {
+      const a = i / 5 * Math.PI * 2 + T * .8;
+      text("?", 540 + Math.cos(a) * 420, 760 + Math.sin(a) * 330, 90 * k, { fill: [C.yellow, C.cyan, C.pink, C.green, "#fff"][i], rot: Math.sin(T * 3 + i) * .3 });
+    }
+    pill(540, 1140, "WHO WINS?", 64, C.red, "#fff", pop(since(2) - .15), Math.sin(T * 5) * .04);
+    shake = Math.max(shake, 4 * clamp(1 - since(2) * 2));
+  }
+  if (since(1) > .5 && since(1) < .8) shake = 14;
+};
+
+S.gadget = (t) => {
+  const s3 = since(3), s4 = since(4), s5 = since(5), s6 = since(6);
+  const crowd = s5 > 0;
+  if (!crowd) {
+    // mascot intro, then slides to the corner when the gadget appears
+    const m = easeInOut(s4 / .5);
+    drawBrain(lerp(540, 200, m), lerp(760, 1060, m), lerp(1.45, .62, m) * pop(s3), { hat: true, glass: true, talk: mouthAt(t), lookX: m });
+    pill(540, 470, "CASE #001", 60, "#F3D9A4", OUT, pop(s3 - .2) * (1 - m), -.06);
+    if (s4 > 0) {
+      const k = pop(s4 - .2, .45);
+      drawHead(620, 760, 1.15 * k, { temple: clamp((s4 - .5) * 2), mood: "happy", shirt: "#222", phase: .5, lookX: -.3 });
+      const tk = pop(sinceWord(4, 6), .35);
+      if (tk > 0) {
+        ctx.save(); ctx.globalAlpha = tk; ctx.beginPath(); ctx.moveTo(420, 520); ctx.quadraticCurveTo(450, 600, 480, 640);
+        ctx.lineWidth = 8; ctx.strokeStyle = C.yellow; ctx.stroke(); ctx.restore();
+        pill(380, 490, "THE TEMPLE", 52, C.yellow, OUT, tk, -.08);
+      }
+      for (let i = 0; i < 4; i++) { const a = T * 2 + i * 1.6; text("✦", 480 + Math.cos(a) * 90, 640 + Math.sin(a) * 70, 40 * k, { fill: "#fff", font: "Fredoka", stroke: false, shadow: false }); }
+    }
+    return;
+  }
+  // 50 million crowd
+  const r = rng(3);
+  const cols = 9, rows = 7, cx = 540, cy = 800;
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const x = 120 + i * 105, y = 560 + j * 92, d = Math.hypot(x - cx, y - cy) / 900;
+    const k = pop(s5 - d * .9, .35);
+    if (k <= 0) continue;
+    const col = [C.cyan, C.pink, C.yellow, C.green, "#FF9F43", C.purple][Math.floor(r() * 6)];
+    withT(x, y + Math.sin(T * 4 + i + j) * 4, .62 * k * (s6 > 0 ? .9 : 1), 0, () => {
+      ctx.globalAlpha = s6 > 0 ? .55 : 1;
+      ctx.beginPath(); ctx.ellipse(0, 52, 42, 34, 0, Math.PI, 0); ctx.closePath(); fillStroke(col, 6);
+      circle(0, 0, 30); fillStroke(C.skin, 6);
+      circle(-10, -2, 4); ctx.fillStyle = OUT; ctx.fill(); circle(10, -2, 4); ctx.fill();
+    });
+  }
+  const n = Math.round(50 * easeOut(s5 / 1.1));
+  text(`${n},000,000`, 540, 460, 120 * pop(s5, .3), { fill: C.yellow });
+  text("PEOPLE WITH EPILEPSY", 540, 1160, 52 * pop(s5 - .5, .3), { fill: "#fff" });
+  if (s6 > 0) {
+    const k = pop(s6, .45);
+    withT(540, 800, k, Math.sin(T * 2) * .04, () => {
+      circle(0, 0, 210); outlinedFill("#fff", 7);
+      circle(-170, 210, 30); outlinedFill("#fff", 6); circle(-215, 265, 16); outlinedFill("#fff", 5);
+      drawBell(-20, 10, 1.25, 1, 1);
+      text("?", 120, -70, 140, { fill: C.pink });
+    });
+  }
+};
+
+S.twist = (t) => {
+  const s7 = since(7), s8 = since(8), s9 = since(9);
+  const dead = s9 > 0;
+  drawHead(540, 790, 1.35, { temple: 1, mood: dead ? "sad" : s8 > 0 ? "shock" : "happy", shirt: "#222", lookX: dead ? 0 : -.5, phase: .5 });
+  // magnifier sweeps in and parks over the temple device
+  const mk = easeOut(s7 / .8);
+  const mx = lerp(-200, 380, mk), my = lerp(1300, 690, mk);
+  if (s7 > 0 && !dead) {
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(mx + 120, my + 120); ctx.lineTo(mx + 250, my + 260); ctx.lineCap = "round";
+    ctx.lineWidth = 50; ctx.strokeStyle = OUT; ctx.stroke(); ctx.lineWidth = 34; ctx.strokeStyle = "#8B5A2B"; ctx.stroke();
+    circle(mx, my, 175); ctx.save(); ctx.clip();
+    // x-ray view: blood vessels, cells flowing
+    ctx.fillStyle = "#3A0A1A"; ctx.fillRect(mx - 200, my - 200, 400, 400);
+    for (let v = 0; v < 4; v++) {
+      ctx.beginPath();
+      for (let x = -200; x <= 200; x += 10) ctx.lineTo(mx + x, my - 120 + v * 80 + Math.sin(x / 40 + v) * 20);
+      ctx.lineWidth = 34; ctx.strokeStyle = "#B3122E"; ctx.stroke(); ctx.lineWidth = 18; ctx.strokeStyle = "#E8344F"; ctx.stroke();
+      for (let c = 0; c < 4; c++) {
+        const x = ((T * 160 + c * 110 + v * 50) % 400) - 200;
+        circle(mx + x, my - 120 + v * 80 + Math.sin(x / 40 + v) * 20, 11); fillStroke("#FF8095", 3);
+      }
+    }
+    ctx.restore();
+    circle(mx, my, 175); ctx.lineWidth = 26; ctx.strokeStyle = OUT; ctx.stroke(); ctx.lineWidth = 14; ctx.strokeStyle = "#C9D3E0"; ctx.stroke();
+    ctx.restore();
+  }
+  if (s8 > 0) {
+    const k = pop(s8, .3);
+    starburst(540, 450, 230, 14, C.yellow, k, Math.sin(T * 6) * .05);
+    text("PLOT", 540, 410, 92 * k, { fill: C.red }); text("TWIST!", 540, 500, 92 * k, { fill: C.red });
+    pill(740, 1090, "BLOOD FLOW ✓", 52, C.green, OUT, pop(sinceWord(8, 4)), .05);
+    pill(340, 1170, "BRAIN SIGNALS ✗", 52, C.red, "#fff", pop(sinceWord(8, 6)), -.05);
+    if (s8 < .25) shake = 16;
+  }
+  if (dead) {
+    ctx.save(); ctx.fillStyle = `rgba(20,10,30,${.45 * fadeIn(s9, .2)})`; ctx.fillRect(0, 0, W, H); ctx.restore();
+    const k = pop(s9, .3);
+    withT(540, 800, k, 0, () => {
+      for (const sgn of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-260, -260 * sgn); ctx.lineTo(260, 260 * sgn); ctx.lineCap = "round";
+        ctx.lineWidth = 80; ctx.strokeStyle = OUT; ctx.stroke(); ctx.lineWidth = 56; ctx.strokeStyle = C.red; ctx.stroke(); }
+    });
+    withT(540, 460, pop(s9 - .1), Math.PI / 4, () => { rrect(-120, -120, 240, 240, 24); outlinedFill(C.yellow, 8); });
+    text("DEAD", 540, 432, 64 * pop(s9 - .1), { fill: OUT, stroke: false, shadow: false });
+    text("END", 540, 496, 64 * pop(s9 - .1), { fill: OUT, stroke: false, shadow: false });
+    if (s9 < .25) shake = 18;
+  }
+};
+
+S.sim = (t) => {
+  const s10 = since(10), s11 = since(11), s12 = since(12), s13 = since(13);
+  const state = s13 > 0 ? "sleep" : s12 > 0 ? "fire" : "calm";
+  const mk = pop(s10, .45);
+  withT(540, 800, mk, 0, () => {
+    // monitor
+    ctx.beginPath(); ctx.moveTo(-90, 360); ctx.lineTo(90, 360); ctx.lineTo(60, 300); ctx.lineTo(-60, 300); ctx.closePath(); fillStroke("#3A3760", 7);
+    rrect(-450, -400, 900, 720, 46); fillStroke("#2A2850", 9);
+    rrect(-410, -330, 820, 620, 22); fillStroke(state === "fire" ? "#2A0A14" : state === "sleep" ? "#0A0C14" : "#0B1A36", 6);
+    text("SEIZURE.EXE", -250, -366, 40, { fill: C.yellow, lw: 7 });
+    for (let i = 0; i < 3; i++) { circle(300 + i * 42, -366, 12); fillStroke([C.red, C.yellow, C.green][i], 4); }
+    // neurons
+    const grid = [];
+    for (let j = 0; j < 2; j++) for (let i = 0; i < 4; i++) grid.push([-300 + i * 200, -200 + j * 190]);
+    if (state === "fire") { // lightning links between neighbours
+      ctx.save(); ctx.lineWidth = 7; ctx.strokeStyle = (Math.floor(T * 20) % 2) ? C.yellow : "#fff";
+      for (let i = 0; i < grid.length - 1; i++) { if (i === 3) continue; const [a, b] = grid[i], [c2, d] = grid[i + 1];
+        ctx.beginPath(); ctx.moveTo(a, b); for (let q = 1; q < 6; q++) ctx.lineTo(lerp(a, c2, q / 6) + (Math.random() - .5) * 0, lerp(b, d, q / 6) + ((q % 2) ? 22 : -22)); ctx.lineTo(c2, d); ctx.stroke(); }
+      for (let i = 0; i < 4; i++) { const [a, b] = grid[i], [c2, d] = grid[i + 4]; ctx.beginPath(); ctx.moveTo(a, b);
+        for (let q = 1; q < 6; q++) ctx.lineTo(lerp(a, c2, q / 6) + ((q % 2) ? 22 : -22), lerp(b, d, q / 6)); ctx.lineTo(c2, d); ctx.stroke(); }
+      ctx.restore();
+    }
+    grid.forEach(([x, y], i) => drawNeuron(x, y, .78 * pop(s10 - .15 - i * .05, .35), state, i + 1));
+    if (state === "sleep") for (let i = 0; i < 3; i++) { const ph = (s13 * .8 + i * .33) % 1;
+      text("z", 120 + ph * 160, -230 - ph * 120, 40 + ph * 40, { fill: "#fff", alpha: 1 - ph }); }
+    // potassium balls
+    if (s11 > 0 && state !== "sleep") {
+      const r = rng(5);
+      for (let i = 0; i < 26; i++) {
+        const [gx, gy] = grid[i % 8], a = r() * Math.PI * 2, sp = 60 + r() * 90, life = ((s11 * .9 + r()) % 1.6);
+        const x = gx + Math.cos(a) * sp * life, y = gy + Math.sin(a) * sp * life;
+        const k = clamp((s11 - r() * .4) * 3);
+        if (k <= 0) continue;
+        circle(x, y, 17 * k); fillStroke(C.yellow, 4);
+        text("K⁺", x, y + 1, 15 * k, { fill: OUT, stroke: false, shadow: false, font: "Fredoka", weight: 700 });
+      }
+    }
+    // K gauge
+    const kval = s13 > 0 ? lerp(12, 3, easeOut(s13 / .8)) : s11 > 0 ? lerp(3, 12, easeInOut(s11 / 2.2)) : 3;
+    pill(250, 70, `K⁺ ${kval.toFixed(1)} mM`, 34, kval > 9 ? C.red : C.yellow, kval > 9 ? "#fff" : OUT, pop(s11, .3));
+    // EEG strip
+    ctx.save(); rrect(-400, 120, 800, 160, 14); ctx.clip();
+    ctx.fillStyle = "rgba(255,255,255,.04)"; ctx.fillRect(-400, 120, 800, 160);
+    ctx.beginPath();
+    for (let x = -400; x <= 400; x += 4) {
+      const tt = T * 2.2 + x / 260; let v;
+      if (state === "calm") v = Math.sin(tt * 30) * 10 + Math.sin(tt * 53) * 6;
+      else if (state === "fire") { const ph = (tt * 3) % 1; v = (ph < .12 ? -70 * Math.sin(ph / .12 * Math.PI) : 25 * Math.sin((ph - .12) / .88 * Math.PI)); }
+      else v = Math.sin(tt * 40) * 1.5;
+      ctx.lineTo(x, 200 + v);
+    }
+    ctx.lineWidth = 6; ctx.strokeStyle = state === "fire" ? C.red : state === "sleep" ? "#8A8FA8" : C.green; ctx.stroke();
+    ctx.restore();
+    text("EEG", -350, 145, 26, { fill: "#fff", lw: 5, alpha: .7 });
+  });
+  if (state === "fire") { shake = 9; ctx.save(); ctx.fillStyle = `rgba(255,40,60,${.12 + .1 * Math.sin(T * 25)})`; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+};
+
+S.evidence = (t) => {
+  const s14 = since(14), s15 = since(15), s16 = since(16);
+  // faint EEG traces in the background
+  ctx.save(); ctx.globalAlpha = .18; ctx.lineWidth = 4; ctx.strokeStyle = C.cyan;
+  for (let row = 0; row < 9; row++) { ctx.beginPath(); for (let x = 0; x <= W; x += 8) {
+    const tt = x / 90 + T * 3 + row; ctx.lineTo(x, 420 + row * 95 + Math.sin(tt * 2.1) * 14 + Math.sin(tt * 5.3 + row) * 8); } ctx.stroke(); }
+  ctx.restore();
+  const up = easeInOut(s15 / .5);
+  const names = [["CHB-MIT", C.yellow], ["SeizeIT2", C.cyan], ["SIENA", C.pink]];
+  names.forEach(([nm, col], i) => {
+    const k = pop(s14 - .1 - i * .18, .4);
+    if (k <= 0) return;
+    const x = lerp(540 + (i - 1) * 250, 540 + (i - 1) * 300, up), y = lerp(780, 500, up), sc = lerp(1, .62, up);
+    withT(x, y, k * sc, (i - 1) * .12, () => {
+      rrect(-120, -170, 100, 40, 12); outlinedFill("#E8B85A", 6);
+      rrect(-120, -145, 240, 290, 18); outlinedFill("#F5C76A", 6);
+      rrect(-95, -85, 190, 150, 10); fillStroke("#FFF6E0", 4);
+      ctx.beginPath(); for (let x2 = -85; x2 <= 85; x2 += 5) ctx.lineTo(x2, -10 + Math.sin(x2 / 8 + T * 4 + i) * (x2 > 0 && x2 < 40 ? 30 : 8));
+      ctx.lineWidth = 4; ctx.strokeStyle = C.red; ctx.stroke();
+      text(nm, 0, 105, 38, { fill: col, lw: 8 });
+    });
+  });
+  if (s14 > .6 && s15 <= 0) pill(540, 1110, "REAL HOSPITAL EEG", 54, C.red, "#fff", pop(s14 - .6), -.04);
+  if (s15 > 0 && s16 <= 0) {
+    const n = Math.round(162 * easeOut(s15 / 1.6));
+    text(`${Math.max(0, Math.min(160, n))}+`, 540, 790, 210 * pop(s15, .4), { fill: C.yellow });
+    text("PATIENTS", 540, 950, 80 * pop(sinceWord(15, 4)), { fill: "#fff" });
+  }
+  if (s16 > 0) {
+    const n = Math.round(1115 * easeOut(s16 / 1.1));
+    text(`${Math.max(0, Math.min(1100, n)).toLocaleString("en-US")}+`, 540, 790, 190 * pop(s16, .4), { fill: C.pink });
+    text("SEIZURES", 540, 950, 80 * pop(sinceWord(16, 2)), { fill: "#fff" });
+    const r = rng(11);
+    for (let i = 0; i < 14; i++) { const x = r() * W, sp = 600 + r() * 500, y = -100 + ((s16 - r() * .5) * sp);
+      if (y > -100 && y < 1200) text("⚡", x, y, 60, { fill: C.yellow, font: "Fredoka", stroke: false }); }
+  }
+};
+
+S.suspect = (t) => {
+  const s17 = since(17), s18 = since(18);
+  const out = easeInOut(s18 / .45);
+  if (out < 1) {
+    const drop = s17 < .35 ? lerp(-900, 0, easeOut(s17 / .35)) : 0;
+    withT(540, 790 + drop - out * 200, lerp(1, .3, out), -.04, () => {
+      ctx.globalAlpha = 1 - out;
+      rrect(-330, -420, 660, 840, 16); outlinedFill("#F3DDAE", 8);
+      rrect(-290, -230, 580, 480, 10); fillStroke("#FFF3D6", 5);
+      text("WANTED", 0, -320, 120, { fill: "#8B2E1A", stroke: false, shadow: false });
+      drawHookChar(-10, -20, .95 * pop(s17 - .3, .45));
+      text("THE ? EAR-HOOK", 0, 330, 58, { fill: "#8B2E1A", stroke: false, shadow: false });
+      for (const [px, py] of [[-300, -390], [300, -390]]) { circle(px, py, 14); fillStroke(C.red, 4); }
+    });
+    if (s17 > .3 && s17 < .5) shake = 12;
+  }
+  if (s18 > 0) {
+    const k = pop(s18 - .1, .45);
+    drawHead(540, 790, 1.35 * k, { hooks: clamp((s18 - .2) / .6), mood: "happy", shirt: "#2BB673", phase: .2 });
+    const lk = pop(sinceWord(18, 1), .35);
+    if (lk > 0) {
+      for (const [sx, lab] of [[-1, "SENSOR 1"], [1, "SENSOR 2"]]) {
+        const ex = 540 + sx * (148 + 24) * 1.35 * k, ey = 790 + (10 + 92) * 1.35 * k;
+        ctx.save(); ctx.globalAlpha = lk; ctx.beginPath(); ctx.moveTo(ex, ey + 30); ctx.lineTo(540 + sx * 330, 1140 - 30);
+        ctx.lineWidth = 7; ctx.strokeStyle = C.cyan; ctx.setLineDash([16, 12]); ctx.stroke(); ctx.restore();
+        pill(540 + sx * 300, 1140, lab, 44, C.cyan, OUT, lk);
+      }
+    }
+  }
+};
+
+S.verdict = (t) => {
+  const s19 = since(19), s20 = since(20), s21 = since(21);
+  // spotlights
+  ctx.save(); ctx.globalAlpha = .16 + .05 * Math.sin(T * 3);
+  for (const [x, a] of [[320, Math.sin(T * 1.5) * .15], [760, -Math.sin(T * 1.5) * .15]]) {
+    ctx.save(); ctx.translate(x, 0); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(-40, -50); ctx.lineTo(40, -50); ctx.lineTo(220, 1200); ctx.lineTo(-220, 1200); ctx.closePath();
+    ctx.fillStyle = "#FFF6C8"; ctx.fill(); ctx.restore();
+  }
+  ctx.restore();
+  text("Siena hospital EEG · 14 adults · 47 seizures", 540, 1238, 30, { font: "Fredoka", weight: 600, fill: "#fff", lw: 6, alpha: fadeIn(s19, .4) * .9 });
+  const bars = [
+    { x: 320, pct: 96, t0: s20 - .25, col: C.cyan, label: "EAR-HOOK · 2", head: { hooks: 1, shirt: "#2BB673" } },
+    { x: 760, pct: 91, t0: s21 - .45, col: C.pink, label: "FULL CAP · 18", head: { cap: 1, shirt: "#FF6B6B", hairColor: "#C27A3A" } },
+  ];
+  const base = 1150, maxH = 400;
+  bars.forEach((b, i) => {
+    const k = pop(s19 - i * .12, .4);
+    const fill = easeOut(b.t0 / 1.1), v = b.pct * fill;
+    const h = 30 + maxH * v / 100;
+    withT(b.x, base, k, 0, () => {
+      rrect(-115, -h, 230, h, 20); outlinedFill(b.col, 7);
+      ctx.fillStyle = "rgba(255,255,255,.25)"; rrect(-95, -h + 14, 40, Math.max(0, h - 28), 14); ctx.fill();
+      drawHead(0, -h - 90, .42, { ...b.head, mood: b.t0 > 1.1 ? "happy" : "shock", phase: i });
+      const label = b.t0 > 0 ? `${Math.round(v)}%` : "?";
+      text(label, 0, -h - 215, 88, { fill: b.t0 > 0 ? C.yellow : "#fff", scale: 1 + (b.t0 > 0 && b.t0 < 1.1 ? .08 * Math.sin(T * 30) : 0) });
+      text(b.label, 0, 42, 40, { fill: "#fff", lw: 8 });
+    });
+  });
+  if (s19 > 0 && s20 <= 0) shake = 3 * Math.abs(Math.sin(T * 40));
+  // crown + confetti when the hook bar lands
+  const land = s20 - .25 - 1.1;
+  if (land > 0) {
+    const h = 30 + maxH * .96;
+    const cy = lerp(-200, base - h - 205 - 90, easeOut(land / .4));
+    withT(320, cy, 1, Math.sin(T * 4) * .08, () => {
+      ctx.beginPath(); ctx.moveTo(-70, 30); ctx.lineTo(-80, -40); ctx.lineTo(-38, -5); ctx.lineTo(0, -55); ctx.lineTo(38, -5); ctx.lineTo(80, -40); ctx.lineTo(70, 30); ctx.closePath();
+      outlinedFill(C.yellow, 7); circle(0, -55, 9); fillStroke(C.red, 4);
+    });
+    confetti(320, 600, land, 21);
+  }
+};
+function confetti(x0, y0, dt, seed) {
+  if (dt < 0 || dt > 3) return;
+  const r = rng(seed), cols = [C.yellow, C.cyan, C.pink, C.green, "#FF9F43", "#fff"];
+  for (let i = 0; i < 90; i++) {
+    const a = -Math.PI / 2 + (r() - .5) * 2.6, sp = 500 + r() * 900, rot = r() * 6;
+    const x = x0 + Math.cos(a) * sp * dt, y = y0 + Math.sin(a) * sp * dt + 900 * dt * dt;
+    withT(x, y, 1, rot + dt * 8, () => { ctx.fillStyle = cols[i % 6]; ctx.globalAlpha = clamp(3 - dt); ctx.fillRect(-10, -6, 20, 12); });
+  }
+}
+function poof(x, y, dt) {
+  if (dt < 0 || dt > .6) return;
+  const k = dt / .6;
+  for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2;
+    circle(x + Math.cos(a) * 70 * k, y + Math.sin(a) * 70 * k, 38 * (1 - k)); ctx.fillStyle = `rgba(255,255,255,${.9 * (1 - k)})`; ctx.fill(); }
+}
+
+S.catch = (t) => {
+  const s22 = since(22), s23 = since(23), s24 = since(24), s25 = since(25);
+  // hazard banner
+  withT(540, 450, pop(s22, .4), -.05, () => {
+    rrect(-330, -70, 660, 140, 18); outlinedFill(C.yellow, 7);
+    ctx.save(); rrect(-330, -70, 660, 140, 18); ctx.clip(); ctx.fillStyle = OUT;
+    for (let i = -10; i < 12; i++) { ctx.beginPath(); ctx.moveTo(i * 60 - 330, -70); ctx.lineTo(i * 60 - 300, -70); ctx.lineTo(i * 60 - 360, 70); ctx.lineTo(i * 60 - 390, 70); ctx.fill(); }
+    ctx.restore();
+    rrect(-250, -50, 500, 100, 14); fillStroke(C.yellow, 5);
+    text("THE CATCH", 0, 6, 72, { fill: OUT, stroke: false, shadow: false });
+  });
+  if (s23 <= 0) drawBrain(540, 820, 1.4 * pop(s22 - .1), { hat: true, mood: "worried", talk: mouthAt(t) });
+  const bells = [[170, 640], [900, 620], [300, 900], [800, 930], [150, 1110], [930, 1120], [540, 620], [420, 1130], [680, 1130], [80, 860], [1000, 820], [560, 1000]];
+  const vanish = [1, 3, 4, 6, 9, 10];
+  if (s23 > 0) {
+    bells.forEach(([x, y], i) => {
+      const k = pop(s23 - i * .07, .3);
+      const vi = vanish.indexOf(i);
+      if (vi >= 0 && s25 > 0) { const vt = s25 - .2 - vi * .14; if (vt > 0) { poof(x, y, vt); return; } }
+      const near = s24 > 0 && Math.hypot(x - 540, y - 800) < 260;   // make room for the heart
+      drawBell(x, y, .85 * k * (near ? 1 - easeOut(s24 / .3) : 1), i * 1.7);
+    });
+    if (s24 <= 0) { ctx.save(); ctx.fillStyle = `rgba(255,30,30,${.1 + .1 * Math.sin(T * 18)})`; ctx.fillRect(0, 0, W, H); ctx.restore(); shake = 6; }
+  }
+  if (s24 > 0) {
+    ctx.save(); ctx.beginPath(); ctx.globalAlpha = .9;
+    for (let x = 0; x <= W; x += 6) { const ph = ((x / 360 - T * 1.2) % 1 + 1) % 1;
+      const v = ph > .45 && ph < .5 ? -140 * Math.sin((ph - .45) / .05 * Math.PI) : ph > .5 && ph < .53 ? 40 * Math.sin((ph - .5) / .03 * Math.PI) : 0;
+      ctx.lineTo(x, 800 + v); }
+    ctx.lineWidth = 10; ctx.strokeStyle = OUT; ctx.stroke(); ctx.lineWidth = 6; ctx.strokeStyle = "#FF6B81"; ctx.stroke(); ctx.restore();
+    drawHeart(540, 820, pop(s24 - .1, .45) * 1.1);
+  }
+  if (s25 > 0) {
+    starburst(820, 600, 130, 12, C.green, pop(sinceWord(25, 5), .35), T * .3);
+    text("−48%", 820, 606, 70 * pop(sinceWord(25, 5), .35), { fill: "#fff", lw: 12 });
+    text("ear EEG + heart (ECG), Siena: 27–48% fewer false alarms", 540, 1190, 30,
+      { font: "Fredoka", weight: 600, fill: "#fff", lw: 6, alpha: fadeIn(s25 - .4, .3) });
+  }
+};
+
+S.cta = (t) => {
+  const s26 = since(26), s27 = since(27), s28 = since(28);
+  const bp = easeInOut(s27 / .5);
+  if (bp > 0) { // blueprint grid
+    ctx.save(); ctx.globalAlpha = bp; ctx.fillStyle = "#0F4C81"; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 2;
+    for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (bp < 1) {
+    withT(540, 780, pop(s26, .4) * (1 - bp), 0, () => {
+      rrect(-300, -320, 220, 60, 14); outlinedFill("#E8B85A", 7);
+      rrect(-300, -280, 600, 560, 22); outlinedFill("#F5C76A", 7);
+      text("CASE #001", 0, -170, 80, { fill: "#7A4A10", stroke: false, shadow: false });
+      text("EPILEPSY TEMPLE", 0, -90, 50, { fill: "#7A4A10", stroke: false, shadow: false });
+      const sk = s26 > .35 ? lerp(2.2, 1, easeOut((s26 - .35) / .18)) : 0;
+      if (sk > 0) withT(0, 80, sk, -.2, () => {
+        rrect(-260, -90, 520, 180, 16); ctx.lineWidth = 14; ctx.strokeStyle = C.red; ctx.stroke();
+        text("NOT CLOSED", 0, 6, 86, { fill: C.red, stroke: false, shadow: false });
+      });
+    });
+    if (s26 > .35 && s26 < .55) shake = 16;
+  }
+  if (s27 > 0) {
+    const k = clamp((s27 - .3) / 1.2);
+    withT(540, 760, 1.1, 0, () => {
+      ctx.beginPath(); ctx.moveTo(-90, -60); ctx.bezierCurveTo(-90, -190, 110, -190, 100, -60); ctx.bezierCurveTo(95, 20, 10, 20, 8, 110);
+      ctx.setLineDash([700 * k, 800]); ctx.lineCap = "round"; ctx.lineWidth = 9; ctx.strokeStyle = "#fff"; ctx.stroke(); ctx.setLineDash([]);
+      if (k > .9) { circle(8, 190, 34); ctx.lineWidth = 9; ctx.stroke(); glow(8, 190, 90, "rgba(61,220,255,.9)", .6 + .4 * Math.sin(T * 6)); }
+      ctx.setLineDash([12, 10]); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.7)";
+      ctx.beginPath(); ctx.moveTo(-150, -170); ctx.lineTo(-150, 230); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-90, 280); ctx.lineTo(110, 280); ctx.stroke(); ctx.setLineDash([]);
+      text("48 mm", -190, 30, 26, { font: "Fredoka", weight: 600, rot: -Math.PI / 2, lw: 0, stroke: false, shadow: false, alpha: k });
+    });
+    pill(540, 440, "PROTOTYPE 1", 70, C.yellow, OUT, pop(sinceWord(27, 3)), -.04);
+  }
+  if (s28 > 0) {
+    const k = pop(s28 - .1, .4), beat = 1 + .06 * Math.sin(T * 9);
+    withT(540, 1080, k * beat, 0, () => {
+      rrect(-230, -70, 460, 140, 70); outlinedFill(C.pink, 7);
+      text("FOLLOW", 0, 6, 76, { fill: "#fff" });
+    });
+    const tap = (s28 * 2) % 1;
+    withT(690 + tap * 10, 1140 + tap * 10, k, -.4, () => { text("👆", 0, 0, 110, { font: "Fredoka", stroke: false }); });
+    drawBrain(870, 640, .55 * pop(s28 - .3), { hat: true, wave: true, talk: mouthAt(t) });
+    text("Research prototype · not a medical device", 540, 1200, 30, { font: "Fredoka", weight: 600, fill: "#fff", lw: 6, alpha: fadeIn(s28 - .4) * .9 });
+  }
+};
+
+// ---------- captions (word by word, active word gets a pill) ----------
+function chunksOf(line) {
+  const out = []; let cur = [];
+  line.words.forEach((w, i) => { cur.push(w); if (cur.length >= 3 || /[.,?!:…]$/.test(w.w) || i === line.words.length - 1) { out.push(cur); cur = []; } });
+  return out;
+}
+function captions(t) {
+  let li = -1;
+  TL.lines.forEach((l, i) => { if (t >= l.t0 - .05) li = i; });
+  if (li < 0) return;
+  const line = TL.lines[li], next = TL.lines[li + 1];
+  if (t > line.t1 + .5 && (!next || t < next.t0 - .05)) return;
+  const chunks = chunksOf(line);
+  let ch = chunks[0];
+  for (const c of chunks) if (t >= c[0].t0 - .04) ch = c;
+  const size = 84; ctx.font = `${size}px Lucky`;
+  const sp = 44, widths = ch.map(w => ctx.measureText(w.w.toUpperCase()).width);
+  let total = widths.reduce((a, b) => a + b, 0) + sp * (ch.length - 1);
+  const scale = Math.min(1, 960 / total);
+  const y = 1335;
+  let x = 540 - total * scale / 2;
+  const items = ch.map((w, i) => { const wx = x + widths[i] * scale / 2; x += (widths[i] + sp) * scale;
+    const dt = t - w.t0, active = t >= w.t0 && t < w.t1 + .05; return { w, i, wx, dt, active, k: pop(dt + .02, .16) * scale }; })
+    .filter(o => o.dt >= -0.02);
+  for (const o of items) if (o.active) { ctx.save(); ctx.translate(o.wx, y); ctx.scale(o.k * 1.08, o.k * 1.08); ctx.rotate(-.03);
+    rrect(-widths[o.i] / 2 - 14, -size * .62, widths[o.i] + 28, size * 1.2, 18); outlinedFill(C.pink, 5); ctx.restore(); }
+  for (const o of items) text(o.w.w.toUpperCase(), o.wx, y + 4, size, { fill: o.w.hi ? C.yellow : "#fff", scale: o.k * (o.active ? 1.08 : 1), lw: 18 });
+}
+
+// ---------- top chip ----------
+const CHIP = { hook: "THE CASE", gadget: "CLUE #1", twist: "CLUE #1 · TWIST", sim: "CLUE #2", evidence: "CLUE #3",
+               suspect: "THE SUSPECT", verdict: "THE VERDICT", catch: "THE CATCH", cta: "TO BE CONTINUED" };
+function topChip(sc, t) {
+  const k = pop(t - sc.t0 - .1, .35);
+  pill(540, 305, "🔍 " + CHIP[sc.name], 44, OUT, C.yellow, k);
+}
+
+// ---------- frame ----------
+function drawScene(name, t, sc) {
+  background(name, t);
+  S[name](t);
+}
+function draw(t) {
+  T = t; shake = 0;
+  const sc = sceneAt(t);
+  const idx = TL.scenes.indexOf(sc), prev = TL.scenes[idx - 1];
+  // gentle punch-in on every new line = a visual change every ~2 s
+  let last = TL.lines[0].t0; for (const l of TL.lines) if (t >= l.t0) last = l.t0;
+  const punch = 1 + .035 * Math.exp(-Math.max(0, t - last) * 3) + .02 * (t - sc.t0) / Math.max(1, sc.t1 - sc.t0);
+  const intro = idx === 0 ? lerp(1.25, 1, easeOut(t / .5)) : 1;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+  const cam = () => { ctx.translate(540, 900); ctx.scale(punch * intro, punch * intro); ctx.translate(-540, -900); };
+
+  const tr = t - sc.t0;
+  // first pass: scene content (to find shake), with circle-wipe transition from previous scene
+  ctx.save(); cam();
+  if (prev && tr < .4) {
+    ctx.save(); drawScene(prev.name, t, prev); ctx.restore();
+    const R = easeInOut(tr / .4) * 1300;
+    ctx.save(); circle(540, 900, R); ctx.clip(); drawScene(sc.name, t, sc); ctx.restore();
+    circle(540, 900, R); ctx.lineWidth = 26; ctx.strokeStyle = "#fff"; ctx.stroke(); ctx.lineWidth = 10; ctx.strokeStyle = OUT; ctx.stroke();
+  } else drawScene(sc.name, t, sc);
+  ctx.restore();
+  if (shake > 0) { // apply shake by re-blitting with an offset
+    const img = ctx.getImageData(0, 0, W, H);
+    ctx.putImageData(img, Math.round((Math.sin(t * 91) * shake)), Math.round(Math.cos(t * 73) * shake));
+  }
+  // vignette
+  const g = ctx.createRadialGradient(540, 900, 500, 540, 900, 1250);
+  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.45)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  topChip(sc, t);
+  captions(t);
+}
+
+async function init(timeline) {
+  TL = timeline;
+  await Promise.all([document.fonts.load("80px Lucky"), document.fonts.load("600 40px Fredoka")]);
+  await document.fonts.ready;
+  return TL.duration;
+}
+window.draw = draw; window.init = init;
+// preview mode: open reel.html?preview in a browser (needs a local server for fetch)
+if (location.search.includes("preview")) {
+  fetch("build/timeline.json").then(r => r.json()).then(init).then(dur => {
+    const t0 = performance.now(); const tick = () => { draw(((performance.now() - t0) / 1000) % dur); requestAnimationFrame(tick); }; tick();
+  });
+}
+</script>
+</body>
+</html>
