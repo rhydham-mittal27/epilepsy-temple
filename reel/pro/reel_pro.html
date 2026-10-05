@@ -236,8 +236,8 @@ S.hook = () => {
   const out = 1 - fade(s1 - .1, .35);
   const lift = cubic(s1 / .5) * 120;
   ctx.save(); ctx.translate(0, -lift);
-  const a = fade(s0 + .3, .3) * out;            // visible from frame 0
-  const n1 = Math.round(96 * expo((s0 + .2) / 1.6));
+  const a = out;                                  // fully visible from frame 0 (thumbnail)
+  const n1 = Math.round(96 * expo((s0 + .65) / 1.4));
   bigNumber(`${n1}%`, M - 8, 700, 300, C.acc, a);
   label("2 SENSORS  ·  AT THE EARS", M, 760, { color: C.fg, alpha: a, size: 26 });
   hline(M, 840, W - M, expo((s0 - .4) / .8) * out, "rgba(255,255,255,.2)");
@@ -389,10 +389,12 @@ S.design = (t, sc) => {
 };
 S.result = () => {
   const s15 = since(15), s16 = since(16);
-  headline("*96%* caught.", M, 540, 150, sinceW(15, 8) > -0.3 ? wordAt(15, 8) - .3 : 1e9);
+  const reveal = wordAt(15, 8) - .3;
+  if (T < reveal) headline("The *verdict.*", M, 540, 150, L(15).t0 + .05, { out: 1 - fade(T - reveal + .2, .2) });
+  else headline("*96%* caught.", M, 540, 150, reveal);
   label("UNSEEN ADULT PATIENTS  ·  SEIZURES DETECTED", M, 640, { size: 20, alpha: fade(s15, .3) });
   const bar = (y, name, sub, pct, t0, color, numColor) => {
-    const dt = T - t0, a = fade(dt + .4, .3), p = expo(dt / 1.3) * pct / 100;
+    const dt = T - t0, a = name === "Ear-hook" ? fade(T - L(15).t0 - .3, .4) : fade(dt + .4, .3), p = expo(dt / 1.3) * pct / 100;
     ctx.save(); ctx.globalAlpha = a;
     font(40, 650); ctx.fillStyle = C.fg; ctx.textBaseline = "middle"; ctx.fillText(name, M, y);
     label(sub, M, y + 40, { size: 19, ls: 1 });
