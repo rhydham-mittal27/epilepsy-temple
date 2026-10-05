@@ -31,10 +31,12 @@ if (cfg.skip) {
 }
 const base = cfg.skip ? await p.evaluate(() => performance.now()) : 0;
 const t0 = Date.now();
+const done = fs.readdirSync(out).length;   // resumable: fast-forward past frames already on disk
 for (let f = 0; f < cfg.frames; f++) {
+  if (f < done) { if (!cfg.skip) await p.clock.runFor(1000 / FPS); continue; }
   if (cfg.skip) { await p.evaluate(n => { window.__step(n); window.__step(n + 0.01); }, base + 4000 + f * 1000 / FPS); }
   else await p.clock.runFor(1000 / FPS);
-  await p.screenshot({ path: path.join(out, String(f).padStart(4, "0") + ".jpg"), type: "jpeg", quality: 92 });
+  await p.screenshot({ path: path.join(out, String(f).padStart(4, "0") + ".jpg"), type: "jpeg", quality: 92, timeout: 180000 });
   if (f % 30 === 0) console.log(which, f, ((Date.now() - t0) / 1000).toFixed(0) + "s");
 }
 await b.close();
